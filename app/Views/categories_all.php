@@ -16,5 +16,6 @@
         <h1>All Categories</h1>
         <p>This is the placeholder page for all categories.</p>
     </main>
+<?= view('footer') ?>
 </body>
 </html>

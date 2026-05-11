@@ -16,5 +16,6 @@
         <h1>All Bands</h1>
         <p>This is the placeholder page for all bands.</p>
     </main>
+<?= view('footer') ?>
 </body>
 </html>

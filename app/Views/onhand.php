@@ -16,5 +16,6 @@
         <h1>On-hand Items</h1>
         <p>This is the placeholder page for on-hand items.</p>
     </main>
+<?= view('footer') ?>
 </body>
 </html>

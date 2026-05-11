@@ -22,5 +22,6 @@
         <h1>Categories</h1>
         <p>This is the placeholder categories page.</p>
     </main>
+<?= view('footer') ?>
 </body>
 </html>

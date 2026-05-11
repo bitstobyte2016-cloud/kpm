@@ -16,5 +16,6 @@
         <h1>Pre-order / New In</h1>
         <p>This is the placeholder page for pre-orders.</p>
     </main>
+<?= view('footer') ?>
 </body>
 </html>

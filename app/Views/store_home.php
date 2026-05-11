@@ -22,5 +22,6 @@
         <h1>Welcome to K-Pop Merch Store</h1>
         <p>This is the home page. <i class="fa-solid fa-heart"></i></p>
     </main>
+<?= view('footer') ?>
 </body>
 </html>
