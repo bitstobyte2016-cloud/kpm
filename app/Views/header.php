@@ -1,13 +1,14 @@
 <header class="main-header">
+    
     <div class="header-top-bar">
         <div class="top-bar-item">
             <i class="fa-regular fa-circle-check"></i> 100% Official Products
         </div>
         <div class="top-bar-item">
-            <i class="fa-solid fa-truck-fast"></i> Fast Shipping (3-5 Days)
+            <i class="fa-solid fa-truck-fast"></i> Secure Shipping
         </div>
         <div class="top-bar-item">
-            <i class="fa-solid fa-shoe-prints"></i> Worldwide Shipping
+            <i class="fa-solid fa-shoe-prints"></i> Tracked Orders
         </div>
         <div class="top-bar-item">
             <i class="fa-solid fa-lock"></i> Secure Payments
@@ -68,10 +69,6 @@
                 </li>
                 <li class="nav-item"><a href="#">Pre-order / New In</a></li>
                 <li class="nav-item"><a href="#">On-hand</a></li>
-                <li class="nav-item"><a href="#">Best Sellers</a></li>
-                <li class="nav-item"><a href="#">Coming Soon</a></li>
-                <li class="nav-item"><a href="#">Sale</a></li>
-                <li class="nav-item"><a href="#">Track Order</a></li>
             </ul>
         </nav>
     </div>
