@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Store Home</title>
+    <title>Register - K-Pop Merch</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,9 +18,9 @@
 </head>
 <body>
     <?= view('header') ?>
-    <main>
-        <h1>Welcome to K-Pop Merch Store</h1>
-        <p>This is the home page. <i class="fa-solid fa-heart"></i></p>
+    <main style="padding: 40px 5%;">
+        <h1>Register</h1>
+        <p>This is the placeholder register page.</p>
     </main>
 </body>
 </html>
