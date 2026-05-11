@@ -13,4 +13,9 @@ class HomeController extends BaseController
     {
         return view('cart');
     }
+
+    public function categories(): string
+    {
+        return view('categories');
+    }
 }

@@ -7,5 +7,6 @@ use CodeIgniter\Router\RouteCollection;
  */
 $routes->get('/', 'HomeController::index');
 $routes->get('/cart', 'HomeController::cart');
+$routes->get('/categories', 'HomeController::categories');
 $routes->get('/register', 'RegistCont::index');
 $routes->get('/search', 'HeaderCont::search');
