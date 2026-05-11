@@ -233,8 +233,8 @@ h1, h2, h3, h4, h5, h6 {
     left: 0;
     background-color: var(--main-bg);
     min-width: 200px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    border-radius: 0 0 4px 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-radius: 0 0 8px 8px;
     padding: 10px 0;
     z-index: 1001;
     list-style: none;
@@ -255,4 +255,97 @@ h1, h2, h3, h4, h5, h6 {
 .dropdown-menu li a:hover {
     background-color: var(--section-bg);
     color: var(--theme-dark-purple);
+}
+
+/* Mega Menu */
+.mega-menu {
+    min-width: 550px;
+    padding: 20px;
+}
+
+.mega-menu-content {
+    display: flex;
+    gap: 20px;
+}
+
+.mega-menu-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.categories-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 15px 0;
+}
+
+.categories-list li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 10px;
+    color: var(--main-text);
+    text-decoration: none;
+    font-size: 0.95rem;
+    border-radius: 6px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.categories-list li a .cat-icon {
+    width: 20px;
+    height: auto;
+    object-fit: contain;
+}
+
+.categories-list li a:hover {
+    background-color: var(--section-bg);
+    color: var(--theme-dark-purple);
+}
+
+.view-all-link {
+    color: var(--theme-dark-purple);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 10px;
+    display: inline-block;
+    transition: opacity 0.2s;
+}
+
+.view-all-link:hover {
+    opacity: 0.8;
+}
+
+.mega-menu-featured {
+    flex: 1;
+    background-color: var(--theme-light-purple);
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.mega-menu-featured .featured-img {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    border-radius: 8px;
+    margin: 0 auto 15px auto;
+    display: block;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.mega-menu-featured h4 {
+    margin: 0 0 8px 0;
+    font-size: 1rem;
+    color: var(--main-text);
+}
+
+.mega-menu-featured p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--sec-text);
+    line-height: 1.4;
 }

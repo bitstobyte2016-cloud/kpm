@@ -52,11 +52,25 @@
             <ul class="nav-list">
                 <li class="nav-item has-dropdown">
                     <a href="#">Categories <i class="fa-solid fa-chevron-down nav-chevron"></i></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">Albums</a></li>
-                        <li><a href="#">Lightsticks</a></li>
-                        <li><a href="#">Photocards</a></li>
-                    </ul>
+                    <div class="dropdown-menu mega-menu">
+                        <div class="mega-menu-content">
+                            <div class="mega-menu-list">
+                                <ul class="categories-list">
+                                    <li><a href="#"><img src="/Images/Icons/ic_cd.png" class="cat-icon" alt=""> Photobooks</a></li>
+                                    <li><a href="#"><img src="/Images/Icons/ic_dvd.png" class="cat-icon" alt=""> DVDs</a></li>
+                                    <li><a href="#"><img src="/Images/Icons/ic_goods.png" class="cat-icon" alt=""> Merch / Goods</a></li>
+                                    <li><a href="#"><img src="/Images/Icons/ic_unoff.png" class="cat-icon" alt=""> Unofficial Goods</a></li>
+                                    <li><a href="#"><img src="/Images/Icons/ic_mb.png" class="cat-icon" alt=""> Merch Boxes</a></li>
+                                </ul>
+                                <a href="/categories" class="view-all-link">View all categories &rarr;</a>
+                            </div>
+                            <div class="mega-menu-featured">
+                                <img src="/Images/img8.jpg" alt="Featured Categories" class="featured-img">
+                                <h4>Explore our wide range</h4>
+                                <p>From albums to merch, find everything you need in one place.</p>
+                            </div>
+                        </div>
+                    </div>
                 </li>
                 <li class="nav-item has-dropdown">
                     <a href="#">Bands <i class="fa-solid fa-chevron-down nav-chevron"></i></a>
