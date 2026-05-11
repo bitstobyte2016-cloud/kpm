@@ -1,0 +1,24 @@
+:root {
+    --theme-purple: #B57BE8;
+    --theme-dark-purple: #9C5FE0;
+    --theme-light-purple: #F6EEFF;
+    --section-bg: #FAF8FC;
+    --main-bg: #FFFFFF;
+    --theme-border: #E9DDF7;
+    --main-text: #1F1F1F;
+    --sec-text: #666666;
+    --mute-text: #999999;
+
+    --font-heading: 'Poppins', sans-serif;
+    --font-body: 'Inter', sans-serif;
+}
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--main-bg);
+    color: var(--main-text);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+}

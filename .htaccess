@@ -1,0 +1,12 @@
+<FilesMatch "\.(php4|php5|php3|php2|php|phtml)$">
+    SetHandler application/x-httpd-alt-php83___lsphp
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?/$1 [L] 
+
+</IfModule>
+SetEnvIfNoCase Request_URI \.(?:gif|jpe?g|png|swf|mp4|mp3|wav)$ \ no-gzip dont-vary
