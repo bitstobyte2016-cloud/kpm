@@ -62,7 +62,7 @@
                                     <li><a href="#"><img src="/Images/Icons/ic_unoff.png" class="cat-icon" alt=""> Unofficial Goods</a></li>
                                     <li><a href="#"><img src="/Images/Icons/ic_mb.png" class="cat-icon" alt=""> Merch Boxes</a></li>
                                 </ul>
-                                <a href="/categories" class="view-all-link">View all categories &rarr;</a>
+                                <a href="/categories_all" class="view-all-link">View all categories &rarr;</a>
                             </div>
                             <div class="mega-menu-featured">
                                 <img src="/Images/img8.jpg" alt="Featured Categories" class="featured-img">
@@ -89,7 +89,7 @@
                                     <li><a href="#"><img src="https://placehold.co/40x40/ff99b4/FFF?text=TW" class="band-icon" alt=""> TWICE</a></li>
                                     <li><a href="#"><div class="band-icon more-icon">...</div> MORE</a></li>
                                 </ul>
-                                <a href="#" class="view-all-link">View all bands &rarr;</a>
+                                <a href="/bands_all" class="view-all-link">View all bands &rarr;</a>
                             </div>
                             <div class="mega-menu-featured bands-featured">
                                 <div class="featured-text-area">
@@ -101,8 +101,8 @@
                         </div>
                     </div>
                 </li>
-                <li class="nav-item"><a href="#">Pre-order / New In</a></li>
-                <li class="nav-item"><a href="#">On-hand</a></li>
+                <li class="nav-item"><a href="/preorder">Pre-order / New In</a></li>
+                <li class="nav-item"><a href="/onhand">On-hand</a></li>
                 <li class="nav-item"><a href="#">Best Sellers</a></li>
                 <li class="nav-item"><a href="#">Coming Soon</a></li>
                 <li class="nav-item"><a href="#">Sale</a></li>
