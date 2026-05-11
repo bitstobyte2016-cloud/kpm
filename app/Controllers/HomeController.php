@@ -8,4 +8,9 @@ class HomeController extends BaseController
     {
         return view('store_home');
     }
+
+    public function cart(): string
+    {
+        return view('cart');
+    }
 }

@@ -1,0 +1,14 @@
+
+CodeIgniter v4.7.2 Command Line Tool - Server Time: 2026-05-11 19:07:50 UTC+05:30
+
+CodeIgniter development server started on http://localhost:8080
+Press Control-C to stop.
+[Mon May 11 13:37:50 2026] PHP 8.3.6 Development Server (http://localhost:8080) started
+[Mon May 11 13:39:03 2026] [::1]:41496 Accepted
+[Mon May 11 13:39:03 2026] [::1]:41496 Closing
+[Mon May 11 13:39:03 2026] [::1]:41500 Accepted
+[Mon May 11 13:39:03 2026] [::1]:41508 Accepted
+[Mon May 11 13:39:03 2026] [::1]:41500 [200]: GET /css/theme.css
+[Mon May 11 13:39:03 2026] [::1]:41508 [200]: GET /Images/logo.png
+[Mon May 11 13:39:03 2026] [::1]:41500 Closing
+[Mon May 11 13:39:03 2026] [::1]:41508 Closing
