@@ -1,13 +1,14 @@
 <header class="main-header">
+    
     <div class="header-top-bar">
         <div class="top-bar-item">
             <i class="fa-regular fa-circle-check"></i> 100% Official Products
         </div>
         <div class="top-bar-item">
-            <i class="fa-solid fa-truck-fast"></i> Fast Shipping (3-5 Days)
+            <i class="fa-solid fa-truck-fast"></i> Secure Shipping
         </div>
         <div class="top-bar-item">
-            <i class="fa-solid fa-shoe-prints"></i> Worldwide Shipping
+            <i class="fa-solid fa-shoe-prints"></i> Tracked Orders
         </div>
         <div class="top-bar-item">
             <i class="fa-solid fa-lock"></i> Secure Payments
@@ -56,18 +57,18 @@
                         <div class="mega-menu-content">
                             <div class="mega-menu-list">
                                 <ul class="categories-list">
-                                    <li><a href="#"><img src="/Images/Icons/ic_cd.png" class="cat-icon" alt=""> Photobooks</a></li>
-                                    <li><a href="#"><img src="/Images/Icons/ic_dvd.png" class="cat-icon" alt=""> DVDs</a></li>
-                                    <li><a href="#"><img src="/Images/Icons/ic_goods.png" class="cat-icon" alt=""> Merch / Goods</a></li>
-                                    <li><a href="#"><img src="/Images/Icons/ic_unoff.png" class="cat-icon" alt=""> Unofficial Goods</a></li>
-                                    <li><a href="#"><img src="/Images/Icons/ic_mb.png" class="cat-icon" alt=""> Merch Boxes</a></li>
+                                    <li><a href="#"><img src="/Images/icons/ic_cd.png" class="cat-icon" alt=""> Photobooks</a></li>
+                                    <li><a href="#"><img src="/Images/icons/ic_dvd.png" class="cat-icon" alt=""> DVDs</a></li>
+                                    <li><a href="#"><img src="/Images/icons/ic_goods.png" class="cat-icon" alt=""> Merch / Goods</a></li>
+                                    <li><a href="#"><img src="/Images/icons/ic_unoff.png" class="cat-icon" alt=""> Unofficial Goods</a></li>
+                                    <li><a href="#"><img src="/Images/icons/ic_mb.png" class="cat-icon" alt=""> Merch Boxes</a></li>
                                 </ul>
                                 <a href="/categories_all" class="view-all-link">View all categories &rarr;</a>
                             </div>
                             <div class="mega-menu-featured">
                                 <img src="/Images/img8.jpg" alt="Featured Categories" class="featured-img">
                                 <h4>Explore our wide range</h4>
-                                <p>From albums to merch, find everything you need in one place.</p>
+                                <p>From albums to merch, find everything you need in one place!</p>
                             </div>
                         </div>
                     </div>
