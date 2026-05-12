@@ -163,9 +163,8 @@
             </p>
             <div class="footer-socials">
                 <a href="#"><i class="fa-brands fa-instagram"></i></a>
-                <a href="#"><i class="fa-brands fa-twitter"></i></a>
                 <a href="#"><i class="fa-brands fa-youtube"></i></a>
-                <a href="#"><i class="fa-regular fa-envelope"></i></a>
+                <a href="mailto:support@kpopmerch.in"><i class="fa-regular fa-envelope"></i></a>
             </div>
         </div>
 
@@ -214,10 +213,7 @@
             <div class="footer-payments">
                 <i class="fa-brands fa-cc-visa"></i>
                 <i class="fa-brands fa-cc-mastercard"></i>
-                <!-- Adding text or icons for UPI, RuPay, PhonePe roughly matching the image -->
-                <span style="background: white; color: var(--theme-purple); font-weight: bold; font-style: italic; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">UPI</span>
-                <span style="background: white; color: var(--theme-purple); font-weight: bold; font-style: italic; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">RuPay</span>
-                <span style="background: white; color: var(--theme-purple); font-weight: bold; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">PhonePe</span>
+                <li><img src="/Images/icons/ic_upi.png" class="band-icon" alt=""> BTS</a></li>
             </div>
         </div>
     </div>

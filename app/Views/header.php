@@ -104,10 +104,6 @@
                 </li>
                 <li class="nav-item"><a href="/preorder">Pre-order / New In</a></li>
                 <li class="nav-item"><a href="/onhand">On-hand</a></li>
-                <li class="nav-item"><a href="#">Best Sellers</a></li>
-                <li class="nav-item"><a href="#">Coming Soon</a></li>
-                <li class="nav-item"><a href="#">Sale</a></li>
-                <li class="nav-item"><a href="#">Track Order</a></li>
             </ul>
         </nav>
     </div>
