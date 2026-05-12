@@ -66,7 +66,7 @@
                                 <a href="/categories_all" class="view-all-link">View all categories &rarr;</a>
                             </div>
                             <div class="mega-menu-featured">
-                                <img src="/Images/img8.jpg" alt="Featured Categories" class="featured-img">
+                                <img src="/Images/cat_img.png" alt="Featured Categories" class="featured-img">
                                 <h4>Explore our wide range</h4>
                                 <p>From albums to merch, find everything you need in one place!</p>
                             </div>
