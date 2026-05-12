@@ -1,5 +1,5 @@
 <header class="main-header">
-    
+
     <div class="header-top-bar">
         <div class="top-bar-item">
             <i class="fa-regular fa-circle-check"></i> 100% Official Products
@@ -66,7 +66,7 @@
                                 <a href="/categories_all" class="view-all-link">View all categories &rarr;</a>
                             </div>
                             <div class="mega-menu-featured">
-                                <img src="/Images/img8.jpg" alt="Featured Categories" class="featured-img">
+                                <img src="/Images/cat_img.png" alt="Featured Categories" class="featured-img">
                                 <h4>Explore our wide range</h4>
                                 <p>From albums to merch, find everything you need in one place!</p>
                             </div>
@@ -104,10 +104,6 @@
                 </li>
                 <li class="nav-item"><a href="/preorder">Pre-order / New In</a></li>
                 <li class="nav-item"><a href="/onhand">On-hand</a></li>
-                <li class="nav-item"><a href="#">Best Sellers</a></li>
-                <li class="nav-item"><a href="#">Coming Soon</a></li>
-                <li class="nav-item"><a href="#">Sale</a></li>
-                <li class="nav-item"><a href="#">Track Order</a></li>
             </ul>
         </nav>
     </div>

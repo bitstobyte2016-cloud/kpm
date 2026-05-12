@@ -162,10 +162,9 @@
                 Your one-stop destination for official and unofficial K-Pop merchandise. We love K-Pop as much as you do!
             </p>
             <div class="footer-socials">
-                <a href="#"><i class="fa-brands fa-instagram"></i></a>
-                <a href="#"><i class="fa-brands fa-twitter"></i></a>
+                <a href="https://www.instagram.com/kp0pmerch/"><i class="fa-brands fa-instagram"></i></a>
                 <a href="#"><i class="fa-brands fa-youtube"></i></a>
-                <a href="#"><i class="fa-regular fa-envelope"></i></a>
+                <a href="mailto:support@kpopmerch.in"><i class="fa-regular fa-envelope"></i></a>
             </div>
         </div>
 
@@ -196,12 +195,12 @@
             </ul>
         </div>
 
-        <div class="footer-col">
+        <div class="footer-col brand-col">
             <h4>CONTACT</h4>
             <div class="footer-contact-info">
-                <div>Email: <a href="mailto:support@kpopmerch.in">support@kpopmerch.in</a></div>
-                <div>WhatsApp: <a href="tel:+917014847875">+91 70148 47875</a></div>
-                <div>Mon - Sat: 10AM - 7PM (IST)</div>
+                <div><i class="fa-regular fa-envelope"></i>Email: <a href="mailto:support@kpopmerch.in">support@kpopmerch.in</a></div>
+                <div><i class="fa-brands fa-whatsapp"></i>WhatsApp: <a href="tel:+917014879475">+91 70148 79475</a></div>
+                <div><i class="fa-regular fa-clock"></i>Mon - Sat: 10AM - 7PM (IST)</div>
             </div>
         </div>
     </div>
@@ -209,15 +208,12 @@
     <div class="footer-bottom">
         <div class="footer-bottom-inner">
             <div class="footer-copyright">
-                &copy; 2024 K-Pop Merch. All Rights Reserved.
+                &copy; 2019 K-Pop Merch. All Rights Reserved.
             </div>
             <div class="footer-payments">
                 <i class="fa-brands fa-cc-visa"></i>
                 <i class="fa-brands fa-cc-mastercard"></i>
-                <!-- Adding text or icons for UPI, RuPay, PhonePe roughly matching the image -->
-                <span style="background: white; color: var(--theme-purple); font-weight: bold; font-style: italic; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">UPI</span>
-                <span style="background: white; color: var(--theme-purple); font-weight: bold; font-style: italic; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">RuPay</span>
-                <span style="background: white; color: var(--theme-purple); font-weight: bold; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">PhonePe</span>
+                <li><img src="/Images/icons/ic_upi.png" class="band-icon" alt=""></li>
             </div>
         </div>
     </div>
