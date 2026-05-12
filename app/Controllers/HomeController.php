@@ -18,4 +18,24 @@ class HomeController extends BaseController
     {
         return view('categories');
     }
+
+    public function bands_all(): string
+    {
+        return view('bands_all');
+    }
+
+    public function categories_all(): string
+    {
+        return view('categories_all');
+    }
+
+    public function preorder(): string
+    {
+        return view('preorder');
+    }
+
+    public function onhand(): string
+    {
+        return view('onhand');
+    }
 }

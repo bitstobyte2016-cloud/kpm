@@ -22,5 +22,6 @@
         <h1>Register</h1>
         <p>This is the placeholder register page.</p>
     </main>
+<?= view('footer') ?>
 </body>
 </html>

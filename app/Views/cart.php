@@ -22,5 +22,6 @@
         <h1>Your Cart</h1>
         <p>This is the placeholder cart page. Your cart is empty.</p>
     </main>
+<?= view('footer') ?>
 </body>
 </html>
