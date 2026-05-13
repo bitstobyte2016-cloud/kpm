@@ -1,5 +1,5 @@
 <header class="main-header">
-    
+
     <div class="header-top-bar">
         <div class="top-bar-item">
             <i class="fa-regular fa-circle-check"></i> 100% Official Products
