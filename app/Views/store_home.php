@@ -18,7 +18,10 @@
 </head>
 <body>
     <?= view('header') ?>
+    
     <main>
+        
+        <!-- banner image carousel -->
         <div class="carousel-container">
             <div class="carousel-track" id="carouselTrack">
                 <div class="carousel-slide">
@@ -45,12 +48,10 @@
                 <span class="dot" data-index="2"></span>
             </div>
         </div>
-
-        <div style="padding: 20px;">
-            <h1>Welcome to K-Pop Merch Store</h1>
-            <p>This is the home page. <i class="fa-solid fa-heart"></i></p>
-        </div>
+        
     </main>
+    
+    <?= view('footer') ?>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -116,6 +117,5 @@
             startInterval();
         });
     </script>
-<?= view('footer') ?>
 </body>
 </html>
