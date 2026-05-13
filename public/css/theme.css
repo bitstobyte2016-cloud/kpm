@@ -45,6 +45,7 @@ body {
 }
 
 .carousel-slide {
+    flex: 0 0 100%;
     min-width: 100%;
     box-sizing: border-box;
 }
@@ -61,26 +62,22 @@ body {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: #fff;
-    border: 1px solid var(--theme-border);
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
+    background: transparent;
+    border: none;
+    width: 60px;
+    height: 60px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     color: var(--main-text);
-    font-size: 1.2rem;
+    font-size: 2rem;
     z-index: 10;
-    transition: all 0.3s ease;
+    transition: color 0.3s ease;
 }
 
 .carousel-btn:hover {
     color: var(--theme-purple);
-    border-color: var(--theme-purple);
-    box-shadow: 0 4px 12px rgba(181, 123, 232, 0.3);
 }
 
 .prev-btn {
