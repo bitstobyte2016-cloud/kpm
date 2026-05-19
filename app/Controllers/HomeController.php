@@ -7,7 +7,7 @@ class HomeController extends BaseController
     
     public function __construct() {
 		parent::__construct();
-		$this->load->model("apiaccess","a_access");
+		$this->a_access = new \App\Models\Apiaccess();
 	} 
     
     //home page functions
@@ -15,7 +15,7 @@ class HomeController extends BaseController
     //index
     public function index(): string
     {
-        $data['home_imgs'] = getBannerImages();
+        $data['home_imgs'] = $this->getBannerImages();
         
         return view('store_home',$data);
     }
