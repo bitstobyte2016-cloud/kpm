@@ -4,38 +4,35 @@ namespace App\Controllers;
 
 class HomeController extends BaseController
 {
+    
+    public function __construct() {
+		parent::__construct();
+		$this->load->model("apiaccess","a_access");
+	} 
+    
+    //home page functions
+    
+    //index
     public function index(): string
     {
-        return view('store_home');
+        $data['home_imgs'] = getBannerImages();
+        
+        return view('store_home',$data);
     }
 
-    public function cart(): string
-    {
-        return view('cart');
+    //get banner images
+    public function getBannerImages(){
+        //get images
+		$sql = "Select * from Home_images where status ='Y' Order By id desc";
+		return $this->a_access->custom_query($sql);
+                
     }
 
+    
     public function categories(): string
     {
         return view('categories');
     }
 
-    public function bands_all(): string
-    {
-        return view('bands_all');
-    }
 
-    public function categories_all(): string
-    {
-        return view('categories_all');
-    }
-
-    public function preorder(): string
-    {
-        return view('preorder');
-    }
-
-    public function onhand(): string
-    {
-        return view('onhand');
-    }
 }
