@@ -6,7 +6,6 @@ class HomeController extends BaseController
 {
     
     public function __construct() {
-		parent::__construct();
 		$this->a_access = new \App\Models\Apiaccess();
 	} 
     
@@ -15,7 +14,10 @@ class HomeController extends BaseController
     //index
     public function index(): string
     {
+        //get banner images
         $data['home_imgs'] = $this->getBannerImages();
+        
+        
         
         return view('store_home',$data);
     }
@@ -23,8 +25,8 @@ class HomeController extends BaseController
     //get banner images
     public function getBannerImages(){
         //get images
-		$sql = "Select * from Home_images where status ='Y' Order By id desc";
-		return $this->a_access->custom_query($sql);
+	$sql = "Select * from Home_images where status ='Y' Order By id desc";
+	return $this->a_access->custom_query($sql);
                 
     }
 

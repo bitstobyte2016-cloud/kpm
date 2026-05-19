@@ -23,37 +23,42 @@
         
         <!-- banner section -->
         <section class="hero-banner-section">
-            <div class="container">
-                <div class="hero-slider">
-                    <!-- Slides -->
-                    <div class="hero-slides">
-                        <?php if (!empty($data['home_imgs'])) : ?>
-                            <?php foreach ($data['home_imgs'] as $index => $banner) : ?>
-                                <a href="<?= base_url('product/' . $banner['product_id']) ?>" 
-                                    class="hero-slide <?= ($index === 0) ? 'active' : '' ?>">
-                                    <img src="<?= base_url($banner['img_link']) ?>" 
-                                        alt="Banner Image" >
-                                </a>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </div>
+            <div class="hero-slider">
+                <div class="hero-slides">
+                    <?php if (!empty($home_imgs)) : ?>
+                        <?php foreach ($home_imgs as $index => $banner) : ?>
+                            <a 
+                                href="<?= base_url('product/' . $banner['product_id']) ?>" 
+                                class="hero-slide <?= ($index === 0) ? 'active' : '' ?>"
+                            >
+                                <img 
+                                    src="<?= $banner['img_link'] ?>" 
+                                    alt="Banner Image"
+                                >
+                            </a>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
 
-                    <!-- Navigation Buttons -->
-                    <button class="hero-nav prev-btn">
-                        <i class="fa-solid fa-chevron-left"></i>
-                    </button>
-                    <button class="hero-nav next-btn">
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </button>
+                <!-- Navigation Buttons -->
 
-                    <!-- Dots -->
-                    <div class="hero-dots">
-                        <?php if (!empty($hero_banners)) : ?>
-                            <?php foreach ($hero_banners as $index => $banner) : ?>
-                                <span class="hero-dot <?= ($index === 0) ? 'active' : '' ?>"></span>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </div>
+                <button class="hero-nav prev-btn">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+
+                <button class="hero-nav next-btn">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+
+                <!-- Dots -->
+
+                <div class="hero-dots">
+
+                    <?php if (!empty($home_imgs)) : ?>
+                        <?php foreach ($home_imgs as $index => $banner) : ?>
+                            <span class="hero-dot <?= ($index === 0) ? 'active' : '' ?>"></span>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </section>
