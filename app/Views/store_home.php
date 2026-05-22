@@ -1,162 +1,141 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Store Home</title>
+<?= $this->extend('layouts/main'); ?>
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<?= $this->section('content'); ?>
 
-    <!-- FontAwesome Icon Pack -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<main>
 
-    <!-- Theme CSS -->
-    <link rel="stylesheet" href="/css/theme.css">
-</head>
-<body>
-    <?= view('header') ?>
-    
-    <main>
-        
-        <!-- banner section -->
-        <section class="hero-banner-section">
-            <div class="hero-slider">
-                <div class="hero-slides">
-                    <?php if (!empty($home_imgs)) : ?>
-                        <?php foreach ($home_imgs as $index => $banner) : ?>
-                            <a 
-                                href="<?= base_url('product/' . $banner['product_id']) ?>" 
-                                class="hero-slide <?= ($index === 0) ? 'active' : '' ?>"
+    <section class="hero-banner-section">
+        <div class="hero-slider">
+            <div class="hero-slides">
+                <?php if (!empty($home_imgs)) : ?>
+                    <?php foreach ($home_imgs as $index => $banner) : ?>
+                        <a 
+                            href="<?= base_url('product/' . $banner['product_id']) ?>" 
+                            class="hero-slide <?= ($index === 0) ? 'active' : '' ?>" >
+                            <img 
+                                src="<?= $banner['img_link'] ?>" 
+                                alt="Banner Image"
                             >
-                                <img 
-                                    src="<?= $banner['img_link'] ?>" 
-                                    alt="Banner Image"
-                                >
-                            </a>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
-
-                <!-- Navigation Buttons -->
-
-                <button class="hero-nav prev-btn">
-                    <i class="fa-solid fa-chevron-left"></i>
-                </button>
-
-                <button class="hero-nav next-btn">
-                    <i class="fa-solid fa-chevron-right"></i>
-                </button>
-
-                <!-- Dots -->
-
-                <div class="hero-dots">
-
-                    <?php if (!empty($home_imgs)) : ?>
-                        <?php foreach ($home_imgs as $index => $banner) : ?>
-                            <span class="hero-dot <?= ($index === 0) ? 'active' : '' ?>"></span>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
+                        </a>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
-        </section>
-      
-        
-    </main>
-    
-    <?= view('footer') ?>
 
-    <!-- banner section -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
+            <button class="hero-nav prev-btn">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button class="hero-nav next-btn">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
 
-            const slides = document.querySelectorAll(".hero-slide");
-            const dots = document.querySelectorAll(".hero-dot");
-            const nextBtn = document.querySelector(".next-btn");
-            const prevBtn = document.querySelector(".prev-btn");
 
-            let currentSlide = 0;
-            let slideInterval;
+            <!-- =====================================
+                DOTS
+            ====================================== -->
 
-            function showSlide(index) {
+            <div class="hero-dots">
 
-                slides.forEach((slide) => {
-                    slide.classList.remove("active");
-                });
+                <?php if (!empty($home_imgs)) : ?>
 
-                dots.forEach((dot) => {
-                    dot.classList.remove("active");
-                });
+                    <?php foreach ($home_imgs as $index => $banner) : ?>
 
-                slides[index].classList.add("active");
-                dots[index].classList.add("active");
+                        <span 
+                            class="hero-dot <?= ($index === 0) ? 'active' : '' ?>"
+                        ></span>
 
-                currentSlide = index;
-            }
+                    <?php endforeach; ?>
 
-            function nextSlide() {
+                <?php endif; ?>
 
-                let nextIndex = currentSlide + 1;
+            </div>
+        </div>
+    </section>
+</main>
 
-                if (nextIndex >= slides.length) {
-                    nextIndex = 0;
-                }
+<script>
 
-                showSlide(nextIndex);
-            }
+    document.addEventListener("DOMContentLoaded", function () {
 
-            function prevSlideFunc() {
+        const slides =document.querySelectorAll(".hero-slide");
+        const dots = document.querySelectorAll(".hero-dot");
+        const nextBtn = document.querySelector(".next-btn");
+        const prevBtn = document.querySelector(".prev-btn");
 
-                let prevIndex = currentSlide - 1;
+        let currentSlide = 0;
+        let slideInterval;
 
-                if (prevIndex < 0) {
-                    prevIndex = slides.length - 1;
-                }
-
-                showSlide(prevIndex);
-            }
-
-            nextBtn.addEventListener("click", () => {
-                nextSlide();
-                resetInterval();
+        function showSlide(index) {
+            slides.forEach((slide) => {
+                slide.classList.remove("active");
+            });
+            dots.forEach((dot) => {
+                dot.classList.remove("active");
             });
 
-            prevBtn.addEventListener("click", () => {
-                prevSlideFunc();
-                resetInterval();
-            });
+            slides[index].classList.add("active");
+            dots[index].classList.add("active");
+            currentSlide = index;
+        }
 
-            dots.forEach((dot, index) => {
+        function nextSlide() {
 
-                dot.addEventListener("click", () => {
-                    showSlide(index);
-                    resetInterval();
-                });
-
-            });
-
-            function startSlider() {
-
-                slideInterval = setInterval(() => {
-                    nextSlide();
-                }, 7000);
-
+            let nextIndex = currentSlide + 1;
+            if (nextIndex >= slides.length) {
+                nextIndex = 0;
             }
 
-            function resetInterval() {
+            showSlide(nextIndex);
+        }
 
-                clearInterval(slideInterval);
-                startSlider();
+        function prevSlideFunc() {
 
+            let prevIndex =currentSlide - 1;
+            if (prevIndex < 0) {
+                prevIndex =
+                    slides.length - 1;
             }
 
-            startSlider();
+            showSlide(prevIndex);
+        }
+
+        nextBtn.addEventListener("click", () => {
+            nextSlide();
+            resetInterval();
 
         });
-        </script>
-    
-    
-</body>
-</html>
+
+        prevBtn.addEventListener("click", () => {
+            prevSlideFunc();
+            resetInterval();
+
+        });
+
+        dots.forEach((dot, index) => {
+            dot.addEventListener("click", () => {
+                showSlide(index);
+                resetInterval();
+
+            });
+
+        });
+
+        function startSlider() {
+
+            slideInterval = setInterval(() => {
+                nextSlide();
+            }, 7000);
+
+        }
+
+        function resetInterval() {
+            clearInterval(slideInterval);
+            startSlider();
+        }
+
+        startSlider();
+
+    });
+
+</script>
+
+<?= $this->endSection(); ?>

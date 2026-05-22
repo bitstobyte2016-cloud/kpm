@@ -20,26 +20,55 @@ use Psr\Log\LoggerInterface;
  */
 abstract class BaseController extends Controller
 {
-    /**
-     * Be sure to declare properties for any property fetch you initialized.
-     * The creation of dynamic property is deprecated in PHP 8.2.
-     */
-
-    // protected $session;
-
+    
+    protected $header_data=[];
+    
     /**
      * @return void
      */
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
     {
-        // Load here all helpers you want to be available in your controllers that extend BaseController.
-        // Caution: Do not put the this below the parent::initController() call below.
-        // $this->helpers = ['form', 'url'];
-
+        
         // Caution: Do not edit this line.
         parent::initController($request, $response, $logger);
 
-        // Preload any models, libraries, etc, here.
-        // $this->session = service('session');
+        $this->a_access = new \App\Models\Apiaccess();
+        $this->header_data['categories'] = $this->getCategories();
+        $this->header_data['brands']=$this->getBrands();
+      
+            service('renderer')->setData(
+                $this->header_data
+            );
+    }
+    
+     //get categories list 
+    public function getCategories(){
+        
+        $sql = "Select * from Category where parent_id = 0 AND status = 'Y'";
+		$result = $this->a_access->custom_query($sql);
+		if($result){
+			$categories = array();
+			foreach($result as $row){
+				$cat = $row;
+				//get sub categories
+				$sql1 = "Select * from Category where parent_id = ".$row["id"];
+				$cat["scat"] = $this->a_access->custom_query($sql1);
+				
+				array_push($categories,$cat);
+			}
+		} 
+		else {
+			$categories = [];
+		}
+                return $categories;
+    }
+    
+     //get categories list 
+    public function getBrands(){
+        
+        $sql = "Select * from Brands where is_Header = 'Y' AND status = 'Y'";
+		$result = $this->a_access->custom_query($sql);
+		
+                return $result;
     }
 }

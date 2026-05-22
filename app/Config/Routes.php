@@ -20,6 +20,7 @@ $routes->get('/privacy', 'FooterCont::privacy');
 
 //header routes
 $routes->get('/search', 'HeaderCont::search');
+$routes->post('live-search', 'HeaderCont::liveSearch');
 $routes->get('/register', 'HeaderCont::register');
 $routes->get('/cart', 'HeaderController::cart');
 $routes->get('/categories_all', 'HeaderController::categories_all');
