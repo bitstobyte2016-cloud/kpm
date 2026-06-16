@@ -71,8 +71,8 @@
                         <label>State <span>*</span></label>
 
                         <select
-                            name="state"
                             id="state"
+                            name="state"
                         >
                             <option value="">
                                 Select State
@@ -84,8 +84,8 @@
                         <label>City <span>*</span></label>
 
                         <select
-                            name="city"
                             id="city"
+                            name="city"
                         >
                             <option value="">
                                 Select City
@@ -100,6 +100,7 @@
                             type="text"
                             value="India"
                             readonly
+                            class="readonly-input"
                         >
 
                         <input
@@ -182,5 +183,90 @@
 
 </section>
 
+<script>
+
+let indiaData=null;
+
+$(document).ready(function(){
+
+    $.getJSON(
+
+        "<?= base_url('assets/countries+states+cities.json'); ?>",
+
+        function(data){
+
+            indiaData=
+            data.find(
+                c=>c.name==="India"
+            );
+
+            let html=
+            '<option value="">Select State</option>';
+
+            $.each(
+
+                indiaData.states,
+
+                function(i,state){
+
+                    html+=
+                    '<option value="'+
+                    state.name+
+                    '">'+
+                    state.name+
+                    '</option>';
+
+                }
+
+            );
+
+            $("#state").html(html);
+
+        }
+
+    );
+
+});
+
+
+$("#state").change(function(){
+
+    let selectedState=
+    $(this).val();
+
+    let state=
+    indiaData.states.find(
+        s=>s.name===selectedState
+    );
+
+    let html=
+    '<option value="">Select City</option>';
+
+    if(state){
+
+        $.each(
+
+            state.cities,
+
+            function(i,city){
+
+                html+=
+                '<option value="'+
+                city.name+
+                '">'+
+                city.name+
+                '</option>';
+
+            }
+
+        );
+
+    }
+
+    $("#city").html(html);
+
+});
+
+</script>
 
 <?= $this->endSection(); ?>

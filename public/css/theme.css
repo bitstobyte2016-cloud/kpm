@@ -2629,3 +2629,8 @@ color:#9b6cf3;
 font-weight:600;
 text-decoration:none;
 }
+
+.readonly-input{
+background:#f8f8f8;
+cursor:not-allowed;
+}
