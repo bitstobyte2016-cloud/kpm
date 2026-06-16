@@ -163,7 +163,6 @@
             </p>
             <div class="footer-socials">
                 <a href="https://www.instagram.com/kp0pmerch/"><i class="fa-brands fa-instagram"></i></a>
-                <a href="#"><i class="fa-brands fa-youtube"></i></a>
                 <a href="mailto:support@kpopmerch.in"><i class="fa-regular fa-envelope"></i></a>
             </div>
         </div>
@@ -171,27 +170,27 @@
         <div class="footer-col">
             <h4>SHOP</h4>
             <ul class="footer-links">
-                <li><a href="<?= base_url('/') ?>">All Products</a></li>
-                <li><a href="<?= base_url('preorder') ?>">Pre-order / New In</a></li>
-                <li><a href="<?= base_url('onhand') ?>">On-hand</a></li>
+                <li><a href="<?php echo base_url().'categories/1'; ?>" >All Products</a></li>
+                <li><a href="<?php echo base_url().'preorder'; ?>">Pre-order / New In</a></li>
+                <li><a href="<?php echo base_url().'onhand' ?>">On-hand</a></li>
             </ul>
         </div>
 
         <div class="footer-col">
             <h4>HELP & INFO</h4>
             <ul class="footer-links">
-                <li><a href="<?= base_url('faq') ?>">FAQ</a></li>
-                <li><a href="<?= base_url('shipping-info') ?>">Shipping Info</a></li>
-                <li><a href="<?= base_url('returns') ?>">Returns & Exchange</a></li>
-                <li><a href="<?= base_url('contact') ?>">Contact Us</a></li>
+                <li><a href="<?php echo base_url().'faq' ?>">FAQ</a></li>
+                <li><a href="<?php echo base_url().'shipping_info' ?>">Shipping Info</a></li>
+                <li><a href="<?php echo base_url().'returns' ?>">Returns & Exchange</a></li>
+                <li><a href="<?php echo base_url().'contact' ?>">Contact Us</a></li>
             </ul>
         </div>
 
         <div class="footer-col">
             <h4>POLICIES</h4>
             <ul class="footer-links">
-                <li><a href="<?= base_url('terms') ?>">Terms & Conditions</a></li>
-                <li><a href="<?= base_url('privacy') ?>">Privacy Policy</a></li>
+                <li><a href="<?= base_url().'terms' ?>">Terms & Conditions</a></li>
+                <li><a href="<?= base_url().'privacy' ?>">Privacy Policy</a></li>
             </ul>
         </div>
 

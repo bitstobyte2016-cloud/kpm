@@ -44,7 +44,7 @@
         </div>
 
         <div class="actions-area">
-            <a href="/register" class="action-item sign-in-action">
+            <a href="/signin" class="action-item sign-in-action">
                 <i class="fa-regular fa-user"></i>
                 <span>Sign In / Sign Up</span>
             </a>
@@ -81,7 +81,7 @@
                                                 <?php } 
                                         } ?>
                                 </ul>
-                                <a href="/categories_all" class="view-all-link">View all categories &rarr;</a>
+                                <a href="<?php echo base_url().'categories/1'; ?>" class="view-all-link">View all categories &rarr;</a>
                             </div>
                             <div class="mega-menu-featured">
                                 <img src="/Images/cat_img.png" alt="Featured Categories" class="featured-img">
@@ -117,8 +117,8 @@
                         </div>
                     </div>
                 </li>
-                <li class="nav-item"><a href="/preorder">Pre-order / New In</a></li>
-                <li class="nav-item"><a href="/onhand">On-hand</a></li>
+                <li class="nav-item"><a href="<?php echo base_url().'preorder'; ?>">Pre-order / New In</a></li>
+                <li class="nav-item"><a href="<?php echo base_url().'onhand'; ?>">On-hand</a></li>
             </ul>
         </nav>
     </div>

@@ -1,27 +1,186 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - K-Pop Merch</title>
+<?= $this->extend('layouts/main'); ?>
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<?= $this->section('content'); ?>
 
-    <!-- FontAwesome Icon Pack -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<section class="register-page">
 
-    <!-- Theme CSS -->
-    <link rel="stylesheet" href="/css/theme.css">
-</head>
-<body>
-    <?= view('header') ?>
-    <main style="padding: 40px 5%;">
-        <h1>Register</h1>
-        <p>This is the placeholder register page.</p>
-    </main>
-<?= view('footer') ?>
-</body>
-</html>
+    <div class="container">
+
+        <div class="search-breadcrumb">
+            <a href="<?= base_url(); ?>">Home</a>
+            <span>/</span>
+            <span>Create Account</span>
+        </div>
+
+        <div class="register-card">
+
+            <div class="register-header">
+
+                <div class="register-icon">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+
+                <h1>Create An Account</h1>
+
+                <p>
+                    Join K-Pop Merch and enjoy a better shopping experience.
+                </p>
+
+            </div>
+
+            <form id="registerForm">
+
+                <div class="register-form">
+
+                    <div class="form-row">
+                        <label>Email Address <span>*</span></label>
+                        <input type="email" name="email">
+                    </div>
+
+                    <div class="form-row">
+                        <label>Password <span>*</span></label>
+                        <input type="password" name="password">
+                    </div>
+
+                    <div class="form-row">
+                        <label>Confirm Password <span>*</span></label>
+                        <input type="password" name="confirm_password">
+                    </div>
+
+                    <div class="form-row">
+                        <label>First Name <span>*</span></label>
+                        <input type="text" name="fname">
+                    </div>
+
+                    <div class="form-row">
+                        <label>Last Name <span>*</span></label>
+                        <input type="text" name="lname">
+                    </div>
+
+                    <div class="form-row">
+                        <label>Address Line 1 <span>*</span></label>
+                        <input type="text" name="address1">
+                    </div>
+
+                    <div class="form-row">
+                        <label>Address Line 2</label>
+                        <input type="text" name="address2">
+                    </div>
+
+                    <div class="form-row">
+                        <label>State <span>*</span></label>
+
+                        <select
+                            name="state"
+                            id="state"
+                        >
+                            <option value="">
+                                Select State
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <label>City <span>*</span></label>
+
+                        <select
+                            name="city"
+                            id="city"
+                        >
+                            <option value="">
+                                Select City
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <label>Country</label>
+
+                        <input
+                            type="text"
+                            value="India"
+                            readonly
+                        >
+
+                        <input
+                            type="hidden"
+                            name="country"
+                            value="India"
+                        >
+                    </div>
+
+                    <div class="form-row">
+                        <label>Pincode <span>*</span></label>
+                        <input type="text" name="pincode">
+                    </div>
+
+                    <div class="form-row">
+                        <label>Phone Number <span>*</span></label>
+                        <input type="text" name="phone">
+                    </div>
+
+                    <div class="form-row">
+                        <label>Company Name</label>
+                        <input type="text" name="company_name">
+                    </div>
+
+                    <div class="form-row">
+                        <label>Company GST Number</label>
+                        <input type="text" name="gst_no">
+                    </div>
+
+                </div>
+
+                <div class="register-terms">
+
+                    <label>
+
+                        <input
+                            type="checkbox"
+                            id="terms"
+                        >
+
+                        By registering you agree to our
+
+                        <a href="<?= base_url('terms'); ?>">
+
+                            Terms and Conditions
+
+                        </a>
+
+                    </label>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="auth-btn"
+                    onclick="window.location='<?= base_url('verify'); ?>'"
+                >
+
+                    CREATE ACCOUNT
+
+                </button>
+
+                <div class="register-login">
+
+                    Already have an account?
+
+                    <a href="<?= base_url('login'); ?>">
+
+                        Sign In
+
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<?= $this->endSection(); ?>
