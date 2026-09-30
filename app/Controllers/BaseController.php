@@ -34,7 +34,7 @@ abstract class BaseController extends Controller
 
         $this->a_access = new \App\Models\Apiaccess();
         $this->header_data['categories'] = $this->getCategories();
-        $this->header_data['brands']=$this->getBrands();
+        $this->header_data['bands']=$this->getBrands();
       
             service('renderer')->setData(
                 $this->header_data
@@ -71,4 +71,5 @@ abstract class BaseController extends Controller
 		
                 return $result;
     }
+ 
 }

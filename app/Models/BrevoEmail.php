@@ -1,0 +1,1337 @@
+<?php
+
+namespace App\Models;
+
+use CodeIgniter\Model;
+
+class BrevoEmail extends Model
+{
+
+    private $apiKey='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';
+    
+    //send test email
+    public function sendTestEmail($email)
+    {
+        $htmlContent =
+            $this->emailHeader() .
+            '
+            <tr>
+                <td style="
+                    padding:60px 40px;
+                    text-align:center;
+                    font-family:Arial,Helvetica,sans-serif;
+                ">
+                    <h1 style="
+                        margin:0 0 15px;
+                        color:#171a31;
+                        font-size:30px;
+                    ">
+                        Email Template Test
+                    </h1>
+
+                    <p style="
+                        margin:0;
+                        color:#666666;
+                        font-size:15px;
+                        line-height:24px;
+                    ">
+                        If you can see this message, the K-Pop Merch
+                        email header and footer are working correctly.
+                    </p>
+                </td>
+            </tr>
+            ' .
+            $this->emailFooter();
+
+        $data = [
+            'sender' => [
+                'name'  => 'Support K-Pop Merch',
+                'email' => 'support@kpopmerch.in'
+            ],
+            'to' => [
+                [
+                    'email' => $email
+                ]
+            ],
+            'subject' => 'K-Pop Merch Email Template Test',
+            'htmlContent' => $htmlContent
+        ];
+
+        $ch = curl_init();
+
+        curl_setopt( $ch, CURLOPT_URL, 'https://api.brevo.com/v3/smtp/email'  );
+        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+        curl_setopt(  $ch,  CURLOPT_POST, true  );
+        curl_setopt(  $ch,  CURLOPT_POSTFIELDS,  json_encode($data) );
+        curl_setopt(  $ch, CURLOPT_HTTPHEADER,
+            [
+                'accept: application/json',
+                'api-key: ' . $this->apiKey,
+                'content-type: application/json'
+            ]
+        );
+
+       $result = curl_exec($ch);
+
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+
+        curl_close($ch);
+
+        return [
+            "http_code" => $httpCode,
+            "curl_error" => $curlError,
+            "response" => $result
+        ];
+
+    }
+    
+    //to generate otp
+    public function generateOtp()
+    {
+        $chars ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        $otp='';
+
+        for($i=0;$i<6;$i++)
+        {
+            $otp .= $chars[
+                random_int(  0,  strlen($chars)-1 )
+            ];
+        }
+
+        return $otp;
+    }
+    
+    public function sendOtpEmail($email){
+        
+        $otp = $this->generateOtp();
+        
+        $data=[
+            'sender'=>['name'=>'Support K-Pop Merch','email'=>'support@kpopmerch.in' ],
+            'to'=>[['email'=>$email ]],
+            'subject'=>'Verify Your K-Pop Merch Account',
+            'htmlContent'=>'
+            <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;">
+                <h2 style="color:#7c3aed;">
+                    K-Pop Merch
+                </h2>
+                <p>
+                    Thank you for registering.
+                </p>
+                <p>
+                    Your verification code is:
+                </p>
+                <div style="
+                    font-size:32px;
+                    font-weight:bold;
+                    letter-spacing:5px;
+                    color:#7c3aed;
+                    padding:15px 0;
+                ">
+                    '.$otp.'
+                </div>
+                <p>
+                    This code will expire in 10 minutes.
+                </p>
+            </div>'
+        ];
+
+        $ch=curl_init();
+        curl_setopt( $ch, CURLOPT_URL,  'https://api.brevo.com/v3/smtp/email');
+        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+        curl_setopt(  $ch, CURLOPT_POST, true );
+        curl_setopt(  $ch, CURLOPT_POSTFIELDS, json_encode($data) );
+        curl_setopt( $ch, CURLOPT_HTTPHEADER,
+            [
+                'accept: application/json',
+                'api-key: '.$this->apiKey,
+                'content-type: application/json'
+            ]
+        );
+
+        $result=curl_exec($ch);
+        curl_close($ch);
+
+        if($result){
+            return ["success"=>'true',"otp"=>$otp];
+        }else{
+            return ["success"=>'false'];
+        }
+        
+    }
+    
+    //to send email for forgot password
+    public function sendPasswordEmail($email, $firstName, $tempPassword)
+    {
+        $body = '
+            <!-- FORGOT PASSWORD BODY -->
+            <tr>
+                <td
+                    style="
+                        padding:20px 45px 18px;
+                        background:#ffffff;
+                        text-align:center; " >
+                    <!-- LOCK IMAGE -->
+                    <img
+                        src="' . base_url('Images/email/ic_email1.png') . '"
+                        alt=""
+                        width="145"
+                        style="
+                            width:145px;
+                            height:auto;
+                            margin:0 auto 10px; " >
+
+                    <!-- TITLE -->
+                    <h1
+                        style="
+                            margin:0 0 12px;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:30px;
+                            line-height:38px;
+                            font-weight:700;
+                            color:#2d1b62; " >
+                        Here&rsquo;s Your Temporary Password!
+                    </h1>
+
+                    <!-- GREETING -->
+                    <p
+                        style="
+                            margin:0 0 10px;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:18px;
+                            line-height:26px;
+                            color:#29205c; " >
+                        Hi ' . htmlspecialchars($firstName) . ',
+                    </p>
+
+                    <!-- DESCRIPTION -->
+                    <p
+                        style="
+                            margin:0 auto 18px;
+                            max-width:550px;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:16px;
+                            line-height:25px;
+                            color:#29205c; " >
+                        We received a request to reset your password for your
+                        K-Pop Merch account. Here&rsquo;s your temporary password:
+                    </p>
+
+
+                    <!-- TEMPORARY PASSWORD -->
+                    <table
+                        cellpadding="0"
+                        cellspacing="0"
+                        border="0"
+                        align="center"
+                        style="margin:0 auto 25px;"  >
+                        <tr>
+                            <td
+                                style="
+                                    background:#f8f1ff;
+                                    border:2px dashed #c5a3ed;
+                                    border-radius:14px;
+                                    padding:10px 24px; " >
+                                <table
+                                    cellpadding="0"
+                                    cellspacing="0"
+                                    border="0" >
+                                    <tr>
+                                        <td
+                                            valign="middle"
+                                            style="padding-right:14px;" >
+                                            <img
+                                                src="' . base_url('Images/email/ic_email2.png') . '"
+                                                alt=""
+                                                width="45"
+                                                style="
+                                                    width:45px;
+                                                    height:auto;  "  >
+                                        </td>
+                                        <td
+                                            valign="middle"
+                                            style="
+                                                font-family:Arial,Helvetica,sans-serif;
+                                                font-size:30px;
+                                                line-height:40px;
+                                                font-weight:700;
+                                                letter-spacing:2px;
+                                                color:#35206f;
+                                                white-space:nowrap; "  >
+                                            ' . htmlspecialchars($tempPassword) . '
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+
+
+                    <!-- STEP 1 -->
+                    <table
+                        width="100%"
+                        cellpadding="0"
+                        cellspacing="0"
+                        border="0"
+                        style="margin-bottom:14px;"  >
+                        <tr>
+                            <td
+                                width="80"
+                                valign="middle"
+                                align="center" >
+                                <table
+                                    width="55"
+                                    height="55"
+                                    cellpadding="0"
+                                    cellspacing="0"
+                                    border="0"
+                                    style="
+                                        width:55px;
+                                        height:55px;
+                                        background:#f4eaff;
+                                        border-radius:50%;  " >
+                                    <tr>
+                                        <td align="center" valign="middle">
+
+                                            <img
+                                                src="' . base_url('Images/icons/ic_login.png') . '"
+                                                alt=""
+                                                width="32"
+                                                height="32"
+                                                style="
+                                                    width:32px;
+                                                    height:32px;  "  >
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+
+                            <td
+                                valign="middle"
+                                align="left"
+                                style="padding-left:8px;"   >
+                                <div
+                                    style="
+                                        font-family:Arial,Helvetica,sans-serif;
+                                        font-size:17px;
+                                        line-height:23px;
+                                        font-weight:700;
+                                        color:#29205c;  "  >
+                                    1.&nbsp; Login to your account
+                                </div>
+                                <div
+                                    style="
+                                        font-family:Arial,Helvetica,sans-serif;
+                                        font-size:15px;
+                                        line-height:22px;
+                                        color:#29205c;  "  >
+                                    Use the temporary password above to log in to your account.
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- STEP 2 -->
+                    <table
+                        width="100%"
+                        cellpadding="0"
+                        cellspacing="0"
+                        border="0"
+                        style="margin-bottom:14px;"  >
+                        <tr>
+
+                            <td
+                                width="80"
+                                valign="middle"
+                                align="center"  >
+                                <table
+                                    width="55"
+                                    height="55"
+                                    cellpadding="0"
+                                    cellspacing="0"
+                                    border="0"
+                                    style="
+                                        width:55px;
+                                        height:55px;
+                                        background:#f4eaff;
+                                        border-radius:50%; " >
+                                    <tr>
+                                        <td align="center" valign="middle">
+
+                                            <img
+                                                src="' . base_url('Images/icons/ic_setting.png') . '"
+                                                alt=""
+                                                width="32"
+                                                height="32"
+                                                style="
+                                                    width:32px;
+                                                    height:32px;  "  >
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+
+                            <td
+                                valign="middle"
+                                align="left"
+                                style="padding-left:8px;"  >
+
+                                <div
+                                    style="
+                                        font-family:Arial,Helvetica,sans-serif;
+                                        font-size:17px;
+                                        line-height:23px;
+                                        font-weight:700;
+                                        color:#29205c; "  >
+                                    2.&nbsp; Go to My Account
+                                </div>
+
+                                <div
+                                    style="
+                                        font-family:Arial,Helvetica,sans-serif;
+                                        font-size:15px;
+                                        line-height:22px;
+                                        color:#29205c;  " >
+                                    Once logged in, navigate to the Account Settings section.
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    </table>
+
+
+                    <!-- STEP 3 -->
+                    <table
+                        width="100%"
+                        cellpadding="0"
+                        cellspacing="0"
+                        border="0"
+                        style="margin-bottom:18px;"  >
+                        <tr>
+                            <td
+                                width="80"
+                                valign="middle"
+                                align="center" >
+                                <table
+                                    width="55"
+                                    height="55"
+                                    cellpadding="0"
+                                    cellspacing="0"
+                                    border="0"
+                                    style="
+                                        width:55px;
+                                        height:55px;
+                                        background:#f4eaff;
+                                        border-radius:50%; "  >
+                                    <tr>
+                                        <td align="center" valign="middle">
+
+                                            <img
+                                                src="' . base_url('Images/icons/ic_lock1.png') . '"
+                                                alt=""
+                                                width="32"
+                                                height="32"
+                                                style="
+                                                    width:32px;
+                                                    height:32px; "  >
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+
+                            <td
+                                valign="middle"
+                                align="left"
+                                style="padding-left:8px;" >
+                                <div
+                                    style="
+                                        font-family:Arial,Helvetica,sans-serif;
+                                        font-size:17px;
+                                        line-height:23px;
+                                        font-weight:700;
+                                        color:#29205c;  " >
+                                    3.&nbsp; Change Your Password
+                                </div>
+
+                                <div
+                                    style="
+                                        font-family:Arial,Helvetica,sans-serif;
+                                        font-size:15px;
+                                        line-height:22px;
+                                        color:#29205c; " >
+                                    Set a new password of your choice to keep your account secure.
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- SECURITY MESSAGE -->
+                    <p
+                        style="
+                            margin:0 auto 5px;
+                            max-width:540px;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:15px;
+                            line-height:23px;
+                            color:#29205c; " >
+                        If you didn&rsquo;t request a password reset, please ignore this email
+                        or contact our support team.
+                    </p>
+
+
+                    <!-- HAPPY SHOPPING -->
+                    <img
+                        src="' . base_url('Images/email/email4.png') . '"
+                        alt="Happy Shopping"
+                        width="190"
+                        style="
+                            width:190px;
+                            height:auto;
+                            margin:4px auto 0; " >
+                </td>
+            </tr>
+
+        ';
+
+
+        $htmlContent = $this->emailHeader() . $body .  $this->emailFooter();
+
+
+        $data = [
+            'sender' => [
+                'name'  => 'Support K-Pop Merch',
+                'email' => 'support@kpopmerch.in'
+            ],
+            'to' => [
+                [
+                    'email' => $email
+                ]
+            ],
+            'subject' => 'Your Temporary Password - K-Pop Merch',
+            'htmlContent' => $htmlContent
+        ];
+
+
+        $ch = curl_init();
+
+        curl_setopt(  $ch,  CURLOPT_URL, 'https://api.brevo.com/v3/smtp/email' );
+        curl_setopt( $ch,  CURLOPT_RETURNTRANSFER,  true );
+        curl_setopt($ch, CURLOPT_POST, true );
+        curl_setopt( $ch, CURLOPT_POSTFIELDS,  json_encode($data) );
+
+        curl_setopt(  $ch, CURLOPT_HTTPHEADER, [
+                'accept: application/json',
+                'api-key: ' . $this->apiKey,
+                'content-type: application/json'
+            ]
+        );
+
+        $result = curl_exec($ch);
+
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+
+        curl_close($ch);
+
+
+        if($httpCode == 201)
+        {
+            return [
+                'success' => true,
+                'response' => $result
+            ];
+        }
+
+
+        return [
+            'success' => false,
+            'response' => $result,
+            'curl_error' => $curlError
+        ];
+    }
+    
+    
+    //email header
+    public function emailHeader()
+    {
+        return '
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+            <style>
+                @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+                body {
+                    margin:0;
+                    padding:0;
+                    background:#ffffff;
+                    font-family:"Inter", Arial, Helvetica, sans-serif;
+                }
+
+                table {
+                    border-collapse:collapse;
+                    border-spacing:0;
+                }
+
+                img {
+                    border:0;
+                    display:block;
+                }
+
+                a {
+                    text-decoration:none;
+                }
+            </style>
+        </head>
+
+        <body>
+
+            <table
+                width="100%"
+                cellpadding="0"
+                cellspacing="0"
+                border="0"
+                style="background:#ffffff;"
+            >
+
+                <tr>
+                    <td align="center">
+
+                        <table
+                            width="700"
+                            cellpadding="0"
+                            cellspacing="0"
+                            border="0"
+                            style="
+                                width:700px;
+                                max-width:700px;
+                                background:#ffffff;
+                            "
+                        >
+
+                            <!-- TOP BENEFITS BAR -->
+                            <tr>
+                                <td
+                                    style="
+                                        background:#dec9f3;
+                                        padding:10px 15px;
+                                    "
+                                >
+
+                                    <table
+                                        width="100%"
+                                        cellpadding="0"
+                                        cellspacing="0"
+                                        border="0"
+                                    >
+                                        <tr>
+
+                                            <!-- OFFICIAL PRODUCTS -->
+                                            <td
+                                                width="33.33%"
+                                                align="center"
+                                                style="
+                                                    border-right:1px solid #b99ad9;
+                                                    padding:3px 8px;
+                                                "
+                                            >
+                                                <table cellpadding="0" cellspacing="0" border="0">
+                                                    <tr>
+
+                                                        <td
+                                                            valign="middle"
+                                                            style="padding-right:7px;"
+                                                        >
+                                                            <img
+                                                                src="' . base_url('Images/icons/ic_official.png') . '"
+                                                                width="25"
+                                                                height="25"
+                                                                alt=""
+                                                                style="
+                                                                    width:25px;
+                                                                    height:25px;
+                                                                "
+                                                            >
+                                                        </td>
+
+                                                        <td
+                                                            valign="middle"
+                                                            style="
+                                                                font-family:Arial,Helvetica,sans-serif;
+                                                                font-size:12px;
+                                                                font-weight:600;
+                                                                color:#111111;
+                                                                white-space:nowrap;
+                                                            "
+                                                        >
+                                                            100% Official Products
+                                                        </td>
+
+                                                    </tr>
+                                                </table>
+                                            </td>
+
+
+                                            <!-- FAST SHIPPING -->
+                                            <td
+                                                width="33.33%"
+                                                align="center"
+                                                style="
+                                                    border-right:1px solid #b99ad9;
+                                                    padding:3px 8px;
+                                                "
+                                            >
+                                                <table cellpadding="0" cellspacing="0" border="0">
+                                                    <tr>
+
+                                                        <td
+                                                            valign="middle"
+                                                            style="padding-right:7px;"
+                                                        >
+                                                            <img
+                                                                src="' . base_url('Images/icons/ic_ship.png') . '"
+                                                                width="25"
+                                                                height="25"
+                                                                alt=""
+                                                                style="
+                                                                    width:25px;
+                                                                    height:25px;
+                                                                "
+                                                            >
+                                                        </td>
+
+                                                        <td
+                                                            valign="middle"
+                                                            style="
+                                                                font-family:Arial,Helvetica,sans-serif;
+                                                                font-size:12px;
+                                                                font-weight:600;
+                                                                color:#111111;
+                                                                white-space:nowrap;
+                                                            "
+                                                        >
+                                                            Fast Shipping (3-5 Days)
+                                                        </td>
+
+                                                    </tr>
+                                                </table>
+                                            </td>
+
+
+                                            <!-- SECURE PAYMENTS -->
+                                            <td
+                                                width="33.33%"
+                                                align="center"
+                                                style="padding:3px 8px;"
+                                            >
+                                                <table cellpadding="0" cellspacing="0" border="0">
+                                                    <tr>
+
+                                                        <td
+                                                            valign="middle"
+                                                            style="padding-right:7px;"
+                                                        >
+                                                            <img
+                                                                src="' . base_url('Images/icons/ic_lock.png') . '"
+                                                                width="25"
+                                                                height="25"
+                                                                alt=""
+                                                                style="
+                                                                    width:25px;
+                                                                    height:25px;
+                                                                "
+                                                            >
+                                                        </td>
+
+                                                        <td
+                                                            valign="middle"
+                                                            style="
+                                                                font-family:Arial,Helvetica,sans-serif;
+                                                                font-size:12px;
+                                                                font-weight:600;
+                                                                color:#111111;
+                                                                white-space:nowrap;
+                                                            "
+                                                        >
+                                                            Secure Payments
+                                                        </td>
+
+                                                    </tr>
+                                                </table>
+                                            </td>
+
+                                        </tr>
+                                    </table>
+
+                                </td>
+                            </tr>
+
+
+                            <!-- MAIN HEADER -->
+                            <tr>
+                                <td
+                                    style="
+                                        padding:20px 35px;
+                                        background:#ffffff;
+                                    "
+                                >
+
+                                    <table
+                                        width="100%"
+                                        cellpadding="0"
+                                        cellspacing="0"
+                                        border="0"
+                                    >
+                                        <tr>
+
+                                            <!-- LOGO + BRAND -->
+                                            <td
+                                                width="70%"
+                                                valign="middle"
+                                            >
+
+                                                <table
+                                                    cellpadding="0"
+                                                    cellspacing="0"
+                                                    border="0"
+                                                >
+                                                    <tr>
+
+                                                        <td
+                                                            valign="middle"
+                                                            style="padding-right:15px;"
+                                                        >
+                                                            <a
+                                                                href="' . base_url() . '"
+                                                                target="_blank"
+                                                            >
+                                                                <img
+                                                                    src="' . base_url('Images/logo.png') . '"
+                                                                    alt="K-Pop Merch"
+                                                                    width="82"
+                                                                    style="
+                                                                        width:82px;
+                                                                        height:auto;
+                                                                    "
+                                                                >
+                                                            </a>
+                                                        </td>
+
+                                                        <td valign="middle">
+
+                                                            <div
+                                                                style="
+                                                                    font-family:Arial,Helvetica,sans-serif;
+                                                                    font-size:25px;
+                                                                    line-height:30px;
+                                                                    font-weight:700;
+                                                                    color:#111111;
+                                                                "
+                                                            >
+                                                                K-Pop Merch
+                                                            </div>
+
+                                                            <div
+                                                                style="
+                                                                    margin-top:3px;
+                                                                    font-family:Arial,Helvetica,sans-serif;
+                                                                    font-size:15px;
+                                                                    line-height:20px;
+                                                                    color:#202040;
+                                                                "
+                                                            >
+                                                                Your Ultimate K-Pop Store
+                                                            </div>
+
+                                                        </td>
+
+                                                    </tr>
+                                                </table>
+
+                                            </td>
+
+
+                                            <!-- GOOD MUSIC IMAGE -->
+                                            <td
+                                                width="30%"
+                                                valign="middle"
+                                                align="right"
+                                            >
+
+                                                <img
+                                                    src="' . base_url('Images/email/email1.png') . '"
+                                                    alt="Good Music Brighter Days"
+                                                    width="95"
+                                                    style="
+                                                        width:95px;
+                                                        height:auto;
+                                                        margin-left:auto;
+                                                    "
+                                                >
+
+                                            </td>
+
+                                        </tr>
+                                    </table>
+
+                                </td>
+                            </tr>
+
+
+                            <!-- NAVIGATION -->
+                            <tr>
+                                <td
+                                    style="
+                                        background:#b98adf;
+                                        padding:12px 20px;
+                                    "
+                                >
+
+                                    <table
+                                        width="100%"
+                                        cellpadding="0"
+                                        cellspacing="0"
+                                        border="0"
+                                    >
+                                        <tr>
+
+                                            <!-- CATEGORIES -->
+                                            <td
+                                                width="25%"
+                                                align="center"
+                                                style="
+                                                    border-right:1px solid rgba(255,255,255,0.65);
+                                                "
+                                            >
+                                                <a
+                                                    href="' . base_url('categories/1') . '"
+                                                    target="_blank"
+                                                    style="
+                                                        color:#ffffff;
+                                                        font-family:Arial,Helvetica,sans-serif;
+                                                        font-size:13px;
+                                                        font-weight:600;
+                                                    "
+                                                >
+                                                    Categories
+                                                </a>
+                                            </td>
+
+
+                                            <!-- BRANDS -->
+                                            <td
+                                                width="25%"
+                                                align="center"
+                                                style="
+                                                    border-right:1px solid rgba(255,255,255,0.65);
+                                                "
+                                            >
+                                                <a
+                                                    href="' . base_url('bands_all') . '"
+                                                    target="_blank"
+                                                    style="
+                                                        color:#ffffff;
+                                                        font-family:Arial,Helvetica,sans-serif;
+                                                        font-size:13px;
+                                                        font-weight:600;
+                                                    "
+                                                >
+                                                    Brands
+                                                </a>
+                                            </td>
+
+
+                                            <!-- PRE-ORDER -->
+                                            <td
+                                                width="25%"
+                                                align="center"
+                                                style="
+                                                    border-right:1px solid rgba(255,255,255,0.65);
+                                                "
+                                            >
+                                                <a
+                                                    href="' . base_url('preorder') . '"
+                                                    target="_blank"
+                                                    style="
+                                                        color:#ffffff;
+                                                        font-family:Arial,Helvetica,sans-serif;
+                                                        font-size:13px;
+                                                        font-weight:600;
+                                                    "
+                                                >
+                                                    Pre-order
+                                                </a>
+                                            </td>
+
+
+                                            <!-- ON-HAND -->
+                                            <td
+                                                width="25%"
+                                                align="center"
+                                            >
+                                                <a
+                                                    href="' . base_url('onhand') . '"
+                                                    target="_blank"
+                                                    style="
+                                                        color:#ffffff;
+                                                        font-family:Arial,Helvetica,sans-serif;
+                                                        font-size:13px;
+                                                        font-weight:600;
+                                                    "
+                                                >
+                                                    On-Hand
+                                                </a>
+                                            </td>
+
+                                        </tr>
+                                    </table>
+
+                                </td>
+                            </tr>
+
+
+                            <!-- EMAIL BODY BEGINS HERE -->
+        ';
+    }
+    
+    //email footer
+    public function emailFooter()
+    {
+        return '
+
+                            <!-- FOOTER -->
+                            <tr>
+                                <td
+                                    style="
+                                        background:#f7efff;
+                                        padding:28px 30px 25px;
+                                    " >
+
+                                    <!-- TOP FOOTER -->
+                                    <table
+                                        width="100%"
+                                        cellpadding="0"
+                                        cellspacing="0"
+                                        border="0" >
+                                        <tr>
+                                            <!-- THANK YOU -->
+                                            <td
+                                                width="25%"
+                                                valign="middle"
+                                                align="left" >
+                                                <img
+                                                    src="' . base_url('Images/email/email2.png') . '"
+                                                    alt="Thank you for being here"
+                                                    width="115"
+                                                    style="
+                                                        width:115px;
+                                                        height:auto;
+                                                    " >
+                                            </td>
+
+                                            <!-- INSTAGRAM + TAGLINE -->
+                                            <td
+                                                width="50%"
+                                                valign="middle"
+                                                align="center" >
+                                                <a
+                                                    href="https://www.instagram.com/kp0pmerch/"
+                                                    target="_blank"  >
+                                                    <img
+                                                        src="' . base_url('Images/icons/ic_insta.png') . '"
+                                                        alt="Instagram"
+                                                        width="48"
+                                                        height="48"
+                                                        style="
+                                                            width:48px;
+                                                            height:48px;
+                                                            margin:0 auto; " >
+                                                </a>
+
+                                                <div
+                                                    style="
+                                                        margin-top:13px;
+                                                        font-family:Arial,Helvetica,sans-serif;
+                                                        font-size:11px;
+                                                        letter-spacing:3px;
+                                                        color:#171a31;
+                                                        white-space:nowrap; " >
+                                                    MUSIC&nbsp;&nbsp; PEOPLE&nbsp;&nbsp; GOOD VIBES&nbsp;&nbsp; ALWAYS&nbsp;&nbsp;♡
+                                                </div>
+
+                                            </td>
+
+                                            <!-- COLLECT -->
+                                            <td
+                                                width="25%"
+                                                valign="middle"
+                                                align="right" >
+                                                <img
+                                                    src="' . base_url('Images/email/email3.png') . '"
+                                                    alt="Collect Your Happy Moments"
+                                                    width="115"
+                                                    style="
+                                                        width:115px;
+                                                        height:auto;
+                                                        margin-left:auto; " >
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <!-- DIVIDER -->
+                                    <table
+                                        width="100%"
+                                        cellpadding="0"
+                                        cellspacing="0"
+                                        border="0"  >
+                                        <tr>
+                                            <td
+                                                style="
+                                                    padding-top:20px;
+                                                    border-bottom:1px solid #d4b8ed;
+                                                    font-size:0;
+                                                    line-height:0; " >
+                                                &nbsp;
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <!-- SERVICE FEATURES -->
+                                    <table
+                                        width="100%"
+                                        cellpadding="0"
+                                        cellspacing="0"
+                                        border="0"
+                                        style="margin-top:20px;"  >
+                                        <tr>
+
+                                            <!-- CONTACT -->
+                                            <td
+                                                width="25%"
+                                                valign="middle"
+                                                align="center" >
+                                                <table cellpadding="0" cellspacing="0" border="0">
+                                                    <tr>
+                                                        <td
+                                                            valign="middle"
+                                                            style="padding-right:7px;" >
+                                                            <img
+                                                                src="' . base_url('Images/icons/ic_contact.png') . '"
+                                                                width="38"
+                                                                height="38"
+                                                                alt=""
+                                                                style="
+                                                                    width:38px;
+                                                                    height:38px;  " >
+                                                        </td>
+
+                                                        <td
+                                                            valign="middle"
+                                                            style="
+                                                                font-family:Arial,Helvetica,sans-serif;
+                                                                font-size:11px;
+                                                                line-height:16px;
+                                                                color:#202040; " >
+                                                            Need Help?<br>
+                                                            Contact Us
+                                                        </td>
+
+                                                    </tr>
+                                                </table>
+                                            </td>
+
+                                            <!-- SHIPPING -->
+                                            <td
+                                                width="25%"
+                                                valign="middle"
+                                                align="center" >
+                                                <table cellpadding="0" cellspacing="0" border="0">
+                                                    <tr>
+                                                        <td
+                                                            valign="middle"
+                                                            style="padding-right:7px;"  >
+                                                            <img
+                                                                src="' . base_url('Images/icons/ic_ship.png') . '"
+                                                                width="38"
+                                                                height="38"
+                                                                alt=""
+                                                                style="
+                                                                    width:38px;
+                                                                    height:38px; "  >
+                                                        </td>
+
+                                                        <td
+                                                            valign="middle"
+                                                            style="
+                                                                font-family:Arial,Helvetica,sans-serif;
+                                                                font-size:11px;
+                                                                line-height:16px;
+                                                                color:#202040;  "  >
+                                                            Fast &amp; Reliable<br>
+                                                            Shipping
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+
+                                            <!-- SECURE PAYMENTS -->
+                                            <td
+                                                width="25%"
+                                                valign="middle"
+                                                align="center"
+                                            >
+                                                <table cellpadding="0" cellspacing="0" border="0">
+                                                    <tr>
+
+                                                        <td
+                                                            valign="middle"
+                                                            style="padding-right:7px;"
+                                                        >
+                                                            <img
+                                                                src="' . base_url('Images/icons/ic_shield.png') . '"
+                                                                width="38"
+                                                                height="38"
+                                                                alt=""
+                                                                style="
+                                                                    width:38px;
+                                                                    height:38px;
+                                                                "
+                                                            >
+                                                        </td>
+
+                                                        <td
+                                                            valign="middle"
+                                                            style="
+                                                                font-family:Arial,Helvetica,sans-serif;
+                                                                font-size:11px;
+                                                                line-height:16px;
+                                                                color:#202040;
+                                                            "
+                                                        >
+                                                            Secure<br>
+                                                            Payments
+                                                        </td>
+
+                                                    </tr>
+                                                </table>
+                                            </td>
+
+
+                                            <!-- K-POP FANS -->
+                                            <td
+                                                width="25%"
+                                                valign="middle"
+                                                align="center"
+                                            >
+                                                <table cellpadding="0" cellspacing="0" border="0">
+                                                    <tr>
+
+                                                        <td
+                                                            valign="middle"
+                                                            style="padding-right:7px;"
+                                                        >
+                                                            <img
+                                                                src="' . base_url('Images/icons/ic_heart.png') . '"
+                                                                width="38"
+                                                                height="38"
+                                                                alt=""
+                                                                style="
+                                                                    width:38px;
+                                                                    height:38px;
+                                                                "
+                                                            >
+                                                        </td>
+
+                                                        <td
+                                                            valign="middle"
+                                                            style="
+                                                                font-family:Arial,Helvetica,sans-serif;
+                                                                font-size:11px;
+                                                                line-height:16px;
+                                                                color:#202040;
+                                                            "
+                                                        >
+                                                            K-Pop Fans<br>
+                                                            Just Like You
+                                                        </td>
+
+                                                    </tr>
+                                                </table>
+                                            </td>
+
+                                        </tr>
+                                    </table>
+
+                                </td>
+                            </tr>
+
+
+                            <!-- COPYRIGHT -->
+                            <tr>
+                                <td
+                                    style="
+                                        background:#c49be7;
+                                        padding:14px 25px;
+                                    "
+                                >
+
+                                    <table
+                                        width="100%"
+                                        cellpadding="0"
+                                        cellspacing="0"
+                                        border="0"
+                                    >
+                                        <tr>
+
+                                            <td
+                                                width="50%"
+                                                align="left"
+                                                style="
+                                                    font-family:Arial,Helvetica,sans-serif;
+                                                    font-size:11px;
+                                                    color:#ffffff;
+                                                    white-space:nowrap;
+                                                "
+                                            >
+                                                &copy; ' . date('Y') . ' K-Pop Merch. All rights reserved.
+                                            </td>
+
+                                            <td
+                                                width="50%"
+                                                align="right"
+                                                style="
+                                                    font-family:Arial,Helvetica,sans-serif;
+                                                    font-size:11px;
+                                                    color:#ffffff;
+                                                    white-space:nowrap;
+                                                "
+                                            >
+                                                Spread the Love ♡&nbsp;&nbsp;
+                                                Keep Supporting ♡&nbsp;&nbsp;
+                                                Stay You ♡
+                                            </td>
+
+                                        </tr>
+                                    </table>
+
+                                </td>
+                            </tr>
+
+
+                        </table>
+
+                    </td>
+                </tr>
+
+            </table>
+
+        </body>
+        </html>
+        ';
+    }
+
+}

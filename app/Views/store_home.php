@@ -49,7 +49,7 @@
                     <h2>
                         Shop By Category
                     </h2>
-                    <a href="#" class="view-all-btn">
+                    <a href="<?php echo base_url().'categories/1'; ?>" class="view-all-btn">
                         View all
                         <i class="fa-solid fa-arrow-right"></i>
                     </a>
@@ -57,8 +57,8 @@
 
                 <div class="category-grid">
                     <?php foreach($categories as $row){ ?>
-                        <a
-                            href="#"
+                        <a href="javascript:void(0);"
+                            onclick="openCategory(<?= $row["id"]; ?>, '<?= esc($row["category_name"]); ?>')"
                             class="category-card"
                         >
                             <div class="category-image">
@@ -80,7 +80,7 @@
                     <h2>
                         Shop By Brand
                     </h2>
-                    <a href="#" class="view-all-btn">
+                    <a href="/bands_all" class="view-all-btn">
                         View all
                         <i class="fa-solid fa-arrow-right"></i>
                     </a>
@@ -88,10 +88,7 @@
 
                 <div class="brand-grid">
                     <?php foreach($artists as $row){ ?>
-                        <a
-                            href="#"
-                            class="brand-card"
-                        >
+                         <a href="javascript:void(0);" class="brand-card" onclick="openBand(<?= $row["id"]; ?>, '<?= esc($row["brand_name"]); ?>')" >
                             <div class="brand-image">
                                 <img
                                     src="<?= $row['brand_img']; ?>"
@@ -115,7 +112,7 @@
                 <div class="home-products-header">
                     <h2> PRE-ORDER / NEW IN </h2>
 
-                    <a href="#" class="view-all-btn">
+                    <a href="<?php echo base_url().'preorder'; ?>" class="view-all-btn">
                         View all
                         <i class="fa-solid fa-arrow-right"></i>
                     </a>
@@ -187,7 +184,7 @@
             <div class="home-products-box">
                 <div class="home-products-header">
                     <h2> ON-HAND (READY TO SHIP) </h2>
-                    <a href="#" class="view-all-btn">
+                    <a href="<?php echo base_url().'onhand'; ?>" class="view-all-btn">
                         View all
                         <i class="fa-solid fa-arrow-right"></i>
                     </a>

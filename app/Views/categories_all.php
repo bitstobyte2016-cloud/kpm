@@ -24,7 +24,6 @@
                                 <a href="javascript:void(0)" class="category-sidebar-item
                                         <?= ($selected_category== $row['id']) ? 'active' : ''; ?> "
                                     data-category="<?= $row['id']; ?>" >
-
                                     <div class="category-sidebar-left">
                                         <img src="<?= $row['cat_img']; ?>">
                                         <span>

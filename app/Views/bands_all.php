@@ -63,7 +63,7 @@
 
             <div class="bands-grid" id="bandsGrid">
                 <?php foreach($brands as $brand){ ?>
-                    <a href="#" class="band-card brand-item" >
+                    <a href="javascript:void(0);"  onclick="openBand(<?= $brand["id"]; ?>, '<?= esc($brand["brand_name"]); ?>')" class="band-card brand-item" >
                         <div class="band-image">
                             <img
                                 src="<?= !empty($brand['brand_img'])
@@ -85,18 +85,14 @@
             <div class="brands-pagination">
                 <button
                     id="brandPrev"
-                    class="page-btn"
-                >
+                    class="page-btn" >
                     <i class="fa fa-chevron-left"></i>
                 </button>
 
                 <?php for($i=1;$i<=$totalPages;$i++){ ?>
                     <button
                         class=" page-btn  brand-page-btn
-
-                            <?= ($i==1)
-                                ? 'active'
-                                : ''; ?> "
+                            <?= ($i==1) ? 'active' : ''; ?> "
                         data-page="<?= $i; ?>" >
                         <?= $i; ?>
                     </button>

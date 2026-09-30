@@ -72,40 +72,39 @@
                     Sign in to continue to your account
                 </p>
 
-                <form id="loginForm">
+               <form id="loginForm">
+
                     <div class="form-group">
                         <input
                             type="email"
+                            id="loginEmail"
                             name="email"
-                            placeholder="EMAIL ADDRESS" >
-
+                            placeholder="EMAIL ADDRESS"
+                        >
                     </div>
 
                     <div class="form-group">
                         <input
                             type="password"
+                            id="loginPassword"
                             name="password"
-                            placeholder="PASSWORD">
+                            placeholder="PASSWORD"
+                        >
                     </div>
 
                     <div class="forgot-password">
-                        <a href="#">
+                        <a href="javascript:void(0);" onclick="openForgotPassword()">
                             Forgot your password?
                         </a>
-
                     </div>
 
                     <button
                         type="submit"
                         class="auth-btn"
                     >
-
                         SIGN IN
-
                     </button>
-
                 </form>
-
             </div>
 
         </div>
@@ -113,5 +112,145 @@
     </div>
 
 </section>
+
+<script>
+    $("#loginForm").on("submit", function(e){
+        e.preventDefault();
+
+        let email = $("#loginEmail").val().trim();
+        let password = $("#loginPassword").val();
+
+        if(email === ""){
+            showAlert("error", "Missing Email", "Please enter your email address.");
+            return;
+        }
+
+        if(password === ""){
+            showAlert("error", "Missing Password", "Please enter your password.");
+            return;
+        }
+
+        $("#siteLoader").fadeIn(200);
+
+        $.post(
+            "<?= base_url('login'); ?>",
+            {
+                email: email,
+                password: password
+            },
+            function(response){
+
+                $("#siteLoader").fadeOut(200);
+
+                if(response.status){
+                    
+                    console.log(response);
+
+                    setTimeout(function(){
+                        window.location.href = "<?= base_url(); ?>";
+                    },500);
+
+                } else {
+
+                    showAlert(
+                        "error",
+                        "Sign In Failed",
+                        response.message
+                    );
+
+                }
+
+            },
+            "json"
+        ).fail(function(xhr){
+
+            $("#siteLoader").fadeOut(200);
+
+            console.log(xhr);
+
+            showAlert(
+                "error",
+                "Something Went Wrong",
+                "Unable to sign you in. Please try again."
+            );
+
+        });
+
+    });
+    
+    //forgot password
+    function openForgotPassword()
+    {
+        showInputAlert({
+            type: "info",
+            icon: "fa-envelope",
+            title: "Forgot Password?",
+            message: "No worries! Enter your email address and we'll send you a new temporary password.",
+            inputType: "email",
+            placeholder: "Enter your email address",
+            buttonText: "Submit",
+            callback: function(email)
+            {
+                if(email == '')
+                {
+                    showAlert(
+                        "error",
+                        "Email Required",
+                        "Please enter your email address."
+                    );
+
+                    return;
+                }
+
+                showLoader();
+
+                $.post(
+                    "<?= base_url('forgotPassword'); ?>",
+                    {
+                        email: email
+                    },
+                    function(response)
+                    {
+                        hideLoader();
+
+                        if(response.status)
+                        {
+                            closeAlert();
+
+                            showAlert(
+                                "success",
+                                "Password Reset email sent.",
+                                response.message
+                            );
+                        }
+                        else
+                        {
+                            showAlert(
+                                "error",
+                                "Unable to Reset Password",
+                                response.message
+                            );
+                        }
+                    },
+                    "json"
+                )
+                .fail(function(xhr)
+                {
+                    hideLoader();
+
+                    console.log(xhr.responseText);
+
+                    showAlert(
+                        "error",
+                        "Something Went Wrong",
+                        "Unable to reset your password. Please try again."
+                    );
+                });
+            }
+        });
+    }
+    
+</script>
+
 
 <?= $this->endSection(); ?>

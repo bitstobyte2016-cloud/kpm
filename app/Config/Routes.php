@@ -7,6 +7,7 @@ use CodeIgniter\Router\RouteCollection;
  */
 //home routes
 $routes->get('/', 'HomeController::index');
+$routes->get('/test','HeaderCont::test');
 
 // Footer routes
 $routes->get('/faq', 'FooterCont::faq');
@@ -21,8 +22,15 @@ $routes->get('/privacy', 'FooterCont::privacy');
 $routes->get('/search', 'HeaderCont::search');
 $routes->post('live-search', 'HeaderCont::liveSearch');
 $routes->get('/signin', 'HeaderCont::signin');
+$routes->post('login', 'HeaderCont::login');
+$routes->get('register','HeaderController::register');
+$routes->get('getIndiaData', 'HeaderCont::getIndiaData');
+$routes->post('getIndiaData', 'HeaderCont::getIndiaData');
+$routes->post( '/verify', 'HeaderCont::verify');
+$routes->post('/verifyOtp','HeaderCont::verifyOtp');
+$routes->post('resendE','HeaderCont::resendEmailOtp');
+$routes->post('registerUser','HeaderCont::registerUser');
 $routes->get('/cart', 'HeaderCont::cart');
-
 $routes->get('/categories/(:num)','HeaderCont::categoriesAll/$1');
 $routes->get('/bands_all', 'HeaderCont::bands_all');
 $routes->get('/preorder', 'HeaderCont::preorder');
@@ -32,4 +40,29 @@ $routes->get('/onhand', 'HeaderCont::onhand');
 
 //home controller routes
 $routes->post('getProductsByCat','HomeController::getProductsByCat');
-$routes->get('register','HomeController::register');
+$routes->post('getProductsByCategory','HomeController::getProductsByCategory');
+$routes->post('getProductsByBand','HomeController::getProductsByBand');
+$routes->post('forgotPassword', 'HomeController::forgotPassword');
+
+
+//user account routes
+$routes->get('userhome', 'UserController::accountHome');
+$routes->post('accountHomeContent', 'UserController::accountHomeContent');
+$routes->post('editProfile', 'UserController::editProfile');
+$routes->post('updateProfile', 'UserController::updateProfile');
+$routes->post('changePassword', 'UserController::changePassword');
+$routes->post('redeemReward', 'UserController::redeemReward');
+$routes->post('logout', 'UserController::logout');
+
+$routes->post('accountAddresses', 'UserController::accountAddresses');
+$routes->post('setDefaultAddress', 'UserController::setDefaultAddress');
+$routes->post('accountAddAddress', 'UserController::accountAddAddress');
+$routes->post('saveAccountAddress', 'UserController::saveAccountAddress');
+$routes->post('deleteAccountAddress', 'UserController::deleteAccountAddress');
+$routes->post('editAccountAddress', 'UserController::editAccountAddress');
+$routes->post('updateAccountAddress', 'UserController::updateAccountAddress');
+
+$routes->post('accountOrders', 'UserController::accountOrders');
+$routes->post('orderDetails', 'UserController::orderDetails');
+$routes->post('getInvoiceID', 'UserController::getInvoiceID');
+$routes->post('generateInvoice', 'UserController::generateInvoice');

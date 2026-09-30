@@ -7,7 +7,17 @@ class HeaderCont extends BaseController
     
       public function __construct() {
 		$this->a_access = new \App\Models\Apiaccess();
+                $this->b_email = new \App\Models\BrevoEmail();
 	} 
+        
+    //running test page
+    public function test(){
+        return view('test');
+    }
+        
+        
+        
+        
         
     //live search
     public function liveSearch()
@@ -121,16 +131,271 @@ class HeaderCont extends BaseController
         return view('search_results', $data );
     }
 
-    // user register
+    
+    
+
+    
+    // to open sign in page
     public function signin(){
         return view('signin');
     }
     
+    //to log in user
+    public function login()
+    {
+        $email = strtolower(trim($this->request->getPost('email')));
+        $password = $this->request->getPost('password');
+
+        if($email == '' || $password == '')
+        {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Please enter your email and password.'
+            ]);
+        }
+
+        $password = md5($password);
+
+        $sql = "SELECT * FROM Customer  WHERE email = '" . $email . "'  AND customer_pass = '" . $password . "'
+                LIMIT 1";
+
+        $customer = $this->a_access->custom_query($sql);
+
+        if(empty($customer))
+        {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Invalid email address or password.'
+            ]);
+        }
+
+        $customer = $customer[0];
+
+        // Check account status
+        if($customer['status'] != 'Y')
+        {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Your account is currently inactive. Please contact us via email to resolve this.'
+            ]);
+        }
+
+        // Store customer information in session
+        session()->set([
+            'customer_id'   => $customer['id'],
+            'customer_name' => $customer['first_name']
+        ]);
+
+        return $this->response->setJSON([
+            'status' => true,
+            'message' => 'You have successfully signed in.'
+        ]);
+    }
+    
+    //to open register page
+    public function register(){
+        return view('register');
+    }
+    
+    //to get states and countires list
+    public function getIndiaData()
+    {
+        $file =ROOTPATH.'public/assets/countries_data.json';
+
+        if(!file_exists($file))
+        {
+            return $this->response->setJSON([
+                'success'=>false,
+                'message'=>'File not found'
+            ]);
+        }
+
+        return $this->response ->setContentType('application/json') ->setBody(file_get_contents($file));
+    }
+
+    //to open verfy pop-up
+    public function verify()
+    {
+        //sending email with otp
+        $email =$this->request->getPost('email');
+        $result =$this->b_email->sendOtpEmail( $email );
+        
+
+        if(!$result['success'])
+        {
+            return redirect() ->back();
+        }
+
+        session()->set('email_otp',  $result['otp']);
+        session()->set( 'email_otp_expiry',time()+600 );
+        session()->set('email',$email);
+        
+        $data=[];
+        $data['email']=$email;
+
+        return view('verify',$data);
+    }
+    
+    //to verify otp
+    public function verifyOtp()
+    {
+        //check email otp
+        $enteredEOtp =$this->request->getPost('e_otp');
+        $eOtp =session() ->get( 'email_otp' );
+        
+        if($enteredEOtp == $eOtp)
+        {
+            return $this->response->setJSON(['success'=>true ]);
+        }
+
+        return $this->response ->setJSON([ 'success'=>false ]);
+    }
+    
+    //to resend emailotp
+    public function resendEmailOtp()
+    {
+        $email =session()->get( 'email' );
+
+        if(empty($email))
+        {
+            return $this->response->setJSON([
+                    'success'=>false,
+                    'message'=>'Session expired'
+                ]);
+        }
+
+        $result =$this->b_email->sendOtpEmail($email );
+
+        if(!$result['success'])
+        {
+            return $this->response->setJSON([
+                    'success'=>false,
+                    'message'=>'Unable to send Email OTP'
+                ]);
+        }
+
+        session()->set('email_otp', $result['otp']);
+        session()->set( 'email_otp_expiry', time()+600);
+
+        return $this->response ->setJSON([ 'success'=>true ]);
+    }
+  
+    //to register user 
+    public function registerUser(){
+
+        $firstName = trim($this->request->getPost('fname'));
+        $lastName  = trim($this->request->getPost('lname'));
+        $email = strtolower(trim($this->request->getPost('email')));
+        $phone = trim( $this->request->getPost('phone'));
+        $password = $this->request->getPost('password');
+        $address1 = trim( $this->request->getPost('address1'));
+        $address2 = trim( $this->request->getPost('address2'));
+        $city = trim( $this->request->getPost('city'));
+        $state = trim($this->request->getPost('state'));
+        $country = trim($this->request->getPost('country'));
+        $pincode = trim( $this->request->getPost('pincode'));
+        $c_name = trim($this->request->getPost('company_name'));
+        $c_gst = trim($this->request->getPost('company_gst'));
+        
+        //check duplicate email
+        $emailExists = $this->a_access->if_exist('Customer','email', $email);
+
+        if ($emailExists)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'An account already exists with this email address.'
+            ]);
+        }
+        
+        //check duplicate phone number
+        $phoneExists = $this->a_access->if_exist('Customer_addresses','contact_no',$phone);
+
+        if ($phoneExists)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'An account already exists with this mobile number.'
+            ]);
+        }
+        
+        //insert customer
+            $customerData = [
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'email' => $email,
+                'customer_pass' =>md5($password),
+                'status' => 'Y',
+
+                // INR
+                'preferred_currency_id' => 1,
+                'redeem_points_balance' => 0,
+                'store_credit' => 0,
+
+                // Active
+                'acc_status' => 1
+            ];
+
+            $customerId = $this->a_access->insert_table_id('Customer', $customerData);
+            
+        //insert address
+                $addressData = [
+
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'address_line1' => $address1,
+                    'address_line2' => $address2,
+                    'city' => $city,
+                    'state' => $state,
+                    'country' => $country,
+                    'zip' => $pincode,
+                    'company_name' => $c_name,
+                    'company_gstin' => $c_gst,
+                    'contact_no' => $phone,
+                    'cust_id' => $customerId,
+                    'status' => 'Y'
+                ];
+
+                $addressInserted = $this->a_access->insert_table('Customer_addresses',$addressData );
+        
+        //add to subscriptions
+            $subscriptionData = [
+                'email_address' => $email,
+                'subscription_date' => date('Y-m-d'),
+                'status' => 'opt-in'
+            ];
+
+            $subscriptionInserted = $this->a_access->insert_table('Subscriptions', $subscriptionData );
+            
+             if ($customerId &&$addressInserted &&$subscriptionInserted )
+            {
+                  session()->set([
+                    'customer_id' => $customerId,
+                    'customer_name' => $firstName
+                ]);
+                return $this->response->setJSON([
+                    'status' => true,
+                    'message' =>'Your account has been created successfully.',
+                    'customer_id' => $customerId
+                ]);
+            }
+
+            return $this->response->setJSON([
+                'status' => false,
+                'message' =>'Something went wrong while creating your account. Please try again.'
+            ]);
+    }
+
     //user cart
     public function cart(): string
     {
         return view('cart');
     }
+    
+    
+    
+    
+    
     
     //open all categories page
     public function categoriesAll($cat_id)
@@ -150,7 +415,7 @@ class HeaderCont extends BaseController
 			$data['category'] = $categories;
 		} 
 		else {
-			$data['category'] = [];
+                    $data['category'] = [];
 		}
         
         foreach($category as $row){
@@ -194,13 +459,47 @@ class HeaderCont extends BaseController
     //open pre-order items page
     public function preorder(): string
     {
-        return view('preorder');
+        $today = date('Y-m-d');
+        $sql = "SELECT
+                    p.id AS product_id, p.cat_id, p.brand_id, p.main_image, p.release_date,
+                    pd.product_name,  pp.price,
+                    pp.discounted_price,
+                    ps.instock, ps.product_qty, ps.on_hand,
+                    b.brand_name
+                FROM Products p
+                INNER JOIN Product_description pd ON pd.product_id = p.id
+                INNER JOIN Product_price pp ON pp.product_id = p.id
+                INNER JOIN Products_stock ps ON ps.product_id = p.id
+                LEFT JOIN Brands b ON b.id = p.brand_id
+                WHERE p.status = 'Y'
+                AND p.release_date > '" . $today . "'
+                ORDER BY p.release_date DESC";
+
+        $products = $this->a_access->custom_query($sql);
+        $data = ['products' => $products ];
+        return view('preorder', $data);
+
     }
 
     //open on hand items page
     public function onhand(): string
     {
-        return view('onhand');
+        $sql = "
+            SELECT
+                p.id,  p.cat_id,  p.main_image, p.release_date,
+                pd.product_name,
+                ps.product_qty, ps.on_hand,
+                pp.price, pp.discounted_price
+
+            FROM Products p
+            INNER JOIN Product_description pd ON pd.product_id = p.id
+            INNER JOIN Products_stock ps ON ps.product_id = p.id
+            INNER JOIN Product_price pp ON pp.product_id = p.id
+            WHERE  p.status = 'Y'  AND ps.on_hand = 'Y' ";
+
+        $products = $this->a_access->custom_query($sql);
+
+        return view('onhand', ['products' => $products]);
     }
     
 }

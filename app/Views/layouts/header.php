@@ -44,10 +44,25 @@
         </div>
 
         <div class="actions-area">
-            <a href="/signin" class="action-item sign-in-action">
-                <i class="fa-regular fa-user"></i>
-                <span>Sign In / Sign Up</span>
-            </a>
+
+            <?php if (session()->has('customer_id')): ?>
+                <div class="action-item user-greeting">
+                    <span>Hello <?= esc(session()->get('customer_name')); ?></span>
+                </div>
+                <a href="<?= base_url('userhome'); ?>" class="action-item account-action">
+                    <i class="fa-regular fa-user"></i>
+                    <span>Account</span>
+                </a>
+
+            <?php else: ?>
+
+                <a href="/signin" class="action-item sign-in-action">
+                    <i class="fa-regular fa-user"></i>
+                    <span>Sign In / Sign Up</span>
+                </a>
+
+            <?php endif; ?>
+
             <a href="/cart" class="action-item cart-action">
                 <div class="cart-icon-wrapper">
                     <i class="fa-solid fa-cart-shopping"></i>
@@ -55,6 +70,7 @@
                 </div>
                 <span>Cart</span>
             </a>
+
         </div>
     </div>
 
@@ -71,11 +87,13 @@
                                             if(count($row["scat"]) == 0){ 
                                                 ?>
                                                     <li>
-                                                        <a href="<?php echo base_url()."category/".$row["category_name"]."/".$row["id"]."/1/0/20";?>"><img class="cat-icon" src="<?php echo base_url().$row["cat_img"];?>">
+                                                        <a href="javascript:void(0);"   onclick="openCategory(<?= $row["id"]; ?>, '<?= esc($row["category_name"]); ?>')">
+                                                            <img class="cat-icon" src="<?php echo base_url().$row["cat_img"];?>">
                                                                     <?php echo $row["category_name"];?></a>
                                                     </li>
                                                 <?php } else { ?>
-                                                    <li><a href="<?php echo base_url()."officialgoods/".$row["category_name"]."/".$row["id"]."/1/0/20/0";?>"><img  class="cat-icon" src="<?php echo $row["cat_img"];?>">
+                                                    <li><a href="javascript:void(0);"   onclick="openCategory(<?= $row["id"]; ?>, '<?= esc($row["category_name"]); ?>'>
+                                                           <img  class="cat-icon" src="<?php echo $row["cat_img"];?>">
                                                         <?php echo $row["category_name"];?></a>
                                                     </li>
                                                 <?php } 
@@ -97,22 +115,19 @@
                         <div class="mega-menu-content">
                             <div class="mega-menu-list">
                                 <ul class="bands-grid-list">
-                                    <?php foreach($brands as $row){ 
-                                                ?>
-                                                    <li>
-                                                        <a href="<?php echo base_url()."artist/".$row["brand_name"]."/".$row["id"]."/1/0/20";?>">
-                                                                    <?php echo $row["brand_name"];?></a>
-                                                    </li>
-                                        <?php } ?>
+                                    <?php foreach($bands as $row){   ?>
+                                            <li>
+                                                 <a href="javascript:void(0);"   onclick="openBand(<?= $row["id"]; ?>, '<?= esc($row["brand_name"]); ?>')" >
+                                                        <?php echo $row["brand_name"];?></a>
+                                            </li>
+                                    <?php } ?>
                                 </ul>
                                 <a href="/bands_all" class="view-all-link">View all bands &rarr;</a>
                             </div>
-                            <div class="mega-menu-featured bands-featured">
-                                <div class="featured-text-area">
-                                    <h4>Shop by your<br>favorite band</h4>
-                                    <p>Browse official merch<br>from all your favorite<br>K-Pop artists.</p>
-                                </div>
-                                <img src="/Images/img9.jpg" alt="Featured Bands" class="featured-band-img">
+                            <div class="mega-menu-featured">
+                                <img src="/Images/brand_img.png" alt="Featured Bands" class="featured-img">
+                                <h4>Shop by your favorite band</h4>
+                                <p>Browse official merch from all your favorite K-Pop Artist!</p>
                             </div>
                         </div>
                     </div>
@@ -224,5 +239,77 @@
         }
 
     });
+    
+    //to open band detail
+    function openBand(brandId, brandName)
+    {
+        if(!brandId)
+        {
+            return;
+        }
+
+        $("#siteLoader").fadeIn(200);
+
+        let form = $('<form>', {
+            method: 'POST',
+            action: '<?= base_url("getProductsByBand"); ?>'
+        });
+
+        form.append(
+            $('<input>', {
+                type: 'hidden',
+                name: 'brand_id',
+                value: brandId
+            })
+        );
+
+        form.append(
+            $('<input>', {
+                type: 'hidden',
+                name: 'brand_name',
+                value: brandName
+            })
+        );
+
+        $('body').append(form);
+
+        form.submit();
+    }
+    
+    //to open per category page
+    function openCategory(catId, catName)
+    {
+        if(!catId)
+        {
+            return;
+        }
+
+        $("#siteLoader").fadeIn(200);
+
+        let form = $('<form>', {
+            method: 'POST',
+            action: '<?= base_url("getProductsByCategory"); ?>'
+        });
+
+        form.append(
+            $('<input>', {
+                type: 'hidden',
+                name: 'cat_id',
+                value: catId
+            })
+        );
+
+        form.append(
+            $('<input>', {
+                type: 'hidden',
+                name: 'category_name',
+                value: catName
+            })
+        );
+
+        $('body').append(form);
+
+        form.submit();
+    }
 
 </script>
