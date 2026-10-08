@@ -44,6 +44,10 @@ $routes->post('getProductsByCategory','HomeController::getProductsByCategory');
 $routes->post('getProductsByBand','HomeController::getProductsByBand');
 $routes->post('forgotPassword', 'HomeController::forgotPassword');
 
+//home product routes
+$routes->get('product/(:segment)', 'HomeController::getProductDetails/$1');
+$routes->post('product/save-review', 'HomeController::saveProductReview');
+
 
 //user account routes
 $routes->get('userhome', 'UserController::accountHome');
@@ -66,3 +70,15 @@ $routes->post('accountOrders', 'UserController::accountOrders');
 $routes->post('orderDetails', 'UserController::orderDetails');
 $routes->post('getInvoiceID', 'UserController::getInvoiceID');
 $routes->post('generateInvoice', 'UserController::generateInvoice');
+$routes->post('sendOrderMessage', 'UserController::sendOrderMessage');
+$routes->post('getOrderMessages', 'UserController::getOrderMessages');
+$routes->post('cancelOrder', 'UserController::cancelOrder');
+$routes->post('emailCancelOrder', 'UserController::emailCancelOrder');
+
+$routes->post('accountWishlists', 'UserController::accountWishlists');
+$routes->post('accountWishlistDetail', 'UserController::accountWishlistDetail');
+$routes->post('renameWishlist', 'UserController::renameWishlist');
+$routes->post('createWishlist', 'UserController::createWishlist');
+$routes->post('deleteWishlist', 'UserController::deleteWishlist');
+$routes->post('deleteWishlistItem', 'UserController::deleteWishlistItem');
+$routes->post('markWishlistFulfilled', 'UserController::markWishlistFulfilled');

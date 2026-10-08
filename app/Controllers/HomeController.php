@@ -10,7 +10,9 @@ class HomeController extends BaseController
                 $this->brevo = new \App\Models\BrevoEmail();
 	} 
     
-    //home page functions
+    /**************************************
+     ******** Home Page functions *********
+     *************************************/
     
     //index
     public function index(): string
@@ -258,6 +260,217 @@ class HomeController extends BaseController
         return $this->response->setJSON([
             'status' => true,
             'message' => 'A new temporary password has been sent to your email address.'
+        ]);
+    }
+    
+    
+    
+        
+    /**************************************
+     ******** Product functions *********
+     *************************************/
+    
+    
+    //to open product details page
+    public function getProductDetails($productId)
+    {
+        $productId = trim($productId);
+        if($productId == '')
+        {
+            return redirect()->to(base_url());
+        }
+        $productId = addslashes($productId);
+
+        //product details
+        $sql = "SELECT   p.id,  p.SKU,  p.UPC,  p.cat_id,  p.brand_id,  p.main_image,  p.status,   p.release_date,   p.weight,   p.url,  p.is_amazon, p.is_featured,
+                    pd.product_name,  pd.product_description,
+                    pp.price,  pp.discounted_price,
+                    ps.instock,  ps.product_qty,  ps.on_hand
+                FROM Products p
+                LEFT JOIN Product_description pd  ON pd.product_id = p.id
+                LEFT JOIN Product_price pp  ON pp.product_id = p.id
+                LEFT JOIN Products_stock ps   ON ps.product_id = p.id
+                WHERE p.id = '".$productId."' AND p.status = 'Y'
+
+                LIMIT 1";
+        $productResult = $this->a_access->custom_query($sql);
+
+        if(empty($productResult))
+        {
+            return redirect()->to(base_url());
+        }
+        $product = $productResult[0];
+
+        //additional product images
+        $sql = "SELECT  id, image_path,  status
+                FROM Product_addiitonal_images
+                WHERE product_id = '".$productId."'  AND status = 'Y'
+                ORDER BY id ASC";
+        $additionalImages = $this->a_access->custom_query($sql);
+
+        //product reviews
+        $sql = "SELECT r.id, r.cust_id, r.review_text,  r.review_star_points,  r.review_title,
+                    c.first_name,  c.last_name
+                FROM Review_master r
+                LEFT JOIN Customer c   ON c.id = r.cust_id
+                WHERE r.product_id = '".$productId."'  AND r.status = 'Y'
+                ORDER BY r.id DESC";
+        $reviews = $this->a_access->custom_query($sql);
+
+        //calculate review summary
+        $reviewCount = count($reviews);
+        $averageRating = 0;
+
+        $ratingCounts = [
+            5 => 0,
+            4 => 0,
+            3 => 0,
+            2 => 0,
+            1 => 0
+        ];
+
+        if($reviewCount > 0)
+        {
+            $totalRating = 0;
+
+            foreach($reviews as $review)
+            {
+                $rating = (float)$review['review_star_points'];
+
+                $totalRating += $rating;
+
+                $ratingKey = (int)round($rating);
+
+                if(isset($ratingCounts[$ratingKey]))
+                {
+                    $ratingCounts[$ratingKey]++;
+                }
+            }
+
+            $averageRating = $totalRating / $reviewCount;
+        }
+        
+        //same band product recommendations
+        $recommendationSql = "SELECT p.id, p.main_image,  p.release_date,
+                                  pd.product_name,
+                                  pp.price,  pp.discounted_price,
+                                  ps.product_qty,  ps.on_hand
+                              FROM Products p
+                              LEFT JOIN Product_description pd  ON pd.product_id = p.id
+                              LEFT JOIN Product_price pp ON pp.product_id = p.id
+                              LEFT JOIN Products_stock ps  ON ps.product_id = p.id
+                              WHERE p.brand_id = '".$product['brand_id']."'
+                                AND p.id != '".$productId."'  AND p.status = 'Y'
+                                AND ps.product_qty > 0  AND ps.on_hand = 'Y'
+                              ORDER BY p.release_date DESC
+                              LIMIT 5";
+        $recommendations = $this->a_access->custom_query($recommendationSql);
+
+        return view('product_detail', [
+            'product'          => $product,
+            'additionalImages' => $additionalImages,
+            'reviews'          => $reviews,
+            'reviewCount'      => $reviewCount,
+            'averageRating'    => $averageRating,
+            'ratingCounts'     => $ratingCounts,
+    'recommendations'  => $recommendations
+        ]);
+    }
+    
+    //save product review
+    public function saveProductReview()
+    {
+        $customerId = session()->get('customer_id');
+        if(!$customerId)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Please sign in to write a review.'
+            ]);
+        }
+
+        $productId = trim($this->request->getPost('product_id'));
+        $stars     = (int)$this->request->getPost('review_star_points');
+        $title     = trim($this->request->getPost('review_title'));
+        $reviewText = trim($this->request->getPost('review_text'));
+
+        if($productId == '')
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Invalid product.'
+            ]);
+        }
+
+        if($stars < 1 || $stars > 5)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Please select a rating between 1 and 5 stars.'
+            ]);
+        }
+
+        if($title == '')
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Review title is required.'
+            ]);
+        }
+
+        if(strlen($title) > 100)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Review title cannot exceed 100 characters.'
+            ]);
+        }
+
+        if(strlen($reviewText) > 500)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Review cannot exceed 500 characters.'
+            ]);
+        }
+
+        //check product exists
+        $product = $this->a_access->custom_query(
+            "SELECT id
+             FROM Products
+             WHERE id = '".$productId."'
+             AND status = 'Y'
+             LIMIT 1" );
+        if(empty($product))
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Product not found.'
+            ]);
+        }
+
+        //save review
+        $reviewData = [
+            'cust_id'           => $customerId,
+            'review_text'       => ($reviewText != '' ? $reviewText : null),
+            'review_star_points'=> $stars,
+            'product_id'        => $productId,
+            'status'            => 'Y',
+            'review_title'      => $title
+        ];
+        $inserted = $this->a_access->insert_table( 'Review_master', $reviewData  );
+
+        if(!$inserted)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Unable to submit your review. Please try again.'
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status'  => true,
+            'message' => 'Your review has been submitted successfully.'
         ]);
     }
     

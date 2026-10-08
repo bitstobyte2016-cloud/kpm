@@ -937,12 +937,22 @@ class UserController extends BaseController
         $deliveryEnd->modify('+4 days');
         $order['delivery_start'] = $deliveryStart->format('d M Y');
         $order['delivery_end']   = $deliveryEnd->format('d M Y');
+        
+        //get order chat
+        $sql = "SELECT id, order_id, order_message, sender_id, message_date, read_status
+                FROM Order_messaging
+                WHERE order_id = ".$orderId."
+                ORDER BY id ASC";
+
+        $orderMessages = $this->a_access->custom_query($sql);
+        
 
         return view('account/acc_order_details', [
             'order'           => $order,
             'billingAddress'  => $billingAddress,
             'shippingAddress' => $shippingAddress,
-            'products'        => $products
+            'products'        => $products,
+            'order_messages'   => $orderMessages
         ]);
     }
     
@@ -990,13 +1000,11 @@ class UserController extends BaseController
                 ]);
         }
 
-
         //check if invoice already exists
         $sql = "SELECT inID, iDate
             FROM Invoices
             WHERE oID = ".$orderId."
             LIMIT 1";
-
         $invoiceResult = $this->a_access->custom_query($sql);
 
         if (!empty($invoiceResult)) {
@@ -1008,7 +1016,6 @@ class UserController extends BaseController
                     'invoice_date' => $invoiceResult[0]['iDate']
                 ]);
         }
-
 
         //create new invoice number
         $currentMonth = (int) date('m');
@@ -1025,13 +1032,11 @@ class UserController extends BaseController
         $fyStart = $financialYearStart . '-04-01 00:00:00';
         $fyEnd   = $financialYearEnd . '-04-01 00:00:00';
 
-
         //get latest invoice number for this financial year
         $sql = "SELECT MAX(
                     CAST(
                         SUBSTRING_INDEX(inID, '_', -1)
-                        AS UNSIGNED
-                    )
+                        AS UNSIGNED )
                 ) AS last_number
                 FROM Invoices
                 WHERE iDate >= '".$fyStart."'
@@ -1051,12 +1056,9 @@ class UserController extends BaseController
 
         $nextNumber = $lastNumber + 1;
 
-
         //generate invoice ID
         $invoiceId = '#BTB' . date('Y_m_d') . '_' . $nextNumber;
-
         $invoiceDate = date('Y-m-d H:i:s');
-
 
         //insert invoice
         $this->a_access->insert_table(
@@ -1069,7 +1071,6 @@ class UserController extends BaseController
             ]
         );
 
-
         return $this->response
             ->setJSON([
                 'status'      => 'created',
@@ -1079,57 +1080,881 @@ class UserController extends BaseController
     }
 
     //to generate invoice pdf
-   public function generateInvoice()
-{
-    $invoiceData = $this->request->getJSON(true);
+    public function generateInvoice()
+    {
+        $invoiceData = $this->request->getJSON(true);
 
-    if (empty($invoiceData)) {
-        return $this->response
-            ->setStatusCode(400)
-            ->setBody('Invalid invoice data.');
+        if (empty($invoiceData)) {
+            return $this->response
+                ->setStatusCode(400)
+                ->setBody('Invalid invoice data.');
+        }
+
+        $invoiceId = $invoiceData['invoice_id'] ?? '';
+
+        if (empty($invoiceId)) {
+            return $this->response
+                ->setStatusCode(400)
+                ->setBody('Invalid invoice ID.');
+        }
+
+        try {
+            $pdf = $this->pdf->createInvoice($invoiceData);
+            return $this->response
+                ->setHeader('Content-Type', 'application/pdf')
+                ->setHeader( 'Content-Disposition', 'inline; filename="KPM_Invoice_' . $invoiceData['order']['id'] . '.pdf"' )
+                ->setBody($pdf);
+
+        } catch (\Throwable $e) {
+            
+            return $this->response
+                ->setStatusCode(500)
+                ->setBody('PDF generation error: ' . $e->getMessage() );
+        }
     }
+    
+    //to add new message to order
+    public function sendOrderMessage()
+    {
+        $orderId = (int) $this->request->getPost('order_id');
+        $message = trim($this->request->getPost('message'));
 
-    $invoiceId = $invoiceData['invoice_id'] ?? '';
+        //check order ID
+        if (!$orderId) {
+            return $this->response
+                ->setStatusCode(400)
+                ->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Invalid order ID.'
+                ]);
+        }
 
-    if (empty($invoiceId)) {
-        return $this->response
-            ->setStatusCode(400)
-            ->setBody('Invalid invoice ID.');
-    }
+        //get customer ID
+        $customerId = (int) session()->get('customer_id');
 
-    log_message('error', 'GENERATE INVOICE DATA: ' . print_r($invoiceData, true));
+        if (!$customerId) {
+            return $this->response
+                ->setStatusCode(401)
+                ->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Please login to continue.'
+                ]);
+        }
 
-    try {
+        //check message
+        if ($message === '') {
+            return $this->response
+                ->setStatusCode(400)
+                ->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Please enter a message.'
+                ]);
+        }
 
-        $pdf = $this->pdf->createInvoice($invoiceData);
+        //limit message length
+        if (mb_strlen($message) > 2000) {
+            return $this->response
+                ->setStatusCode(400)
+                ->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Message cannot exceed 2000 characters.'
+                ]);
+        }
 
-        return $this->response
-            ->setHeader('Content-Type', 'application/pdf')
-            ->setHeader(
-                'Content-Disposition',
-                'inline; filename="KPM_Invoice_' . $invoiceData['order']['id'] . '.pdf"'
-            )
-            ->setBody($pdf);
+        //make sure this order belongs to this customer
+        $sql = "SELECT id
+                FROM Orders
+                WHERE id = ".$orderId."
+                  AND cust_id = ".$customerId."
+                LIMIT 1";
 
-    } catch (\Throwable $e) {
+        $orderResult = $this->a_access->custom_query($sql);
 
-        log_message(
-            'error',
-            'GENERATE INVOICE ERROR: ' .
-            $e->getMessage() .
-            ' | FILE: ' .
-            $e->getFile() .
-            ' | LINE: ' .
-            $e->getLine()
+        if (empty($orderResult)) {
+            return $this->response
+                ->setStatusCode(404)
+                ->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Order not found.'
+                ]);
+        }
+
+        //insert message
+        $this->a_access->insert_table(
+            'Order_messaging',
+            [
+                'order_id'      => $orderId,
+                'order_message' => $message,
+                'sender_id'     => $customerId,
+                'message_date'  => date('Y-m-d'),
+                'read_status'   => 'unread'
+            ]
         );
 
         return $this->response
-            ->setStatusCode(500)
-            ->setBody(
-                'PDF generation error: ' .
-                $e->getMessage()
-            );
+            ->setJSON([
+                'status'  => 'success',
+                'message' => 'Message sent successfully.'
+            ]);
     }
-}
     
+    public function getOrderMessages()
+    {
+        $orderId = (int) $this->request->getPost('order_id');
+
+        if (!$orderId) {
+            return $this->response
+                ->setStatusCode(400)
+                ->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Invalid order ID.'
+                ]);
+        }
+
+
+        //get customer ID
+        $customerId = (int) session()->get('customer_id');
+
+        if (!$customerId) {
+            return $this->response
+                ->setStatusCode(401)
+                ->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Please login to continue.'
+                ]);
+        }
+
+
+        //make sure this order belongs to this customer
+        $sql = "SELECT id
+                FROM Orders
+                WHERE id = ".$orderId."
+                  AND cust_id = ".$customerId."
+                LIMIT 1";
+
+        $orderResult = $this->a_access->custom_query($sql);
+
+        if (empty($orderResult)) {
+            return $this->response
+                ->setStatusCode(404)
+                ->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Order not found.'
+                ]);
+        }
+
+
+        //get order messages
+        $sql = "SELECT
+                    id,
+                    order_id,
+                    order_message,
+                    sender_id,
+                    message_date,
+                    read_status
+                FROM Order_messaging
+                WHERE order_id = ".$orderId."
+                ORDER BY id ASC";
+
+        $messages = $this->a_access->custom_query($sql);
+
+
+        //format dates for display
+        foreach ($messages as &$message) {
+
+            $message['formatted_date'] = date(
+                'd M Y',
+                strtotime($message['message_date'])
+            );
+        }
+
+        unset($message);
+
+
+        return $this->response
+            ->setJSON([
+                'status'   => 'success',
+                'messages' => $messages
+            ]);
+    }
+    
+    //to cancel order 
+    public function cancelOrder()
+    {
+        $orderId = (int) $this->request->getPost('order_id');
+
+        if (!$orderId) {
+            return $this->response
+                ->setStatusCode(400)
+                ->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Invalid order ID.'
+                ]);
+        }
+
+        // Get customer ID
+        $customerId = (int) session()->get('customer_id');
+        if (!$customerId) {
+            return $this->response
+                ->setStatusCode(401)
+                ->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Please login to continue.'
+                ]);
+        }
+
+        // Get order
+        $sql = "SELECT *
+                FROM Orders
+                WHERE id = ".$orderId."
+                  AND cust_id = ".$customerId."
+                LIMIT 1";
+        $orderResult = $this->a_access->custom_query($sql);
+
+        if (empty($orderResult)) {
+            return $this->response
+                ->setStatusCode(404)
+                ->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Order not found.'
+                ]);
+        }
+        $order = $orderResult[0];
+
+        // Get order products
+        $sql = "SELECT *
+                FROM Order_products
+                WHERE order_id = ".$orderId;
+        $orderProducts = $this->a_access->custom_query($sql);
+
+        // Calculate previously refunded amount
+        $previouslyRefundedAmount = 0;
+        if (!empty($orderProducts)) {
+            foreach ($orderProducts as $product) {
+                if (isset($product['status']) && $product['status'] === 'refunded' ) {
+                    $productPrice = (float) $product['product_price'];
+                    $productQty   = (int) $product['product_qty'];
+                    $previouslyRefundedAmount +=$productPrice * $productQty;
+                }
+            }
+        }
+
+        // Order payment information
+        $paymentType = strtolower( trim((string) $order['payment_type']) );
+        $grandTotal = (float) $order['grand_total_amount'];
+        $storeCreditUsed = !empty($order['store_credit']) ? (float) $order['store_credit'] : 0;
+
+        //calculate store credit refund
+        $storeCreditRefund = 0;
+
+        // COD order
+        if ($paymentType === 'cod') {
+            $storeCreditRefund = $storeCreditUsed;
+        }
+        // Prepaid order
+        else {
+            $storeCreditRefund = max(  0, $grandTotal - $previouslyRefundedAmount );
+        }
+
+        //fetch customer's store credit
+        $sql = "SELECT store_credit
+                FROM Customer
+                WHERE id = ".$customerId."
+                LIMIT 1";
+        $customerResult = $this->a_access->custom_query($sql);
+
+        if (empty($customerResult)) {
+            return $this->response
+                ->setStatusCode(404)
+                ->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Customer not found.'
+                ]);
+        }
+
+        $currentStoreCredit = (float) $customerResult[0]['store_credit'];
+
+        //calculate new store credit
+        if ($storeCreditRefund > 0) {
+            $newStoreCredit = $currentStoreCredit + $storeCreditRefund;
+            $this->a_access->update_table("Customer",['store_credit'=>$newStoreCredit],['id'=>$customerId]);
+        }
+
+        //get cancelled status ID
+        $sql = "SELECT id
+                FROM Order_status_master
+                WHERE LOWER(order_status) = 'cancelled'
+                LIMIT 1";
+        $statusResult = $this->a_access->custom_query($sql);
+
+        if (empty($statusResult)) {
+            return $this->response
+                ->setStatusCode(500)
+                ->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Cancelled order status could not be found.'
+                ]);
+        }
+        $cancelledStatusId = (int) $statusResult[0]['id'];
+
+        //update order status
+        $this->a_access->update_table("Orders",['order_status_id'=>$cancelledStatusId],['cust_id'=>$customerId , 'id'=>$orderId]);
+
+        //return
+
+        return $this->response
+            ->setJSON([
+                'status'                  => 'success',
+                'message'                 => 'Order cancelled successfully.',
+                'store_credit_refunded'   => number_format(
+                    $storeCreditRefund,
+                    2,
+                    '.',
+                    ''
+                ),
+                'previously_refunded'     => number_format(
+                    $previouslyRefundedAmount,
+                    2,
+                    '.',
+                    ''
+                )
+            ]);
+    }
+    
+    //to send email for cancelled order
+    public function emailCancelOrder()
+    {
+        //get logged-in customer
+        $customerId = session()->get('customer_id');
+        if (!$customerId) {
+            return $this->response
+                ->setStatusCode(401)
+                ->setJSON([
+                    'status'  => false,
+                    'message' => 'Please login to continue.'
+                ]);
+        }
+
+        //get data sent from JS
+        $data = $this->request->getJSON(true);
+        if (empty($data)) {
+            return $this->response
+                ->setStatusCode(400)
+                ->setJSON([
+                    'status'  => false,
+                    'message' => 'Invalid email data.'
+                ]);
+        }
+
+        //get order
+        $order = $data['order'] ?? [];
+        if (
+            empty($order) ||
+            empty($order['id'])
+        ) {
+            return $this->response
+                ->setStatusCode(400)
+                ->setJSON([
+                    'status'  => false,
+                    'message' => 'Order information is missing.'
+                ]);
+        }
+
+        //make sure this order belongs to logged-in customer
+        if (
+            !isset($order['cust_id']) ||
+            (int)$order['cust_id'] !== (int)$customerId
+        ) {
+            return $this->response
+                ->setStatusCode(403)
+                ->setJSON([
+                    'status'  => false,
+                    'message' => 'You are not authorised to send this email.'
+                ]);
+        }
+
+        //make sure customer email exists
+        if (
+            empty($data['customer_email'])
+        ) {
+            return $this->response
+                ->setStatusCode(400)
+                ->setJSON([
+                    'status'  => false,
+                    'message' => 'Customer email is missing.'
+                ]);
+        }
+
+        //send email through BrevoEmail model
+        $brevoEmail = new \App\Models\BrevoEmail();
+        $emailResult = $brevoEmail->sendCancelOrderEmail( $data   );
+
+        //email sent successfully
+        if (
+            !empty($emailResult) &&
+            isset($emailResult['success']) &&
+            $emailResult['success'] === true
+        ) {
+            return $this->response
+                ->setJSON([
+                    'status'  => true,
+                    'message' => 'Cancellation email sent successfully.'
+                ]);
+        }
+
+        //email failed
+        return $this->response
+            ->setStatusCode(500)
+            ->setJSON([
+                'status'  => false,
+                'message' => 'Unable to send cancellation email.',
+                'response' => $emailResult
+            ]);
+    }
+    
+    
+    
+    /* ---------------------------------
+     * -------- Account Whishlist Page -------
+    ------------------------------------- */
+    
+    
+    //to get customer wishlists
+    public function accountWishlists()
+    {
+        //get customer id
+        $customerId = session()->get('customer_id');
+
+        if(!$customerId)
+        {
+            return redirect()->to(base_url('signin'));
+        }
+
+        //get wishlists
+        $sql = "SELECT id, wishlist_name
+                FROM Wishlists_master
+                WHERE cust_id = ".$customerId."
+                  AND status = 'Y'
+                ORDER BY id DESC";
+        $wishlistResult = $this->a_access->custom_query($sql);
+
+        $wishlists = [];
+        if(!empty($wishlistResult))
+        {
+            foreach($wishlistResult as $wishlist)
+            {
+                $wishlistId = (int)$wishlist['id'];
+
+                //get wishlist products
+                $sql = "SELECT wd.product_id,
+                            p.main_image,
+                            pd.product_name
+                        FROM Wishlist_details wd
+                        LEFT JOIN Products p   ON p.id = wd.product_id
+                        LEFT JOIN Product_description pd  ON pd.product_id = p.id
+                        WHERE wd.wishlist_id = ".$wishlistId."
+                        ORDER BY wd.id ASC";
+                $wishlistProducts = $this->a_access->custom_query($sql);
+
+                $itemCount = count($wishlistProducts);
+
+                //first 4 products for preview
+                $previewProducts = array_slice( $wishlistProducts,  0,  4 );
+                $remainingCount = max(  0,  $itemCount - count($previewProducts)  );
+
+                $wishlists[] = [
+                    'id'              => $wishlistId,
+                    'wishlist_name'   => $wishlist['wishlist_name'],
+                    'item_count'      => $itemCount,
+                    'products'        => $previewProducts,
+                    'remaining_count' => $remainingCount
+                ];
+            }
+        }
+
+
+        return view('account/acc_wishlist', [
+            'wishlists' => $wishlists
+        ]);
+    }
+    
+    //to get wishlist details
+    public function accountWishlistDetail()
+    {
+        //get customer id
+        $customerId = session()->get('customer_id');
+
+        if(!$customerId)
+        {
+            return redirect()->to(base_url('signin'));
+        }
+
+        //get wishlist id
+        $wishlistId = (int) $this->request->getPost('wishlist_id');
+        if(!$wishlistId)
+        {
+            return $this->response
+                ->setStatusCode(400)
+                ->setBody('Invalid wishlist.');
+        }
+
+        //make sure wishlist belongs to this customer
+        $sql = "SELECT id, cust_id, wishlist_name
+                FROM Wishlists_master
+                WHERE id = ".$wishlistId."
+                  AND cust_id = ".$customerId."
+                  AND status = 'Y'
+                LIMIT 1";
+        $wishlistResult = $this->a_access->custom_query($sql);
+
+        if(empty($wishlistResult))
+        {
+            return $this->response
+                ->setStatusCode(404)
+                ->setBody('Wishlist not found.');
+        }
+        $wishlist = $wishlistResult[0];
+
+        $sql = "SELECT
+                    wd.id,
+                    wd.product_id,
+                    wd.acquired_status,
+                    p.main_image,
+                    pd.product_name,
+                    ps.product_qty,
+                    ps.on_hand,
+                    CASE
+                        WHEN ps.product_qty > 0
+                        THEN 1
+                        ELSE 0
+                    END AS is_in_stock
+                FROM Wishlist_details wd
+                LEFT JOIN Products p ON p.id = wd.product_id
+                LEFT JOIN Product_description pd ON pd.product_id = p.id
+                LEFT JOIN Products_stock ps ON ps.product_id = p.id
+                WHERE wd.wishlist_id = ".$wishlistId."
+                ORDER BY wd.id ASC";
+
+        $wishlistProducts = $this->a_access->custom_query($sql);
+
+        //count wishlist items
+        $itemCount = count($wishlistProducts);
+
+        //add wishlist data
+        $wishlist['item_count'] = $itemCount;
+
+        //return wishlist detail view
+        return view('account/acc_wishlist_detail', [
+            'wishlist' => [
+                'id'            => $wishlist['id'],
+                'wishlist_name' => $wishlist['wishlist_name'],
+                'item_count'    => $wishlist['item_count'],
+                'products'      => $wishlistProducts
+            ]
+        ]);
+    }
+    
+    //rename wishlist
+    public function renameWishlist()
+    {
+        $customerId = session()->get('customer_id');
+
+        if(!$customerId)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Please sign in again.'
+            ]);
+        }
+
+        $wishlistId = (int)$this->request->getPost('wishlist_id');
+        $wishlistName = trim($this->request->getPost('wishlist_name'));
+
+        if(!$wishlistId)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Invalid wishlist.'
+            ]);
+        }
+
+        if($wishlistName == '')
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Wishlist name is required.'
+            ]);
+        }
+
+        if(strlen($wishlistName) > 255)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Wishlist name cannot be longer than 255 characters.'
+            ]);
+        }
+
+        //make sure wishlist belongs to this customer
+        $sql = "SELECT id
+                FROM Wishlists_master
+                WHERE id = ".$wishlistId."
+                  AND cust_id = ".$customerId."
+                  AND status = 'Y'
+                LIMIT 1";
+        $wishlist = $this->a_access->custom_query($sql);
+
+        if(empty($wishlist))
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Wishlist not found.'
+            ]);
+        }
+
+        //update wishlist name
+        $this->a_access->update_table(
+            "Wishlists_master", [  'wishlist_name' => addslashes($wishlistName)  ],  [ 'id'      => $wishlistId,  'cust_id' => $customerId  ]
+        );
+
+
+        return $this->response->setJSON([
+            'status'  => true,
+            'message' => 'Your wishlist has been renamed successfully.'
+        ]);
+    }
+    
+    //create new wishlist
+    public function createWishlist()
+    {
+        $customerId = session()->get('customer_id');
+
+        if(!$customerId)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Please sign in again.'
+            ]);
+        }
+
+        $wishlistName = trim(
+            $this->request->getPost('wishlist_name')
+        );
+
+        if($wishlistName == '')
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Wishlist name is required.'
+            ]);
+        }
+
+        if(strlen($wishlistName) > 255)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Wishlist name cannot be longer than 255 characters.'
+            ]);
+        }
+
+        //check if wishlist with same name already exists
+        $sql = "SELECT id
+                FROM Wishlists_master
+                WHERE cust_id = ".$customerId."
+                  AND wishlist_name = '".addslashes($wishlistName)."'
+                  AND status = 'Y'
+                LIMIT 1";
+
+        $existingWishlist = $this->a_access->custom_query($sql);
+
+        if(!empty($existingWishlist))
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'You already have a wishlist with this name.'
+            ]);
+        }
+
+        //create wishlist
+        $wishlistId = $this->a_access->insert_table_id(
+            "Wishlists_master",
+            [
+                'cust_id'       => $customerId,
+                'wishlist_name' => addslashes($wishlistName),
+                'status'        => 'Y'
+            ]
+        );
+
+        return $this->response->setJSON([
+            'status'      => true,
+            'message'     => 'Your wishlist has been created successfully.',
+            'wishlist_id' => $wishlistId
+        ]);
+    }
+    
+    //delete wishlist
+    public function deleteWishlist()
+    {
+        $customerId = session()->get('customer_id');
+
+        if(!$customerId)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Please sign in again.'
+            ]);
+        }
+        $wishlistId = (int)$this->request->getPost('wishlist_id');
+
+        if(!$wishlistId)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Invalid wishlist.'
+            ]);
+        }
+
+        //make sure wishlist belongs to this customer
+        $sql = "SELECT id
+                FROM Wishlists_master
+                WHERE id = ".$wishlistId."
+                  AND cust_id = ".$customerId."
+                  AND status = 'Y'
+                LIMIT 1";
+        $wishlist = $this->a_access->custom_query($sql);
+
+        if(empty($wishlist))
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Wishlist not found.'
+            ]);
+        }
+
+        //delete wishlist products
+        $sql = "DELETE FROM Wishlist_details  WHERE wishlist_id = ".$wishlistId;
+        $this->a_access->custom_query_delete($sql);
+
+        //delete wishlist
+         $sql = "DELETE FROM Wishlists_master
+            WHERE id = ".$wishlistId."  AND cust_id = ".$customerId;
+        $this->a_access->custom_query_update($sql);
+
+        return $this->response->setJSON([
+            'status'  => true,
+            'message' => 'Your wishlist has been deleted successfully.'
+        ]);
+    }
+    
+    //to delete item from wishlist
+    public function deleteWishlistItem()
+    {
+        $customerId = session()->get('customer_id');
+
+        if(!$customerId)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Please sign in again.'
+            ]);
+        }
+
+
+        $itemId = (int)$this->request->getPost('item_id');
+
+        if(!$itemId)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Invalid wishlist item.'
+            ]);
+        }
+
+
+        //make sure this wishlist item belongs to this customer
+        $sql = "SELECT
+                    wd.id
+                FROM Wishlist_details wd
+                INNER JOIN Wishlists_master wm
+                    ON wm.id = wd.wishlist_id
+                WHERE wd.id = ".$itemId."
+                  AND wm.cust_id = ".$customerId."
+                LIMIT 1";
+
+        $item = $this->a_access->custom_query($sql);
+
+        if(empty($item))
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Wishlist item not found.'
+            ]);
+        }
+
+
+        //delete wishlist item
+        $sql = "DELETE FROM Wishlist_details
+                WHERE id = ".$itemId;
+
+        $this->a_access->custom_query_delete($sql);
+
+
+        return $this->response->setJSON([
+            'status'  => true,
+            'message' => 'The item has been removed from your wishlist.'
+        ]);
+    }
+    
+    //to mark item as fulfilled in wishlist
+    public function markWishlistFulfilled()
+    {
+        $customerId = session()->get('customer_id');
+
+        if(!$customerId)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Please sign in again.'
+            ]);
+        }
+        $itemId = (int)$this->request->getPost('item_id');
+
+        if(!$itemId)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Invalid wishlist item.'
+            ]);
+        }
+
+        //make sure this wishlist item belongs to this customer
+        $sql = "SELECT
+                    wd.id
+                FROM Wishlist_details wd
+                INNER JOIN Wishlists_master wm
+                    ON wm.id = wd.wishlist_id
+                WHERE wd.id = ".$itemId."
+                  AND wm.cust_id = ".$customerId."
+                LIMIT 1";
+        $item = $this->a_access->custom_query($sql);
+
+        if(empty($item))
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Wishlist item not found.'
+            ]);
+        }
+
+        //mark item as fulfilled
+        $sql = "UPDATE Wishlist_details
+                SET acquired_status = 'Y'
+                WHERE id = ".$itemId;
+
+        $this->a_access->custom_query_update($sql);
+
+        return $this->response->setJSON([
+            'status'  => true,
+            'message' => 'The item has been marked as fulfilled.'
+        ]);
+    }
 }

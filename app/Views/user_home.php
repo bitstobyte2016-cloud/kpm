@@ -36,7 +36,6 @@
                     <span>Account Home</span>
                 </a>
 
-
                 <a href="javascript:void(0);"
                     class="account-menu-item"
                     onclick="openAddresses()">
@@ -45,7 +44,6 @@
                      <span>Addresses</span>
 
                  </a>
-
 
                 <a
                     href="javascript:void(0);"
@@ -56,18 +54,16 @@
                     <span>Orders</span>
                 </a>
 
-
                 <a
-                    href="#"
-                    class="account-menu-item"
+                    href="javascript:void(0);"
+                    class="account-menu-item wishlist-menu-item"
+                    onclick="openWishlist()"
                 >
                     <i class="fa-regular fa-heart"></i>
                     <span>Wishlists</span>
                 </a>
 
-
                 <div class="account-menu-divider"></div>
-
 
                 <a
                     href="javascript:void(0);"
@@ -976,7 +972,6 @@
         updateOrderPaginationButtons();
     }
 
-
     function updateOrderPaginationButtons()
     {
         let totalPages =
@@ -995,7 +990,6 @@
             );
     }
 
-
     $(document).on(
         "click",
         ".account-content .order-page-btn",
@@ -1006,7 +1000,6 @@
             );
         }
     );
-
 
     $(document).on(
         "click",
@@ -1021,7 +1014,6 @@
             }
         }
     );
-
 
     $(document).on(
         "click",
@@ -1041,7 +1033,7 @@
     );
     
     //to open individual order details
-   function viewOrder(orderId)
+    function viewOrder(orderId)
     {
         if(!orderId)
         {
@@ -1106,6 +1098,30 @@
         $("#shippingArrow").toggleClass(
             "shipping-arrow-up"
         );
+    }
+    
+    //to toggle order chat
+    function toggleOrderChat()
+    {
+        const content = $("#order-chat-content");
+        const arrow = $("#order-chat-arrow");
+
+        if (content.is(":visible"))
+        {
+            content.slideUp(200);
+
+            arrow.removeClass(
+                "order-chat-arrow-up"
+            );
+        }
+        else
+        {
+            content.slideDown(200);
+
+            arrow.addClass(
+                "order-chat-arrow-up"
+            );
+        }
     }
     
     //to go back to orders list
@@ -1247,7 +1263,711 @@
             );
         });
     }
+    
+    //to send new order message
+    function sendOrderMessage(orderId)
+    {
+        if (!orderId) {
+            return;
+        }
 
+        let message = $.trim( $('#orderChatMessage').val());
+
+        if (!message) {
+            return;
+        }
+
+
+        let sendButton = $('.order-chat-send-btn');
+        sendButton.prop('disabled', true);
+
+        $.post(
+            "<?= base_url('sendOrderMessage'); ?>",
+            {
+                order_id: orderId,
+                message: message
+            },
+            function(response)
+            {
+                if (
+                    !response ||
+                    response.status !== 'success'
+                ) {
+
+                    showAlert(
+                        "error",
+                        "Something Went Wrong",
+                        response && response.message
+                            ? response.message
+                            : "Unable to send message."
+                    );
+
+                    sendButton.prop('disabled', false);
+
+                    return;
+                }
+
+                //clear textbox
+                $('#orderChatMessage').val('');
+
+                //reload order messages
+                loadOrderMessages(orderId);
+
+                sendButton.prop('disabled', false);
+
+            },
+            "json"
+        )
+        .fail(function(xhr)
+        {
+            console.log("SEND ORDER MESSAGE ERROR:");
+            console.log(xhr.responseText);
+
+            showAlert(
+                "error",
+                "Something Went Wrong",
+                "Unable to send message. Please try again."
+            );
+
+            sendButton.prop('disabled', false);
+        });
+    }
+    
+    function loadOrderMessages(orderId)
+    {
+        if (!orderId) {
+            return;
+        }
+
+
+        $.post(
+            "<?= base_url('getOrderMessages'); ?>",
+            {
+                order_id: orderId
+            },
+            function(response)
+            {
+                if (
+                    !response ||
+                    response.status !== 'success'
+                ) {
+                    return;
+                }
+
+
+                let html = '';
+
+
+                if (
+                    response.messages &&
+                    response.messages.length > 0
+                ) {
+
+                    response.messages.forEach(function(message)
+                    {
+
+                        let isUser =
+                            parseInt(message.sender_id) !== 0;
+
+
+                        html += `
+                            <div class="order-chat-message ${isUser ? 'order-chat-user' : 'order-chat-support'}">
+
+                                <div class="order-chat-bubble">
+
+                                    <div class="order-chat-sender">
+                                        ${isUser ? 'You:' : 'Support:'}
+                                    </div>
+
+                                    <div class="order-chat-text">
+                                        ${escapeHtml(message.order_message).replace(/\n/g, '<br>')}
+                                    </div>
+
+                                    <div class="order-chat-date">
+                                        ${message.formatted_date}
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        `;
+                    });
+
+                } else {
+
+                    html = `
+                        <div class="order-chat-empty">
+                            No messages yet.
+                        </div>
+                    `;
+                }
+
+
+                $('#orderChatMessages').html(html);
+
+            },
+            "json"
+        )
+        .fail(function(xhr)
+        {
+            console.log("GET ORDER MESSAGES ERROR:");
+            console.log(xhr.responseText);
+        });
+    }
+    
+    //escape helper
+    function escapeHtml(text)
+    {
+        return $('<div>')
+            .text(text || '')
+            .html();
+    }
+    
+    //to cancel order
+    function cancelOrder(orderId)
+    {
+        if (!orderId) {
+            return;
+        }
+
+        showConfirm({
+            title: "Cancel Order",
+            message: "Are you sure you want to cancel this order?",
+            confirmText: "Yes, Cancel Order",
+
+            callback: function()
+            {
+                showLoader();
+
+                $.post(
+                    "<?= base_url('cancelOrder'); ?>",
+                    {
+                        order_id: orderId
+                    },
+                    function(response)
+                    {
+                        if (
+                            !response ||
+                            response.status !== "success"
+                        ) {
+                            hideLoader();
+                            showAlert(
+                                "error",
+                                "Unable to Cancel Order",
+                                response && response.message
+                                    ? response.message
+                                    : "Unable to cancel this order. Please try again." );
+                            return;
+                        }
+
+
+                        //successful, call email
+                        emailCancelOrder(orderId, response);
+
+                    },
+                    "json"
+                )
+                .fail(function(xhr)
+                {
+                    hideLoader();
+
+                    console.log(
+                        "CANCEL ORDER ERROR:"
+                    );
+
+                    console.log(
+                        xhr.responseText
+                    );
+
+                    showAlert(
+                        "error",
+                        "Something Went Wrong",
+                        "Unable to cancel the order. Please try again."
+                    );
+                });
+            }
+        });
+    }
+    
+    //to send email for cancel order
+    function emailCancelOrder(orderId, cancelResponse)
+    {
+        if (!orderId) {
+            hideLoader();
+            return;
+        }
+
+        let emailData = JSON.parse(
+            JSON.stringify(cancelOrderEmailData)
+        );
+
+        emailData.order.order_status = "cancelled";
+        emailData.customer_email = customerEmail;
+
+        //add cancellation information
+        emailData.store_credit_refunded = cancelResponse.store_credit_refunded || "0.00";
+
+        $.ajax({
+            url: "<?= base_url('emailCancelOrder'); ?>",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(emailData),
+
+            success: function(response)
+            {
+                hideLoader();
+                location.reload();
+            },
+
+            error: function(xhr)
+            {
+                console.log(xhr.responseText);
+                
+                 showAlert(
+                        "error",
+                        "Something Went Wrong",
+                        "Order cancelled but unable to send email."
+                    );
+            }
+        });
+    }
+
+</script>
+
+
+<!-- for account wishlist -->
+<script>
+    //to open wishlist page
+    function openWishlist()
+    {
+        showLoader();
+
+        //set active menu
+        $(".account-menu-item").removeClass("active");
+        $(".wishlist-menu-item").addClass("active");
+
+        $.post(
+            "<?= base_url('accountWishlists'); ?>",
+            {},
+            function(response)
+            {
+                hideLoader();
+                $(".account-content").html(response);
+            }
+        )
+        .fail(function(xhr)
+        {
+            hideLoader();
+            console.log(xhr.responseText);
+
+            showAlert(
+                "error",
+                "Something Went Wrong",
+                "Unable to load your wishlists. Please try again."
+            );
+        });
+    }
+    
+    //to open wishlist detail page
+    function openWishlistDetail(wishlistId)
+    {
+        if(!wishlistId)
+        {
+            return;
+        }
+
+        showLoader();
+
+        $.post(
+            "<?= base_url('accountWishlistDetail'); ?>",
+            {
+                wishlist_id: wishlistId
+            },
+            function(response)
+            {
+                hideLoader();
+
+                $(".account-content").html(response);
+            }
+        )
+        .fail(function(xhr)
+        {
+            hideLoader();
+
+            console.log(xhr.responseText);
+
+            showAlert(
+                "error",
+                "Something Went Wrong",
+                "Unable to load this wishlist. Please try again."
+            );
+        });
+    }
+    
+    //to rename whishlist
+    function renameWishlist(wishlistId)
+    {
+        if(!wishlistId)
+        {
+            return;
+        }
+
+        showInputAlert({
+            type: "info",
+            icon: "fa-pen",
+            title: "Rename Wishlist",
+            message: "Enter a new name for your wishlist.",
+            inputType: "text",
+            placeholder: "Wishlist name",
+            buttonText: "Save",
+            callback: function(newName)
+            {
+                if(newName == '')
+                {
+                    showAlert(
+                        "error",
+                        "Name Required",
+                        "Please enter a name for your wishlist."
+                    );
+
+                    return;
+                }
+
+                if(newName.length > 255)
+                {
+                    showAlert(
+                        "error",
+                        "Name Too Long",
+                        "Wishlist name cannot be longer than 255 characters."
+                    );
+
+                    return;
+                }
+
+                showLoader();
+
+                $.post(
+                    "<?= base_url('renameWishlist'); ?>",
+                    {
+                        wishlist_id: wishlistId,
+                        wishlist_name: newName
+                    },
+                    function(response)
+                    {
+                        hideLoader();
+
+                        if(response.status)
+                        {
+                            showAlert(
+                                "success",
+                                "Wishlist Renamed",
+                                response.message
+                            );
+
+                            setTimeout(function(){
+                                openWishlistDetail(wishlistId);
+                            }, 800);
+                        }
+                        else
+                        {
+                            showAlert(
+                                "error",
+                                "Unable to Rename",
+                                response.message
+                            );
+                        }
+                    },
+                    "json"
+                )
+                .fail(function(xhr)
+                {
+                    hideLoader();
+
+                    console.log(xhr.responseText);
+
+                    showAlert(
+                        "error",
+                        "Something Went Wrong",
+                        "Unable to rename your wishlist. Please try again."
+                    );
+                });
+            }
+        });
+    }
+    
+    //create new whishlist 
+    function createWishlist()
+    {
+        showInputAlert({
+            type: "info",
+            icon: "fa-heart",
+            title: "Create New Wishlist",
+            message: "Enter a name for your new wishlist.",
+            inputType: "text",
+            placeholder: "Wishlist name",
+            buttonText: "Create",
+            callback: function(wishlistName)
+            {
+                if(wishlistName == '')
+                {
+                    showAlert(
+                        "error",
+                        "Name Required",
+                        "Please enter a name for your wishlist."
+                    );
+
+                    return;
+                }
+
+                if(wishlistName.length > 255)
+                {
+                    showAlert(
+                        "error",
+                        "Name Too Long",
+                        "Wishlist name cannot be longer than 255 characters."
+                    );
+
+                    return;
+                }
+
+                showLoader();
+
+                $.post(
+                    "<?= base_url('createWishlist'); ?>",
+                    {
+                        wishlist_name: wishlistName
+                    },
+                    function(response)
+                    {
+                        hideLoader();
+
+                        if(response.status)
+                        {
+                            showAlert(
+                                "success",
+                                "Wishlist Created",
+                                response.message
+                            );
+
+                            setTimeout(function(){
+                                openWishlist();
+                            }, 800);
+                        }
+                        else
+                        {
+                            showAlert(
+                                "error",
+                                "Unable to Create Wishlist",
+                                response.message
+                            );
+                        }
+                    },
+                    "json"
+                )
+                .fail(function(xhr)
+                {
+                    hideLoader();
+
+                    console.log(xhr.responseText);
+
+                    showAlert(
+                        "error",
+                        "Something Went Wrong",
+                        "Unable to create your wishlist. Please try again."
+                    );
+                });
+            }
+        });
+    }
+    
+    //to delete whishlist
+    function deleteWishlist(wishlistId)
+    {
+        if(!wishlistId)
+        {
+            return;
+        }
+
+        showConfirm({
+            title: "Delete Wishlist",
+            message: "Are you sure you want to delete this wishlist? All products saved in this wishlist will also be removed.",
+            confirmText: "Yes, Delete",
+
+            callback: function()
+            {
+                showLoader();
+
+                $.post(
+                    "<?= base_url('deleteWishlist'); ?>",
+                    {
+                        wishlist_id: wishlistId
+                    },
+                    function(response)
+                    {
+                        hideLoader();
+
+                        if(response.status)
+                        {
+                            showAlert(
+                                "success",
+                                "Wishlist Deleted",
+                                response.message
+                            );
+
+                            setTimeout(function(){
+                                openWishlist();
+                            }, 800);
+                        }
+                        else
+                        {
+                            showAlert(
+                                "error",
+                                "Unable to Delete",
+                                response.message
+                            );
+                        }
+                    },
+                    "json"
+                )
+                .fail(function(xhr)
+                {
+                    hideLoader();
+
+                    console.log(xhr.responseText);
+
+                    showAlert(
+                        "error",
+                        "Something Went Wrong",
+                        "Unable to delete your wishlist. Please try again."
+                    );
+                });
+            }
+        });
+    }
+    
+    //to delete whishlist item
+    function deleteWishlistItem(itemId, wishlistId)
+    {
+        if(!itemId) return;
+
+        showConfirm({
+            title: "Delete Wishlist Item",
+            message: "Are you sure you want to remove this item from your wishlist?",
+            confirmText: "Delete",
+            cancelText: "Cancel",
+            type: "warning",
+            callback: function()
+            {
+                showLoader();
+
+                $.post(
+                    "<?= base_url('deleteWishlistItem'); ?>",
+                    {
+                        item_id: itemId
+                    },
+                    function(response)
+                    {
+                        hideLoader();
+
+                        if(response.status)
+                        {
+                            showAlert(
+                                "success",
+                                "Item Removed",
+                                response.message
+                            );
+
+                            setTimeout(function(){
+                                openWishlistDetail(wishlistId);
+                            }, 800);
+                        }
+                        else
+                        {
+                            showAlert(
+                                "error",
+                                "Unable to Remove Item",
+                                response.message
+                            );
+                        }
+                    },
+                    "json"
+                )
+                .fail(function(xhr)
+                {
+                    hideLoader();
+                    console.log(xhr.responseText);
+
+                    showAlert(
+                        "error",
+                        "Something Went Wrong",
+                        "Unable to remove this item from your wishlist. Please try again."
+                    );
+                });
+            }
+        });
+    }
+    
+    //mark whishlist item as fulfilled
+    function markWishlistFulfilled(itemId, wishlistId)
+    {
+        if(!itemId || !wishlistId) return;
+
+        showConfirm({
+            title: "Mark as Fulfilled",
+            message: "Have you already acquired this item?",
+            confirmText: "Yes, Mark Fulfilled",
+            cancelText: "Cancel",
+            type: "info",
+            callback: function()
+            {
+                showLoader();
+
+                $.post(
+                    "<?= base_url('markWishlistFulfilled'); ?>",
+                    {
+                        item_id: itemId
+                    },
+                    function(response)
+                    {
+                        hideLoader();
+
+                        if(response.status)
+                        {
+                            showAlert(
+                                "success",
+                                "Item Fulfilled",
+                                response.message
+                            );
+
+                            setTimeout(function(){
+                                openWishlistDetail(wishlistId);
+                            }, 800);
+                        }
+                        else
+                        {
+                            showAlert(
+                                "error",
+                                "Unable to Update Item",
+                                response.message
+                            );
+                        }
+                    },
+                    "json"
+                )
+                .fail(function(xhr)
+                {
+                    hideLoader();
+                    console.log(xhr.responseText);
+
+                    showAlert(
+                        "error",
+                        "Something Went Wrong",
+                        "Unable to mark this item as fulfilled. Please try again."
+                    );
+                });
+            }
+        });
+    }
 </script>
 
 <?= $this->endSection(); ?>

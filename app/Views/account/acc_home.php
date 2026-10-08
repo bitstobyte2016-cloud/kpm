@@ -324,3 +324,7 @@
                 </div>
 
             </main>
+
+<script>
+    const customerEmail = <?= json_encode($customer['email']); ?>;
+</script>

@@ -56,7 +56,7 @@
 
             <?php else: ?>
 
-                <a href="/signin" class="action-item sign-in-action">
+                <a href="<?= base_url('signin'); ?>?redirect=<?= urlencode(current_url()); ?>" class="action-item sign-in-action">
                     <i class="fa-regular fa-user"></i>
                     <span>Sign In / Sign Up</span>
                 </a>

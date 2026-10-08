@@ -102,46 +102,204 @@ class BrevoEmail extends Model
         return $otp;
     }
     
-    public function sendOtpEmail($email){
-        
+    public function sendOtpEmail($email)
+    {
         $otp = $this->generateOtp();
-        
-        $data=[
-            'sender'=>['name'=>'Support K-Pop Merch','email'=>'support@kpopmerch.in' ],
-            'to'=>[['email'=>$email ]],
-            'subject'=>'Verify Your K-Pop Merch Account',
-            'htmlContent'=>'
-            <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;">
-                <h2 style="color:#7c3aed;">
-                    K-Pop Merch
-                </h2>
-                <p>
-                    Thank you for registering.
-                </p>
-                <p>
-                    Your verification code is:
-                </p>
-                <div style="
-                    font-size:32px;
-                    font-weight:bold;
-                    letter-spacing:5px;
-                    color:#7c3aed;
-                    padding:15px 0;
+        $baseUrl = rtrim(base_url(), '/');
+
+        // Email images
+        $otpIcon = $baseUrl . '/Images/email/ic_email3.png';
+
+        // Split OTP into individual digits
+        $otpBoxes = '';
+
+        foreach (str_split((string) $otp) as $digit) {
+            $otpBoxes .= '
+                <span style="
+                    display:inline-block;
+                    width:72px;
+                    height:72px;
+                    line-height:72px;
+                    margin:0 5px;
+                    text-align:center;
+                    font-family:Inter,Arial,sans-serif;
+                    font-size:42px;
+                    font-weight:700;
+                    color:#25156b;
+                    background:#faf7ff;
+                    border:2px dashed #c9a7ff;
+                    border-radius:14px;
+                    box-sizing:border-box;
                 ">
-                    '.$otp.'
-                </div>
-                <p>
-                    This code will expire in 10 minutes.
+                    ' . htmlspecialchars($digit) . '
+                </span>
+            ';
+        }
+
+        // Remove final spacer
+        $otpBoxes = preg_replace(
+            '/<td style="width:8px;"><\/td>\s*$/',
+            '',
+            $otpBoxes
+        );
+
+        $html =
+        $this->emailHeader()
+        . '
+            <!-- OTP EMAIL BODY -->
+
+            <div style="text-align:center; padding:40px 20px 30px;">
+
+                <img
+                    src="' . base_url('Images/email/ic_email3.png') . '"
+                    alt="Verification"
+                    style="
+                        width:180px;
+                        max-width:100%;
+                        height:auto;
+                        display:block;
+                        margin:0 auto 25px;
+                    "
+                >
+
+                <h1 style="
+                    margin:0 0 15px;
+                    font-family:Poppins,Arial,sans-serif;
+                    font-size:38px;
+                    line-height:1.2;
+                    font-weight:700;
+                    color:#2b176b;
+                ">
+                    Your Verification Code is Here!
+                </h1>
+
+                <p style="
+                    margin:0 0 8px;
+                    font-family:Inter,Arial,sans-serif;
+                    font-size:20px;
+                    color:#21145f;
+                ">
+                    Hi there,
                 </p>
-            </div>'
+
+                <p style="
+                    margin:0 auto 8px;
+                    font-family:Inter,Arial,sans-serif;
+                    font-size:19px;
+                    line-height:1.5;
+                    color:#21145f;
+                    max-width:700px;
+                ">
+                    Thanks for creating an account with K-Pop Merch!
+                </p>
+
+                <p style="
+                    margin:0 auto 30px;
+                    font-family:Inter,Arial,sans-serif;
+                    font-size:19px;
+                    line-height:1.5;
+                    color:#21145f;
+                    max-width:700px;
+                ">
+                    Please use the 6-digit code below to verify your email address:
+                </p>
+
+                <div style="
+                    text-align:center;
+                    margin:0 auto 35px;
+                    white-space:nowrap;
+                ">
+                    ' . $otpBoxes . '
+                </div>
+
+                <div style="
+                    max-width:650px;
+                    margin:0 auto 30px;
+                    padding:20px 25px;
+                    background:#f3e8ff;
+                    border-radius:16px;
+                    text-align:left;
+                ">
+
+                    <div style="
+                        font-family:Inter,Arial,sans-serif;
+                        font-size:18px;
+                        line-height:1.5;
+                        color:#21145f;
+                    ">
+                        <strong>
+                            This code will expire in 10 minutes.
+                        </strong>
+                        <br>
+                        For your security, please do not share this code with anyone.
+                    </div>
+
+                </div>
+
+                <p style="
+                    margin:0 auto 30px;
+                    font-family:Inter,Arial,sans-serif;
+                    font-size:17px;
+                    line-height:1.5;
+                    color:#21145f;
+                    max-width:650px;
+                ">
+                    If you didn’t request this code, you can safely ignore this email
+                    or contact our support team.
+                </p>
+
+            </div>
+
+        '
+        . $this->emailFooter();
+
+        $data = [
+            'sender' => [
+                'name'  => 'K-Pop Merch',
+                'email' => 'support@kpopmerch.in'
+            ],
+
+            'to' => [
+                [
+                    'email' => $email
+                ]
+            ],
+
+            'subject' => 'Your K-Pop Merch Verification Code',
+
+            'htmlContent' => $html
         ];
 
-        $ch=curl_init();
-        curl_setopt( $ch, CURLOPT_URL,  'https://api.brevo.com/v3/smtp/email');
-        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
-        curl_setopt(  $ch, CURLOPT_POST, true );
-        curl_setopt(  $ch, CURLOPT_POSTFIELDS, json_encode($data) );
-        curl_setopt( $ch, CURLOPT_HTTPHEADER,
+
+        $ch = curl_init();
+
+        curl_setopt(
+            $ch,
+            CURLOPT_URL,
+            'https://api.brevo.com/v3/smtp/email'
+        );
+
+        curl_setopt(
+            $ch,
+            CURLOPT_RETURNTRANSFER,
+            true
+        );
+
+        curl_setopt(
+            $ch,
+            CURLOPT_POST,
+            true
+        );
+
+        curl_setopt(
+            $ch,
+            CURLOPT_POSTFIELDS,
+            json_encode($data)
+        );
+
+        curl_setopt(
+            $ch,
+            CURLOPT_HTTPHEADER,
             [
                 'accept: application/json',
                 'api-key: '.$this->apiKey,
@@ -149,15 +307,25 @@ class BrevoEmail extends Model
             ]
         );
 
-        $result=curl_exec($ch);
+        $result = curl_exec($ch);
+
         curl_close($ch);
 
-        if($result){
-            return ["success"=>'true',"otp"=>$otp];
-        }else{
-            return ["success"=>'false'];
+
+        if ($result) {
+
+            return [
+                "success" => 'true',
+                "otp"     => $otp
+            ];
+
+        } else {
+
+            return [
+                "success" => 'false'
+            ];
+
         }
-        
     }
     
     //to send email for forgot password
@@ -500,7 +668,7 @@ class BrevoEmail extends Model
 
         $data = [
             'sender' => [
-                'name'  => 'Support K-Pop Merch',
+                'name'  => 'K-Pop Merch',
                 'email' => 'support@kpopmerch.in'
             ],
             'to' => [
@@ -550,6 +718,1360 @@ class BrevoEmail extends Model
             'curl_error' => $curlError
         ];
     }
+    
+    // Send order cancelled email   
+    public function sendCancelOrderEmail($emailData)
+    {
+        $order = $emailData['order'] ?? [];
+        $billingAddress = $emailData['billing_address'] ?? [];
+        $shippingAddress = $emailData['shipping_address'] ?? [];
+        $products = $emailData['products'] ?? [];
+        $customerEmail = trim($emailData['customer_email'] ?? '');
+
+        if (!$customerEmail) {
+            return [
+                'success' => false,
+                'response' => 'Customer email is missing.'
+            ];
+        }
+
+        //helper
+        $e = function ($value) {
+            return htmlspecialchars(
+                (string)$value,
+                ENT_QUOTES,
+                'UTF-8'
+            );
+        };
+
+        //customer name
+        $firstName = trim(
+            $order['customer_first_name']
+            ?? $order['first_name']
+            ?? $billingAddress['first_name']
+            ?? ''
+        );
+
+        if (!$firstName) {
+            $firstName = 'there';
+        }
+
+        //order details
+        $orderId = (int)($order['id'] ?? 0);
+        $orderNumber = '#' . $orderId;
+        $orderDate = !empty($order['order_date'])
+            ? date(
+                'd M Y',
+                strtotime($order['order_date'])
+            )
+            : '—';
+
+        //billing address
+        $billingHtml = '';
+        $billingName = trim(
+            ($billingAddress['first_name'] ?? '') .
+            ' ' .
+            ($billingAddress['last_name'] ?? '')
+        );
+
+        if ($billingName) {
+            $billingHtml .=
+                '<div>' . $e($billingName) . '</div>';
+        }
+
+        if (!empty($billingAddress['company_name'])) {
+            $billingHtml .=
+                '<div>' .
+                $e($billingAddress['company_name']) .
+                '</div>';
+        }
+
+        if (!empty($billingAddress['address_line1'])) {
+            $billingHtml .=
+                '<div>' .
+                $e($billingAddress['address_line1']) .
+                '</div>';
+        }
+
+        if (!empty($billingAddress['address_line2'])) {
+            $billingHtml .=
+                '<div>' .
+                $e($billingAddress['address_line2']) .
+                '</div>';
+        }
+
+        if (!empty($billingAddress['city'])) {
+
+            $cityState = $billingAddress['city'];
+            if (!empty($billingAddress['state'])) {
+                $cityState .=
+                    ', ' .
+                    $billingAddress['state'];
+            }
+
+            $billingHtml .=
+                '<div>' .
+                $e($cityState) .
+                '</div>';
+        }
+
+        if (!empty($billingAddress['country'])) {
+
+            $countryZip = $billingAddress['country'];
+            if (!empty($billingAddress['zip'])) {
+                $countryZip .=
+                    ', ' .
+                    $billingAddress['zip'];
+            }
+
+            $billingHtml .=
+                '<div>' .
+                $e($countryZip) .
+                '</div>';
+        }
+
+        if (!empty($billingAddress['contact_no'])) {
+            $billingHtml .=
+                '<div>' .
+                $e($billingAddress['contact_no']) .
+                '</div>';
+        }
+
+        //shiiping address
+        $shippingHtml = '';
+        $shippingName = trim(
+            ($shippingAddress['first_name'] ?? '') .
+            ' ' .
+            ($shippingAddress['last_name'] ?? '')
+        );
+
+        if ($shippingName) {
+            $shippingHtml .=
+                '<div>' .
+                $e($shippingName) .
+                '</div>';
+        }
+
+        if (!empty($shippingAddress['company_name'])) {
+            $shippingHtml .=
+                '<div>' .
+                $e($shippingAddress['company_name']) .
+                '</div>';
+        }
+
+        if (!empty($shippingAddress['address_line1'])) {
+            $shippingHtml .=
+                '<div>' .
+                $e($shippingAddress['address_line1']) .
+                '</div>';
+        }
+
+        if (!empty($shippingAddress['address_line2'])) {
+            $shippingHtml .=
+                '<div>' .
+                $e($shippingAddress['address_line2']) .
+                '</div>';
+        }
+
+        if (!empty($shippingAddress['city'])) {
+
+            $cityState = $shippingAddress['city'];
+
+            if (!empty($shippingAddress['state'])) {
+                $cityState .=
+                    ', ' .
+                    $shippingAddress['state'];
+            }
+
+            $shippingHtml .=
+                '<div>' .
+                $e($cityState) .
+                '</div>';
+        }
+
+        if (!empty($shippingAddress['country'])) {
+
+            $countryZip =
+                $shippingAddress['country'];
+
+            if (!empty($shippingAddress['zip'])) {
+                $countryZip .=
+                    ', ' .
+                    $shippingAddress['zip'];
+            }
+
+            $shippingHtml .=
+                '<div>' .
+                $e($countryZip) .
+                '</div>';
+        }
+
+        if (!empty($shippingAddress['contact_no'])) {
+            $shippingHtml .=
+                '<div>' .
+                $e($shippingAddress['contact_no']) .
+                '</div>';
+        }
+
+        //product box
+        $productRows = '';
+        $counter = 1;
+        foreach ($products as $product) {
+
+            $productName =$product['product_name'] ?? 'Product';
+            $productImage =$product['main_image'] ?? base_url('Images/icons/ic_product.png');
+            $productPrice = (float)($product['product_price'] ?? 0);
+            $productQty =(int)($product['product_qty'] ?? 0);
+            $lineTotal = (float)($product['line_total'] ?? 0);
+            $productRows .= '
+                <tr>
+
+                    <!-- NUMBER -->
+                    <td
+                        width="7%"
+                        valign="middle"
+                        align="center"
+                        style="
+                            border:1px solid #e5d9f4;
+                            padding:10px 6px;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:13px;
+                            color:#29205c;
+                        "
+                    >
+                        ' . $counter . '
+                    </td>
+
+
+                    <!-- PRODUCT -->
+                    <td
+                        width="53%"
+                        valign="middle"
+                        style="
+                            border:1px solid #e5d9f4;
+                            padding:8px 10px;
+                        "
+                    >
+
+                        <table
+                            cellpadding="0"
+                            cellspacing="0"
+                            border="0"
+                        >
+                            <tr>
+
+                                <td
+                                    width="55"
+                                    valign="middle"
+                                >
+                                    <img
+                                        src="' . $e($productImage) . '"
+                                        alt="' . $e($productName) . '"
+                                        width="45"
+                                        height="45"
+                                        style="
+                                            width:45px;
+                                            height:45px;
+                                            object-fit:contain;
+                                            display:block;
+                                            border-radius:5px;
+                                        "
+                                    >
+                                </td>
+
+                                <td
+                                    valign="middle"
+                                    style="
+                                        padding-left:8px;
+                                        font-family:Arial,Helvetica,sans-serif;
+                                        font-size:13px;
+                                        line-height:18px;
+                                        color:#29205c;
+                                    "
+                                >
+                                    ' . $e($productName) . '
+                                </td>
+
+                            </tr>
+                        </table>
+
+                    </td>
+
+
+                    <!-- PRICE -->
+                    <td
+                        width="14%"
+                        valign="middle"
+                        align="center"
+                        style="
+                            border:1px solid #e5d9f4;
+                            padding:10px 5px;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:13px;
+                            color:#29205c;
+                        "
+                    >
+                        ₹' .
+                        number_format(
+                            $productPrice,
+                            0
+                        ) .
+                    '</td>
+
+
+                    <!-- QTY -->
+                    <td
+                        width="8%"
+                        valign="middle"
+                        align="center"
+                        style="
+                            border:1px solid #e5d9f4;
+                            padding:10px 5px;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:13px;
+                            color:#29205c;
+                        "
+                    >
+                        ' . $productQty . '
+                    </td>
+
+
+                    <!-- TOTAL -->
+                    <td
+                        width="18%"
+                        valign="middle"
+                        align="right"
+                        style="
+                            border:1px solid #e5d9f4;
+                            padding:10px 10px;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:13px;
+                            color:#29205c;
+                        "
+                    >
+                        ₹' .
+                        number_format(
+                            $lineTotal,
+                            0
+                        ) .
+                    '</td>
+
+                </tr>
+            ';
+
+            $counter++;
+        }
+
+        //order summary
+        $subtotal = (float)($order['sub_total_amount'] ?? 0);
+        $discountedTotal =  (float)($order['discounted_total_amount'] ?? 0);
+        $discount = $discountedTotal;
+        $shippingFee = (float)($order['shipping_charged_amount'] ?? 0);
+        $storeCredit = (float)($order['store_credit'] ?? 0);
+        $gst = (float)($order['total_taxed_amount'] ?? 0);
+        $grandTotal = (float)($order['grand_total_amount'] ?? 0);
+        $codCharges = (float)($order['cod_charges'] ?? 0);
+
+        //summary rows
+        $summaryRows = '';
+        $summaryRows .= '
+            <tr>
+                <td
+                    style="
+                        padding:5px 0;
+                        font-family:Arial,Helvetica,sans-serif;
+                        font-size:14px;
+                        color:#29205c;
+                    "
+                >
+                    Subtotal
+                </td>
+
+                <td
+                    align="right"
+                    style="
+                        padding:5px 0;
+                        font-family:Arial,Helvetica,sans-serif;
+                        font-size:14px;
+                        color:#29205c;
+                    "
+                >
+                    ₹' .
+                    number_format(
+                        $subtotal,
+                        0
+                    ) .
+                '</td>
+            </tr>
+        ';
+
+        $summaryRows .= '
+            <tr>
+                <td
+                    style="
+                        padding:5px 0;
+                        font-family:Arial,Helvetica,sans-serif;
+                        font-size:14px;
+                        color:#29205c;
+                    "
+                >
+                    Shipping Fee
+                </td>
+
+                <td
+                    align="right"
+                    style="
+                        padding:5px 0;
+                        font-family:Arial,Helvetica,sans-serif;
+                        font-size:14px;
+                        color:#29205c;
+                    "
+                >
+                    ₹' .
+                    number_format(
+                        $shippingFee,
+                        0
+                    ) .
+                '</td>
+            </tr>
+        ';
+
+        if ($discount > 0) {
+            $summaryRows .= '
+                <tr>
+                    <td
+                        style="
+                            padding:5px 0;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:14px;
+                            color:#29205c;
+                        "
+                    >
+                        Discount
+                    </td>
+
+                    <td
+                        align="right"
+                        style="
+                            padding:5px 0;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:14px;
+                            color:#2e9b52;
+                        "
+                    >
+                        -₹' .
+                        number_format(
+                            $discount,
+                            0
+                        ) .
+                    '</td>
+                </tr>
+            ';
+        }
+
+        if ($storeCredit > 0) {
+            $summaryRows .= '
+                <tr>
+                    <td
+                        style="
+                            padding:5px 0;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:14px;
+                            color:#29205c;
+                        "
+                    >
+                        Store Credit Used
+                    </td>
+
+                    <td
+                        align="right"
+                        style="
+                            padding:5px 0;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:14px;
+                            color:#2e9b52;
+                        "
+                    >
+                        -₹' .
+                        number_format(
+                            $storeCredit,
+                            0
+                        ) .
+                    '</td>
+                </tr>
+            ';
+        }
+
+        if ($codCharges > 0) {
+            $summaryRows .= '
+                <tr>
+                    <td
+                        style="
+                            padding:5px 0;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:14px;
+                            color:#29205c;
+                        "
+                    >
+                        COD Charges
+                    </td>
+
+                    <td
+                        align="right"
+                        style="
+                            padding:5px 0;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:14px;
+                            color:#29205c;
+                        "
+                    >
+                        ₹' .
+                        number_format(
+                            $codCharges,
+                            0
+                        ) .
+                    '</td>
+                </tr>
+            ';
+        }
+
+        $summaryRows .= '
+            <tr>
+                <td
+                    style="
+                        padding:5px 0;
+                        font-family:Arial,Helvetica,sans-serif;
+                        font-size:14px;
+                        color:#29205c;
+                    "
+                >
+                    GST (18%)
+                </td>
+
+                <td
+                    align="right"
+                    style="
+                        padding:5px 0;
+                        font-family:Arial,Helvetica,sans-serif;
+                        font-size:14px;
+                        color:#29205c;
+                    "
+                >
+                    ₹' .
+                    number_format(
+                        $gst,
+                        0
+                    ) .
+                '</td>
+            </tr>
+        ';
+
+        //email body
+        $body = '
+
+            <!-- CANCELLATION BODY -->
+
+            <tr>
+                <td
+                    style="
+                        padding:35px 40px 30px;
+                        background:#ffffff;
+                    "
+                >
+
+                    <!-- MAIN ICON -->
+
+                    <img
+                        src="' .
+                        base_url(
+                            'Images/order/order_cancelled.png'
+                        ) .
+                        '"
+                        alt="Order Cancelled"
+                        width="145"
+                        style="
+                            width:145px;
+                            height:auto;
+                            margin:0 auto 12px;
+                        "
+                    >
+
+
+                    <!-- TITLE -->
+
+                    <h1
+                        style="
+                            margin:0 0 10px;
+                            text-align:center;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:30px;
+                            line-height:38px;
+                            font-weight:700;
+                            color:#25145f;
+                        "
+                    >
+                        Your Order Has Been Cancelled
+                    </h1>
+
+
+                    <!-- GREETING -->
+
+                    <p
+                        style="
+                            margin:0 0 6px;
+                            text-align:center;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:17px;
+                            line-height:25px;
+                            color:#29205c;
+                        "
+                    >
+                        Hi ' . $e($firstName) . ',
+                    </p>
+
+
+                    <p
+                        style="
+                            margin:0 auto 20px;
+                            max-width:620px;
+                            text-align:center;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:16px;
+                            line-height:24px;
+                            color:#29205c;
+                        "
+                    >
+                        We&rsquo;re sorry, but your order
+                        <strong>' . $e($orderNumber) . '</strong>
+                        has been cancelled.<br>
+                        If you have any questions, feel free to contact our support team.
+                    </p>
+
+
+                    <!-- ORDER META -->
+
+                    <table
+                        width="100%"
+                        cellpadding="0"
+                        cellspacing="0"
+                        border="0"
+                        style="
+                            background:#fff1f5;
+                            border-radius:8px;
+                            margin-bottom:20px;
+                        "
+                    >
+                        <tr>
+
+                            <!-- ORDER NUMBER -->
+
+                            <td
+                                width="33.33%"
+                                align="center"
+                                valign="middle"
+                                style="
+                                    padding:13px 8px;
+                                    border-right:1px solid #e5c9d6;
+                                "
+                            >
+                                <div
+                                    style="
+                                        font-family:Arial,Helvetica,sans-serif;
+                                        font-size:13px;
+                                        color:#29205c;
+                                        margin-bottom:5px;
+                                    "
+                                >
+                                    Order Number
+                                </div>
+
+                                <div
+                                    style="
+                                        font-family:Arial,Helvetica,sans-serif;
+                                        font-size:20px;
+                                        font-weight:700;
+                                        color:#17134d;
+                                    "
+                                >
+                                    ' . $e($orderNumber) . '
+                                </div>
+                            </td>
+
+
+                            <!-- ORDER DATE -->
+
+                            <td
+                                width="33.33%"
+                                align="center"
+                                valign="middle"
+                                style="
+                                    padding:13px 8px;
+                                    border-right:1px solid #e5c9d6;
+                                "
+                            >
+                                <div
+                                    style="
+                                        font-family:Arial,Helvetica,sans-serif;
+                                        font-size:13px;
+                                        color:#29205c;
+                                        margin-bottom:5px;
+                                    "
+                                >
+                                    Order Date
+                                </div>
+
+                                <div
+                                    style="
+                                        font-family:Arial,Helvetica,sans-serif;
+                                        font-size:15px;
+                                        color:#17134d;
+                                    "
+                                >
+                                    ' . $e($orderDate) . '
+                                </div>
+                            </td>
+
+
+                            <!-- STATUS -->
+
+                            <td
+                                width="33.33%"
+                                align="center"
+                                valign="middle"
+                                style="
+                                    padding:13px 8px;
+                                "
+                            >
+                                <div
+                                    style="
+                                        font-family:Arial,Helvetica,sans-serif;
+                                        font-size:13px;
+                                        color:#29205c;
+                                        margin-bottom:5px;
+                                    "
+                                >
+                                    Order Status
+                                </div>
+
+                                <span
+                                    style="
+                                        display:inline-block;
+                                        background:#ffcbd3;
+                                        color:#c62e46;
+                                        border-radius:20px;
+                                        padding:5px 14px;
+                                        font-family:Arial,Helvetica,sans-serif;
+                                        font-size:14px;
+                                        font-weight:700;
+                                    "
+                                >
+                                    ✕&nbsp; Cancelled
+                                </span>
+                            </td>
+
+                        </tr>
+                    </table>
+
+
+                    <!-- ADDRESSES -->
+
+                    <table
+                        width="100%"
+                        cellpadding="0"
+                        cellspacing="0"
+                        border="0"
+                        style="margin-bottom:15px;"
+                    >
+                        <tr>
+
+                            <!-- BILLING -->
+
+                            <td
+                                width="50%"
+                                valign="top"
+                                style="padding-right:7px;"
+                            >
+
+                                <table
+                                    width="100%"
+                                    cellpadding="0"
+                                    cellspacing="0"
+                                    border="0"
+                                    style="
+                                        border:1px solid #e2d5f2;
+                                        border-radius:7px;
+                                    "
+                                >
+
+                                    <tr>
+                                        <td
+                                            style="
+                                                background:#eee1ff;
+                                                padding:9px 14px;
+                                                font-family:Arial,Helvetica,sans-serif;
+                                                font-size:14px;
+                                                font-weight:700;
+                                                color:#20154d;
+                                            "
+                                        >
+                                            Billing Address
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td
+                                            style="
+                                                padding:10px 14px;
+                                                font-family:Arial,Helvetica,sans-serif;
+                                                font-size:14px;
+                                                line-height:20px;
+                                                color:#29205c;
+                                            "
+                                        >
+                                            ' . $billingHtml . '
+                                        </td>
+                                    </tr>
+
+                                </table>
+
+                            </td>
+
+
+                            <!-- SHIPPING -->
+
+                            <td
+                                width="50%"
+                                valign="top"
+                                style="padding-left:7px;"
+                            >
+
+                                <table
+                                    width="100%"
+                                    cellpadding="0"
+                                    cellspacing="0"
+                                    border="0"
+                                    style="
+                                        border:1px solid #e2d5f2;
+                                        border-radius:7px;
+                                    "
+                                >
+
+                                    <tr>
+                                        <td
+                                            style="
+                                                background:#eee1ff;
+                                                padding:9px 14px;
+                                                font-family:Arial,Helvetica,sans-serif;
+                                                font-size:14px;
+                                                font-weight:700;
+                                                color:#20154d;
+                                            "
+                                        >
+                                            Shipping Address
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td
+                                            style="
+                                                padding:10px 14px;
+                                                font-family:Arial,Helvetica,sans-serif;
+                                                font-size:14px;
+                                                line-height:20px;
+                                                color:#29205c;
+                                            "
+                                        >
+                                            ' . $shippingHtml . '
+                                        </td>
+                                    </tr>
+
+                                </table>
+
+                            </td>
+
+                        </tr>
+                    </table>
+
+
+                    <!-- PRODUCTS -->
+
+                    <table
+                        width="100%"
+                        cellpadding="0"
+                        cellspacing="0"
+                        border="0"
+                        style="margin-bottom:15px;"
+                    >
+
+                        <tr>
+
+                            <td
+                                width="7%"
+                                align="center"
+                                style="
+                                    background:#eee1ff;
+                                    border:1px solid #e2d5f2;
+                                    padding:9px 5px;
+                                    font-family:Arial,Helvetica,sans-serif;
+                                    font-size:13px;
+                                    font-weight:700;
+                                    color:#20154d;
+                                "
+                            >
+                                #
+                            </td>
+
+                            <td
+                                width="53%"
+                                align="center"
+                                style="
+                                    background:#eee1ff;
+                                    border:1px solid #e2d5f2;
+                                    padding:9px 5px;
+                                    font-family:Arial,Helvetica,sans-serif;
+                                    font-size:13px;
+                                    font-weight:700;
+                                    color:#20154d;
+                                "
+                            >
+                                Item
+                            </td>
+
+                            <td
+                                width="14%"
+                                align="center"
+                                style="
+                                    background:#eee1ff;
+                                    border:1px solid #e2d5f2;
+                                    padding:9px 5px;
+                                    font-family:Arial,Helvetica,sans-serif;
+                                    font-size:13px;
+                                    font-weight:700;
+                                    color:#20154d;
+                                "
+                            >
+                                Price
+                            </td>
+
+                            <td
+                                width="8%"
+                                align="center"
+                                style="
+                                    background:#eee1ff;
+                                    border:1px solid #e2d5f2;
+                                    padding:9px 5px;
+                                    font-family:Arial,Helvetica,sans-serif;
+                                    font-size:13px;
+                                    font-weight:700;
+                                    color:#20154d;
+                                "
+                            >
+                                Qty
+                            </td>
+
+                            <td
+                                width="18%"
+                                align="center"
+                                style="
+                                    background:#eee1ff;
+                                    border:1px solid #e2d5f2;
+                                    padding:9px 5px;
+                                    font-family:Arial,Helvetica,sans-serif;
+                                    font-size:13px;
+                                    font-weight:700;
+                                    color:#20154d;
+                                "
+                            >
+                                Total
+                            </td>
+
+                        </tr>
+
+                        ' . $productRows . '
+
+                    </table>
+
+
+                    <!-- SUMMARY + REFUND -->
+
+                    <table
+                        width="100%"
+                        cellpadding="0"
+                        cellspacing="0"
+                        border="0"
+                    >
+                        <tr>
+
+                            <!-- ORDER SUMMARY -->
+
+                            <td
+                                width="50%"
+                                valign="top"
+                                style="padding-right:7px;"
+                            >
+
+                                <table
+                                    width="100%"
+                                    cellpadding="0"
+                                    cellspacing="0"
+                                    border="0"
+                                    style="
+                                        border:1px solid #e2d5f2;
+                                        border-radius:7px;
+                                    "
+                                >
+
+                                    <tr>
+                                        <td
+                                            colspan="2"
+                                            style="
+                                                background:#eee1ff;
+                                                padding:9px 14px;
+                                                font-family:Arial,Helvetica,sans-serif;
+                                                font-size:15px;
+                                                font-weight:700;
+                                                color:#20154d;
+                                            "
+                                        >
+                                            Order Summary
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td
+                                            colspan="2"
+                                            style="
+                                                padding:8px 14px 10px;
+                                            "
+                                        >
+
+                                            <table
+                                                width="100%"
+                                                cellpadding="0"
+                                                cellspacing="0"
+                                                border="0"
+                                            >
+                                                ' . $summaryRows . '
+                                            </table>
+
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td
+                                            colspan="2"
+                                            style="
+                                                background:#eee1ff;
+                                                padding:10px 14px;
+                                                border-top:1px solid #e2d5f2;
+                                            "
+                                        >
+
+                                            <table
+                                                width="100%"
+                                                cellpadding="0"
+                                                cellspacing="0"
+                                                border="0"
+                                            >
+                                                <tr>
+
+                                                    <td
+                                                        style="
+                                                            font-family:Arial,Helvetica,sans-serif;
+                                                            font-size:17px;
+                                                            font-weight:700;
+                                                            color:#20154d;
+                                                        "
+                                                    >
+                                                        Total Amount
+                                                    </td>
+
+                                                    <td
+                                                        align="right"
+                                                        style="
+                                                            font-family:Arial,Helvetica,sans-serif;
+                                                            font-size:17px;
+                                                            font-weight:700;
+                                                            color:#20154d;
+                                                        "
+                                                    >
+                                                        ₹' .
+                                                        number_format(
+                                                            $grandTotal,
+                                                            0
+                                                        ) .
+                                                    '</td>
+
+                                                </tr>
+                                            </table>
+
+                                        </td>
+                                    </tr>
+
+                                </table>
+
+                            </td>
+
+
+                            <!-- REFUND INFORMATION -->
+
+                            <td
+                                width="50%"
+                                valign="top"
+                                style="padding-left:7px;"
+                            >
+
+                                <table
+                                    width="100%"
+                                    cellpadding="0"
+                                    cellspacing="0"
+                                    border="0"
+                                    style="
+                                        border:1px solid #ddd2f4;
+                                        border-radius:7px;
+                                        background:#ffffff;
+                                    "
+                                >
+
+                                    <tr>
+
+                                        <td
+                                            valign="top"
+                                            width="48"
+                                            style="padding:13px 5px 10px 14px;"
+                                        >
+                                            <div
+                                                style="
+                                                    width:40px;
+                                                    height:40px;
+                                                    background:#f1e4ff;
+                                                    border-radius:50%;
+                                                    text-align:center;
+                                                    line-height:40px;
+                                                    font-family:Arial,Helvetica,sans-serif;
+                                                    font-size:22px;
+                                                    color:#9855dc;
+                                                "
+                                            >
+                                                ₹
+                                            </div>
+                                        </td>
+
+                                        <td
+                                            valign="top"
+                                            style="
+                                                padding:13px 14px 14px 4px;
+                                            "
+                                        >
+
+                                            <div
+                                                style="
+                                                    font-family:Arial,Helvetica,sans-serif;
+                                                    font-size:16px;
+                                                    font-weight:700;
+                                                    color:#29205c;
+                                                    margin-bottom:7px;
+                                                "
+                                            >
+                                                Refund Information
+                                            </div>
+
+                                            <div
+                                                style="
+                                                    font-family:Arial,Helvetica,sans-serif;
+                                                    font-size:13px;
+                                                    line-height:19px;
+                                                    color:#29205c;
+                                                "
+                                            >
+                                                Your refund will be added to your
+                                                store credit. This store credit does
+                                                not expire. You can use this amount
+                                                to place another order on this website.
+                                            </div>
+
+                                        </td>
+
+                                    </tr>
+
+                                </table>
+
+
+                                <!-- NEED HELP -->
+
+                                <table
+                                    width="100%"
+                                    cellpadding="0"
+                                    cellspacing="0"
+                                    border="0"
+                                    style="
+                                        margin-top:12px;
+                                        border:1px solid #ddd2f4;
+                                        border-radius:7px;
+                                        background:#ffffff;
+                                    "
+                                >
+
+                                    <tr>
+
+                                        <td
+                                            valign="top"
+                                            width="48"
+                                            style="padding:13px 5px 10px 14px;"
+                                        >
+                                            <div
+                                                style="
+                                                    width:40px;
+                                                    height:40px;
+                                                    background:#f1e4ff;
+                                                    border-radius:50%;
+                                                    text-align:center;
+                                                    line-height:40px;
+                                                    font-family:Arial,Helvetica,sans-serif;
+                                                    font-size:23px;
+                                                    font-weight:700;
+                                                    color:#9855dc;
+                                                "
+                                            >
+                                                ?
+                                            </div>
+                                        </td>
+
+                                        <td
+                                            valign="top"
+                                            style="
+                                                padding:13px 14px 14px 4px;
+                                            "
+                                        >
+
+                                            <div
+                                                style="
+                                                    font-family:Arial,Helvetica,sans-serif;
+                                                    font-size:16px;
+                                                    font-weight:700;
+                                                    color:#29205c;
+                                                    margin-bottom:7px;
+                                                "
+                                            >
+                                                Need Help?
+                                            </div>
+
+                                            <div
+                                                style="
+                                                    font-family:Arial,Helvetica,sans-serif;
+                                                    font-size:13px;
+                                                    line-height:19px;
+                                                    color:#29205c;
+                                                    margin-bottom:12px;
+                                                "
+                                            >
+                                                If you have any questions regarding
+                                                this cancellation, please contact
+                                                our support team.
+                                            </div>
+
+                                            <a
+                                                href="' . base_url() . '"
+                                                target="_blank"
+                                                style="
+                                                    display:inline-block;
+                                                    background:#9855dc;
+                                                    color:#ffffff;
+                                                    padding:9px 18px;
+                                                    border-radius:6px;
+                                                    font-family:Arial,Helvetica,sans-serif;
+                                                    font-size:13px;
+                                                    font-weight:700;
+                                                    text-decoration:none;
+                                                "
+                                            >
+                                                Contact Us
+                                            </a>
+
+                                        </td>
+
+                                    </tr>
+
+                                </table>
+
+                            </td>
+
+                        </tr>
+                    </table>
+
+                </td>
+            </tr>
+
+        ';
+
+        //complete email
+        $htmlContent = $this->emailHeader() . $body . $this->emailFooter();
+
+        //brevo
+        $data = [
+            'sender' => [
+                'name'  => 'K-Pop Merch',
+                'email' => 'support@kpopmerch.in'
+            ],
+
+            'to' => [
+                [
+                    'email' => $customerEmail
+                ]
+            ],
+            'cc' => [
+                [
+                    'email' => 'orders@kpopmerch.in'
+                ]
+            ],
+
+            'subject' =>
+                'Your Order #' .
+                $orderId .
+                ' Has Been Cancelled - K-Pop Merch',
+
+            'htmlContent' => $htmlContent
+        ];
+
+
+        $ch = curl_init();
+        curl_setopt( $ch,CURLOPT_URL, 'https://api.brevo.com/v3/smtp/email' );
+        curl_setopt(  $ch,  CURLOPT_RETURNTRANSFER,  true );
+        curl_setopt( $ch, CURLOPT_POST,  true  );
+        curl_setopt($ch,  CURLOPT_POSTFIELDS, json_encode($data) );
+        curl_setopt( $ch,  CURLOPT_HTTPHEADER,
+            [
+                'accept: application/json',
+                'api-key: ' . $this->apiKey,
+                'content-type: application/json'
+            ]  );
+
+        $result = curl_exec($ch);
+        $httpCode = curl_getinfo(  $ch, CURLINFO_HTTP_CODE   );
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        if ($httpCode == 201) {
+            return [
+                'success'  => true,
+                'response' => $result
+            ];
+        }
+
+        return [
+            'success'    => false,
+            'response'   => $result,
+            'curl_error' => $curlError
+        ];
+    }
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     //email header

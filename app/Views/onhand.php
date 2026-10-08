@@ -196,7 +196,7 @@
                         On Hand
                     </div>
                     <a
-                        href="/product/${product.id}"
+                        href="<?= base_url('product/'); ?>${product.id}"
                         class="product-image"
                     >
                         <img
@@ -206,7 +206,7 @@
                     </a>
                     <div class="product-content">
                         <a
-                            href="/product/${product.id}"
+                            href="<?= base_url('product/'); ?>${product.id}"
                             class="product-title"
                         >
                             ${product.product_name}

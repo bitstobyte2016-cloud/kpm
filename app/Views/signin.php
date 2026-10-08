@@ -1,3 +1,11 @@
+<?php
+    $redirectUrl = $_GET['redirect'] ?? '';
+    if(empty($redirectUrl))
+    {
+        $redirectUrl = base_url();
+    }
+?>
+
 <?= $this->extend('layouts/main'); ?>
 
 <?= $this->section('content'); ?>
@@ -136,19 +144,16 @@
             "<?= base_url('login'); ?>",
             {
                 email: email,
-                password: password
+                password: password,
+                redirect: "<?= esc($redirectUrl); ?>"
             },
             function(response){
 
                 $("#siteLoader").fadeOut(200);
 
                 if(response.status){
-                    
-                    console.log(response);
 
-                    setTimeout(function(){
-                        window.location.href = "<?= base_url(); ?>";
-                    },500);
+                    setTimeout(function(){ window.location.href = response.redirect; },500);
 
                 } else {
 

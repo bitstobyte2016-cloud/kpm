@@ -145,6 +145,7 @@ class HeaderCont extends BaseController
     {
         $email = strtolower(trim($this->request->getPost('email')));
         $password = $this->request->getPost('password');
+        $redirect = trim($this->request->getPost('redirect'));
 
         if($email == '' || $password == '')
         {
@@ -179,11 +180,26 @@ class HeaderCont extends BaseController
                 'message' => 'Your account is currently inactive. Please contact us via email to resolve this.'
             ]);
         }
+        
+        if($redirect == '')
+        {
+            $redirect = base_url();
+        }
+        else
+        {
+            $baseUrl = base_url();
+
+            if(strpos($redirect, $baseUrl) !== 0)
+            {
+                $redirect = base_url();
+            }
+        }
 
         // Store customer information in session
         session()->set([
             'customer_id'   => $customer['id'],
-            'customer_name' => $customer['first_name']
+            'customer_name' => $customer['first_name'],
+            'redirect' => $redirect
         ]);
 
         return $this->response->setJSON([

@@ -248,7 +248,7 @@
                         <i class="fa-regular fa-heart"></i>
                     </button>
                     <a
-                        href="<?= base_url('product/'); ?>${product.url}"
+                        href="<?= base_url('product/'); ?>${product.id}"
                         class="product-image"
                     >
                         <img
@@ -259,7 +259,7 @@
 
                     <div class="product-content">
                         <a
-                            href="<?= base_url('product/'); ?>${product.url}"
+                            href="<?= base_url('product/'); ?>${product.id}"
                             class="product-title"
                         >
                             ${product.product_name}

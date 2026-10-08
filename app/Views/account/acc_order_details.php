@@ -478,11 +478,8 @@
             </div>
 
             <!-- order notes -->
-
                <?php if (!empty($order['order_comment'])): ?>
-
                    <div class="order-notes-section">
-
                        <div class="order-notes-header">
                            <i class="fa-regular fa-note-sticky"></i>
                            <strong>Order Notes</strong>
@@ -491,20 +488,99 @@
                        <div class="order-notes-content">
                            <?= nl2br(htmlspecialchars($order['order_comment'])); ?>
                        </div>
-
                    </div>
-
                <?php endif; ?>
+            
+            <!-- order chat -->
+            <div class="order-chat-box">
+                <div
+                    class="order-chat-header"
+                    onclick="toggleOrderChat()"  >
+
+                    <div class="order-chat-header-content">
+                        <div class="order-info-title">
+                            <i class="fa-solid fa-comments order-chat-title-icon"></i>
+                            Order Chat
+                        </div>
+                    </div>
+
+                    <div
+                        class="order-chat-arrow"
+                        id="order-chat-arrow" >
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+
+                </div>
+
+                <div
+                    class="order-chat-content"
+                    id="order-chat-content">
+                    <?php if (!empty($order_messages)): ?>
+                        <div
+                            class="order-chat-messages"
+                            id="orderChatMessages"  >
+                            <?php foreach ($order_messages as $message): ?>
+                                <?php
+                                    $isSupport = ((int)$message['sender_id'] === 0);
+                                ?>
+                                <div class="order-chat-message <?= $isSupport ? 'support-message' : 'user-message'; ?>">
+                                    <div class="order-chat-sender">
+                                        <?= $isSupport ? 'Support:' : 'You:'; ?>
+                                    </div>
+                                    
+                                    <div class="order-chat-message-bubble">
+                                        <div class="order-chat-message-text">
+                                            <?= nl2br(htmlspecialchars($message['order_message'])); ?>
+                                        </div>
+
+                                        <div class="order-chat-message-date">
+                                            <?= date('d M Y', strtotime($message['message_date'])); ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php else: ?>
+                        <div
+                            class="order-chat-messages"
+                            id="orderChatMessages"
+                        >
+                            <div class="order-chat-empty">
+                                No messages yet.
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <!-- New Message -->
+                    <div class="order-chat-compose">
+                        <textarea
+                            id="orderChatMessage"
+                            class="order-chat-input"
+                            placeholder="Type your message..."
+                            maxlength="2000"
+                            rows="3"
+                        ></textarea>
+
+                        <button
+                            type="button"
+                            class="order-chat-send-btn"
+                            onclick="sendOrderMessage(<?= (int)$order['id']; ?>)" >
+                            <i class="fa-solid fa-paper-plane"></i>
+                            Send
+                        </button>
+                    </div>
+
+                </div>
+                
+            </div>
 
             <!-- cancel order -->
-
             <?php $statusLower = strtolower(trim($order['order_status'])); ?>
-
             <?php if ( !in_array( $statusLower, ['cancelled', 'delivered', 'returned','fulfilled','shipping soon','shipped'] )  ) { ?>
-
                 <button
                     type="button"
-                    class="order-cancel-btn"  >
+                    class="order-cancel-btn"
+                    onclick="cancelOrder(<?= (int)$order['id']; ?>)">
                     <i class="fa fa-trash"></i>
                     Cancel Order
                 </button>
@@ -525,4 +601,13 @@
         'shipping_address' => $shippingAddress,
         'products' => $products
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+        
+
+    const cancelOrderEmailData = <?= json_encode([
+        'order'            => $order,
+        'billing_address' => $billingAddress,
+        'shipping_address'=> $shippingAddress,
+        'products'        => $products
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+
 </script>

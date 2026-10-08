@@ -205,7 +205,7 @@
                         ${labelText}
                     </div>
                     <a
-                        href="/product/${product.id}"
+                        href="<?= base_url('product/'); ?>${product.id}"
                         class="product-image" >
                         <img
                             src="${product.main_image}"
@@ -214,7 +214,7 @@
 
                     <div class="product-content">
                         <a
-                            href="/product/${product.id}"
+                            href="<?= base_url('product/'); ?>${product.id}"
                             class="product-title" >
                             ${product.product_name}
                         </a>

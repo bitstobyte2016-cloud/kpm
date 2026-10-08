@@ -284,7 +284,7 @@
 
                         <?php foreach($featured_items as $row){ ?>
 
-                        <a href="#" class="featured-card">
+                        <a href="/product/<?= $row['id']; ?>" class="featured-card">
 
                             <div class="featured-img">
                                 <img src="<?= $row['main_image'] ?>">
