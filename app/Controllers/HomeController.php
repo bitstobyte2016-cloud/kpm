@@ -82,23 +82,15 @@ class HomeController extends BaseController
     //get featured items for home 
     public function getFeaturedItems()
     {
-        $sql="SELECT 
-        P.id,
-        P.main_image,
+        $sql="SELECT   P.id,  P.main_image,
         PD.product_name,
-        PP.price,
-        PP.discounted_price
-
+        PP.price, PP.discounted_price,
+        PS.product_qty
         FROM Products P
-
-        LEFT JOIN Product_description PD
-        ON PD.product_id=P.id
-
-        LEFT JOIN Product_price PP
-        ON PP.product_id=P.id
-
+        LEFT JOIN Product_description PD ON PD.product_id=P.id
+        LEFT JOIN Product_price PP ON PP.product_id=P.id
+        LEFT JOIN Products_stock PS ON PS.product_id = P.id
         WHERE P.is_featured='Y'
-
         LIMIT 6";
 
         return $this->a_access->custom_query($sql);
@@ -473,5 +465,265 @@ class HomeController extends BaseController
             'message' => 'Your review has been submitted successfully.'
         ]);
     }
+    
+    // Get logged-in customer's wishlists
+    public function getCustomerWishlists()
+    {
+        $customerId = session()->get('customer_id');
+
+        if(!$customerId)
+        {
+            return $this->response->setJSON([
+                'status'    => false,
+                'message'   => 'Please sign in again.',
+                'wishlists' => []
+            ]);
+        }
+
+        $sql = "SELECT id, wishlist_name
+                FROM Wishlists_master
+                WHERE cust_id = ".(int)$customerId."
+                  AND status = 'Y'
+                ORDER BY id DESC";
+
+        $wishlists = $this->a_access->custom_query($sql);
+
+        return $this->response->setJSON([
+            'status'    => true,
+            'wishlists' => $wishlists
+        ]);
+    }
+    
+    // Add product to an existing wishlist
+    public function addProductToWishlist()
+    {
+        $customerId = session()->get('customer_id');
+
+        if(!$customerId)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Please sign in again.'
+            ]);
+        }
+
+        $wishlistId = trim($this->request->getPost('wishlist_id'));
+        $productId  = trim($this->request->getPost('product_id'));
+
+        if($wishlistId == '' || $productId == '')
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Invalid wishlist or product.'
+            ]);
+        }
+
+        $safeWishlistId = addslashes($wishlistId);
+        $safeProductId  = addslashes($productId);
+
+        // Confirm the wishlist belongs to this customer
+        $wishlist = $this->a_access->custom_query(
+            "SELECT id
+             FROM Wishlists_master
+             WHERE id = '".$safeWishlistId."'
+               AND cust_id = ".(int)$customerId."
+               AND status = 'Y'
+             LIMIT 1"
+        );
+
+        if(empty($wishlist))
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Wishlist not found.'
+            ]);
+        }
+
+        // Confirm the product exists and is active
+        $product = $this->a_access->custom_query(
+            "SELECT id
+             FROM Products
+             WHERE id = '".$safeProductId."'
+               AND status = 'Y'
+             LIMIT 1"
+        );
+
+        if(empty($product))
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Product not found.'
+            ]);
+        }
+
+        // Prevent duplicate entries
+        $existingItem = $this->a_access->custom_query(
+            "SELECT id
+             FROM Wishlist_details
+             WHERE wishlist_id = '".$safeWishlistId."'
+               AND product_id = '".$safeProductId."'
+             LIMIT 1"
+        );
+
+        if(!empty($existingItem))
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'This product is already in that wishlist.'
+            ]);
+        }
+
+        $inserted = $this->a_access->insert_table(
+            "Wishlist_details",
+            [
+                'wishlist_id'     => $wishlistId,
+                'product_id'      => $productId,
+                'acquired_status' => 'N'
+            ]
+        );
+
+        if(!$inserted)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Unable to add this product. Please try again.'
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status'  => true,
+            'message' => 'Product added to your wishlist successfully.'
+        ]);
+    }
+     
+    // Subscribe to back-in-stock notifications
+    public function subscribeProductNotification()
+    {
+        $customerId = session()->get('customer_id');
+
+        if(!$customerId)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Please sign in to receive notifications.'
+            ]);
+        }
+
+        $productId = trim($this->request->getPost('product_id') ?? '');
+
+        if($productId == '')
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Invalid product.'
+            ]);
+        }
+
+        $safeProductId = addslashes($productId);
+
+        // Get the customer's registered email
+        $customer = $this->a_access->custom_query(
+            "SELECT email
+             FROM Customer
+             WHERE id = ".(int)$customerId."
+             LIMIT 1"
+        );
+
+        if(empty($customer) || trim($customer[0]['email']) == '')
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Unable to find your registered email address.'
+            ]);
+        }
+
+        $email = strtolower(trim($customer[0]['email']));
+        $safeEmail = addslashes($email);
+
+        // Confirm that the product exists and is active
+        $product = $this->a_access->custom_query(
+            "SELECT id
+             FROM Products
+             WHERE id = '".$safeProductId."'
+               AND status = 'Y'
+             LIMIT 1"
+        );
+
+        if(empty($product))
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Product not found.'
+            ]);
+        }
+
+        // Find an existing subscription
+        $existing = $this->a_access->custom_query(
+            "SELECT id, status
+             FROM Notify_subscribers
+             WHERE product_id = '".$safeProductId."'
+               AND cust_email = '".$safeEmail."'
+             LIMIT 1"
+        );
+
+        if(!empty($existing))
+        {
+            if($existing[0]['status'] == 'opt_in')
+            {
+                return $this->response->setJSON([
+                    'status'  => true,
+                    'message' => "You're already subscribed to notifications for this product."
+                ]);
+            }
+
+            // Reactivate a previous subscription
+            $updated = $this->a_access->update_table(
+                'Notify_subscribers',
+                ['status' => 'opt_in'],
+                ['id' => $existing[0]['id']]
+            );
+
+            if(!$updated)
+            {
+                return $this->response->setJSON([
+                    'status'  => false,
+                    'message' => 'Unable to reactivate your notification. Please try again.'
+                ]);
+            }
+
+            return $this->response->setJSON([
+                'status'  => true,
+                'message' => "You'll receive an email when this product is back in stock."
+            ]);
+        }
+
+        // Create a new subscription
+        $inserted = $this->a_access->insert_table(
+            'Notify_subscribers',
+            [
+                'product_id' => $productId,
+                'cust_email' => $email,
+                'status'     => 'opt_in'
+            ]
+        );
+
+        if(!$inserted)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Unable to set up your notification. Please try again.'
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status'  => true,
+            'message' => "You'll receive an email when this product is back in stock."
+        ]);
+    }
+
+    
+    
+    
+    
     
 }

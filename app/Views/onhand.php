@@ -188,7 +188,7 @@
                     </div>
                 `;
             }
-
+                
             // product card
             grid.innerHTML += `
                 <div class="product-card">
@@ -207,17 +207,23 @@
                     <div class="product-content">
                         <a
                             href="<?= base_url('product/'); ?>${product.id}"
-                            class="product-title"
-                        >
+                            class="product-title" >
                             ${product.product_name}
                         </a>
                         ${priceHTML}
                         <div class="product-actions">
-                            <button class="add-cart-btn">
+                            <button class="add-cart-btn"
+                                type="button"
+                                onclick="addProductToCart('${product.id}')">
                                 <i class="fa-solid fa-cart-shopping"></i>
                                 Add to Cart
                             </button>
-                            <button class="wishlist-btn">
+                                            
+                            <button
+                                class="wishlist-btn"
+                                type="button"
+                                onclick="addProductToWishlist('${product.id}')"
+                            >
                                 <i class="fa-regular fa-heart"></i>
                             </button>
                         </div>

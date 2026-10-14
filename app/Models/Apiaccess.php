@@ -108,10 +108,15 @@ class Apiaccess extends Model
     {
         return $this->db->query($query);
     }
+    
+    public function custom_query_params($query, $params = [])
+    {
+        return $this->db->query($query, $params)->getResultArray();
+    }
 
     // custom query delete
-    public function custom_query_delete($query)
+    public function custom_query_delete($query, $params = [])
     {
-        return $this->db->query($query);
+        return $this->db->query($query, $params);
     }
 }

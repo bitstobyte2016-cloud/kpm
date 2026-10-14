@@ -190,7 +190,7 @@
                 <?php if ($isInStock): ?>
 
                     <span class="product-detail-max">
-                        Max 5 per customer
+                        Max 25 per customer
                     </span>
 
                 <?php endif; ?>
@@ -204,7 +204,7 @@
                 <button
                     type="button"
                     class="product-detail-cart-btn"
-                    onclick="addProductToCart('<?= esc($product['id']); ?>')"
+                    onclick="addProductToCart('<?= esc($product['id']); ?>', productQuantity)"
                 >
                     <i class="fa-solid fa-cart-shopping"></i>
                     ADD TO CART

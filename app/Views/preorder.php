@@ -197,7 +197,7 @@
                         ₹${Number(product.price).toLocaleString()}
                     </div>`;
             }
-
+                
             // PRODUCT CARD
             grid.innerHTML += `
                 <div class="product-card">
@@ -205,7 +205,7 @@
                         ${labelText}
                     </div>
                     <a
-                        href="<?= base_url('product/'); ?>${product.id}"
+                        href="<?= base_url('product/'); ?>${product.product_id}"
                         class="product-image" >
                         <img
                             src="${product.main_image}"
@@ -214,19 +214,44 @@
 
                     <div class="product-content">
                         <a
-                            href="<?= base_url('product/'); ?>${product.id}"
+                            href="<?= base_url('product/'); ?>${product.product_id}"
                             class="product-title" >
                             ${product.product_name}
                         </a>
 
                         ${priceHTML}
-
                         <div class="product-actions">
-                            <button class="add-cart-btn">
-                                <i class="fa-solid fa-cart-shopping"></i>
-                                Add to Cart
-                            </button>
-                            <button class="wishlist-btn">
+                            ${
+                                parseInt(product.product_qty) <= 0
+                                ?
+                                `
+                                <button
+                                    class="add-cart-btn"
+                                    type="button"
+                                    onclick="notifyProduct('${product.product_id}')"
+                                >
+                                    <i class="fa-regular fa-bell"></i>
+                                    Notify Me
+                                </button>
+                                `
+                                :
+                                `
+                                <button
+                                    class="add-cart-btn"
+                                    type="button"
+                                    onclick="addProductToCart('${product.product_id}')"
+                                >
+                                    <i class="fa-solid fa-cart-shopping"></i>
+                                    Add to Cart
+                                </button>
+                                `
+                            }
+
+                            <button
+                                class="wishlist-btn"
+                                type="button"
+                                onclick="addProductToWishlist('${product.product_id}')"
+                            >
                                 <i class="fa-regular fa-heart"></i>
                             </button>
                         </div>
@@ -377,14 +402,8 @@
         });
     }
 
-
-
     // sort listener 
-    document
-        .getElementById("sortProducts")
-        .addEventListener( "change", applySorting  );
-
-
+    document .getElementById("sortProducts")  .addEventListener( "change", applySorting  );
 
     // category filter
     $(document).on(
@@ -416,7 +435,6 @@
             applySorting();
         }
     );
-
 
 
     // initial page load

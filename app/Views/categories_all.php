@@ -187,13 +187,39 @@
                         >
                             ${product.product_name}
                         </a>
-                        ${priceHTML}
+                        ${priceHTML}                      
                         <div class="product-actions">
-                            <button class="add-cart-btn">
-                                <i class="fa-solid fa-cart-shopping"></i>
-                                Add to Cart
-                            </button>
-                            <button class="wishlist-btn">
+                            ${
+                                parseInt(product.product_qty) <= 0
+                                ?
+                                `
+                                <button
+                                    class="add-cart-btn"
+                                    type="button"
+                                    onclick="notifyProduct('${product.id}')"
+                                >
+                                    <i class="fa-regular fa-bell"></i>
+                                    Notify Me
+                                </button>
+                                `
+                                :
+                                `
+                                <button
+                                    class="add-cart-btn"
+                                    type="button"
+                                        onclick="addProductToCart('${product.id}')"
+                                >
+                                    <i class="fa-solid fa-cart-shopping"></i>
+                                    Add to Cart
+                                </button>
+                                `
+                            }
+
+                            <button
+                                class="wishlist-btn"
+                                type="button"
+                                onclick="addProductToWishlist('${product.id}')"
+                            >
                                 <i class="fa-regular fa-heart"></i>
                             </button>
                         </div>

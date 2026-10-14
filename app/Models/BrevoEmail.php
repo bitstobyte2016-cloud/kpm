@@ -2065,8 +2065,268 @@ class BrevoEmail extends Model
         ];
     }
     
-    
-    
+    // Send back-in-stock notification email
+    public function sendBackInStockEmail($email, $product)
+    {
+        $e = function ($value) {
+            return htmlspecialchars(
+                (string) $value,
+                ENT_QUOTES,
+                'UTF-8'
+            );
+        };
+
+        $productId = trim((string) ($product['id'] ?? ''));
+        $productName = trim((string) ($product['product_name'] ?? ''));
+        $productImage = trim((string) ($product['main_image'] ?? ''));
+        $price = (float) ($product['price'] ?? 0);
+
+        if (
+            !filter_var($email, FILTER_VALIDATE_EMAIL) ||
+            $productId === '' ||
+            $productName === '' ||
+            $productImage === ''
+        ) {
+            return [
+                'success' => false,
+                'response' => 'Invalid email or incomplete product details.'
+            ];
+        }
+
+        // Website product page, not the supplier URL
+        $productUrl = base_url(
+            'product/' . rawurlencode($productId)
+        );
+
+        $iconUrl = base_url('Images/email/ic_email6.png');
+        $headingUrl = base_url('Images/email/email6.png');
+
+        $body = '
+            <tr>
+                <td style="
+                    padding:30px 25px 15px;
+                    text-align:center;
+                    background:#ffffff;
+                ">
+                    <img
+                        src="' . $e($headingUrl) . '"
+                        alt="It\'s Back in Stock!"
+                        style="
+                            display:block;
+                            width:100%;
+                            max-width:650px;
+                            height:auto;
+                            margin:0 auto 15px;
+                        "
+                    >
+
+                    <p style="
+                        margin:0 auto 25px;
+                        max-width:600px;
+                        font-family:Arial,Helvetica,sans-serif;
+                        font-size:16px;
+                        line-height:25px;
+                        color:#21145f;
+                    ">
+                        Good news! An item you were interested in is
+                        now back in stock. Don\'t miss your chance
+                        to grab it before it\'s gone again!
+                    </p>
+                </td>
+            </tr>
+
+            <tr>
+                <td style="
+                    padding:20px 25px 30px;
+                    background:#ffffff;
+                ">
+                    <table
+                        width="100%"
+                        cellpadding="0"
+                        cellspacing="0"
+                        border="0"
+                        style="
+                            background:#faf7ff;
+                            border-radius:12px;
+                        "
+                    >
+                        <tr>
+                            <td
+                                width="50%"
+                                valign="middle"
+                                align="center"
+                                style="padding:20px;"
+                            >
+                                <a
+                                    href="' . $e($productUrl) . '"
+                                    target="_blank"
+                                >
+                                    <img
+                                        src="' . $e($productImage) . '"
+                                        alt="' . $e($productName) . '"
+                                        style="
+                                            display:block;
+                                            width:100%;
+                                            max-width:300px;
+                                            max-height:330px;
+                                            height:auto;
+                                            margin:0 auto;
+                                            object-fit:contain;
+                                        "
+                                    >
+                                </a>
+                            </td>
+
+                            <td
+                                width="50%"
+                                valign="middle"
+                                style="
+                                    padding:20px 20px 20px 5px;
+                                    font-family:Arial,Helvetica,sans-serif;
+                                    color:#21145f;
+                                "
+                            >
+                                <div style="
+                                    display:inline-block;
+                                    margin-bottom:12px;
+                                    padding:8px 12px;
+                                    border-radius:20px;
+                                    background:#eee4ff;
+                                    color:#7540cf;
+                                    font-size:13px;
+                                    font-weight:700;
+                                ">
+                                    <img
+                                        src="' . $e($iconUrl) . '"
+                                        alt=""
+                                        width="20"
+                                        height="20"
+                                        style="
+                                            display:inline-block;
+                                            width:20px;
+                                            height:20px;
+                                            vertical-align:middle;
+                                            margin-right:5px;
+                                        "
+                                    >
+                                    IN STOCK
+                                </div>
+
+                                <h2 style="
+                                    margin:0 0 8px;
+                                    font-size:22px;
+                                    line-height:1.35;
+                                    color:#21145f;
+                                ">
+                                    ' . $e($productName) . '
+                                </h2>
+
+                                <p style="
+                                    margin:0 0 20px;
+                                    font-size:25px;
+                                    font-weight:700;
+                                    color:#8050df;
+                                ">
+                                    ₹' . number_format($price, 0) . '
+                                </p>
+
+                                <a
+                                    href="' . $e($productUrl) . '"
+                                    target="_blank"
+                                    style="
+                                        display:block;
+                                        padding:15px 10px;
+                                        border-radius:8px;
+                                        background:#8050df;
+                                        color:#ffffff;
+                                        text-align:center;
+                                        font-size:16px;
+                                        font-weight:700;
+                                        text-decoration:none;
+                                    "
+                                >
+                                    View Product
+                                </a>
+
+                                <p style="
+                                    margin:12px 0 0;
+                                    text-align:center;
+                                    font-size:12px;
+                                    line-height:18px;
+                                    color:#21145f;
+                                ">
+                                    Stock is limited. Order now before
+                                    it sells out again!
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        ';
+
+        $htmlContent =
+            $this->emailHeader() .
+            $body .
+            $this->emailFooter();
+
+        $data = [
+            'sender' => [
+                'name'  => 'K-Pop Merch',
+                'email' => 'support@kpopmerch.in'
+            ],
+            'to' => [
+                [
+                    'email' => $email
+                ]
+            ],
+            'subject' => 'It\'s Back in Stock! - ' . $productName,
+            'htmlContent' => $htmlContent
+        ];
+
+        $ch = curl_init();
+
+        curl_setopt(
+            $ch,
+            CURLOPT_URL,
+            'https://api.brevo.com/v3/smtp/email'
+        );
+
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'accept: application/json',
+            'api-key: ' . $this->apiKey,
+            'content-type: application/json'
+        ]);
+
+        // Avoid a cron process hanging indefinitely
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+
+        $result = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+
+        curl_close($ch);
+
+        if ($httpCode === 201) {
+            return [
+                'success' => true,
+                'response' => $result
+            ];
+        }
+
+        return [
+            'success' => false,
+            'http_code' => $httpCode,
+            'response' => $result,
+            'curl_error' => $curlError
+        ];
+    }
+
     
     
     

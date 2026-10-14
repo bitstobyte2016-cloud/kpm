@@ -21,6 +21,7 @@ $routes->get('/privacy', 'FooterCont::privacy');
 //header routes
 $routes->get('/search', 'HeaderCont::search');
 $routes->post('live-search', 'HeaderCont::liveSearch');
+
 $routes->get('/signin', 'HeaderCont::signin');
 $routes->post('login', 'HeaderCont::login');
 $routes->get('register','HeaderController::register');
@@ -30,7 +31,12 @@ $routes->post( '/verify', 'HeaderCont::verify');
 $routes->post('/verifyOtp','HeaderCont::verifyOtp');
 $routes->post('resendE','HeaderCont::resendEmailOtp');
 $routes->post('registerUser','HeaderCont::registerUser');
+
 $routes->get('/cart', 'HeaderCont::cart');
+$routes->post('addProductToCart', 'HeaderCont::addProductToCart');
+$routes->post('updateCartItem', 'HeaderCont::updateCartItem');
+$routes->post('removeCartItem', 'HeaderCont::removeCartItem');
+
 $routes->get('/categories/(:num)','HeaderCont::categoriesAll/$1');
 $routes->get('/bands_all', 'HeaderCont::bands_all');
 $routes->get('/preorder', 'HeaderCont::preorder');
@@ -47,6 +53,9 @@ $routes->post('forgotPassword', 'HomeController::forgotPassword');
 //home product routes
 $routes->get('product/(:segment)', 'HomeController::getProductDetails/$1');
 $routes->post('product/save-review', 'HomeController::saveProductReview');
+$routes->post('getCustomerWishlists', 'HomeController::getCustomerWishlists');
+$routes->post('addProductToWishlist', 'HomeController::addProductToWishlist');
+$routes->post('subscribeProductNotification', 'HomeController::subscribeProductNotification');
 
 
 //user account routes
@@ -82,3 +91,6 @@ $routes->post('createWishlist', 'UserController::createWishlist');
 $routes->post('deleteWishlist', 'UserController::deleteWishlist');
 $routes->post('deleteWishlistItem', 'UserController::deleteWishlistItem');
 $routes->post('markWishlistFulfilled', 'UserController::markWishlistFulfilled');
+
+//checkout routes
+$routes->post('calculateShipping', 'CheckoutController::calculateShipping');

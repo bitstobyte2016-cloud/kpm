@@ -241,12 +241,6 @@
                             ${labelText}
                         </div>
                         ` :  "" }
-                    <button
-                        class="wishlist-btn"
-                        type="button"
-                    >
-                        <i class="fa-regular fa-heart"></i>
-                    </button>
                     <a
                         href="<?= base_url('product/'); ?>${product.id}"
                         class="product-image"
@@ -266,12 +260,38 @@
                         </a>
                         ${priceHTML}
                         <div class="product-actions">
+                            ${
+                                parseInt(product.product_qty) <= 0
+                                ?
+                                `
+                                <button
+                                    class="add-cart-btn"
+                                    type="button"
+                                    onclick="notifyProduct('${product.id}')"
+                                >
+                                    <i class="fa-regular fa-bell"></i>
+                                    Notify Me
+                                </button>
+                                `
+                                :
+                                `
+                                <button
+                                    class="add-cart-btn"
+                                    type="button"
+                                        onclick="addProductToCart('${product.id}')"
+                                >
+                                    <i class="fa-solid fa-cart-shopping"></i>
+                                    Add to Cart
+                                </button>
+                                `
+                            }
+
                             <button
-                                class="add-cart-btn"
+                                class="wishlist-btn"
                                 type="button"
+                                onclick="addProductToWishlist('${product.id}')"
                             >
-                                <i class="fa-solid fa-cart-shopping"></i>
-                                Add to Cart
+                                <i class="fa-regular fa-heart"></i>
                             </button>
                         </div>
                     </div>

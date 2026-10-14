@@ -163,8 +163,31 @@
                                         </div>
 
                                         <div class="product-actions">
-                                            <button class="add-cart-btn" >
-                                                PRE-ORDER
+                                            <?php if((int)$product['product_qty'] <= 0): ?>
+
+                                                <button
+                                                    class="add-cart-btn"
+                                                    type="button"
+                                                    onclick="notifyProduct('<?= esc($product['id']); ?>')"
+                                                >
+                                                    <i class="fa-regular fa-bell"></i>
+                                                    NOTIFY ME
+                                                </button>
+
+                                            <?php else: ?>
+
+                                                <button class="add-cart-btn" type="button"
+                                                        onclick="addProductToCart('<?= esc($product['id']); ?>',1)">
+                                                    PRE-ORDER
+                                                </button>
+
+                                            <?php endif; ?>
+                                            <button
+                                                class="wishlist-btn"
+                                                type="button"
+                                                onclick="addProductToWishlist('<?= esc($product['id']); ?>')"
+                                            >
+                                                <i class="fa-regular fa-heart"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -231,8 +254,31 @@
                                         </div>
 
                                         <div class="product-actions">
-                                            <button class="add-cart-btn" >
-                                                ADD TO CART
+                                            <?php if((int)$product['product_qty'] <= 0): ?>
+
+                                                <button
+                                                    class="add-cart-btn"
+                                                    type="button"
+                                                    onclick="notifyProduct('<?= esc($product['id']); ?>')"
+                                                >
+                                                    <i class="fa-regular fa-bell"></i>
+                                                    NOTIFY ME
+                                                </button>
+
+                                            <?php else: ?>
+
+                                                <button class="add-cart-btn" type="button"
+                                                        onclick="addProductToCart('<?= esc($product['id']); ?>',1)">
+                                                    ADD TO CART
+                                                </button>
+
+                                            <?php endif; ?>
+                                            <button
+                                                class="wishlist-btn"
+                                                type="button"
+                                                onclick="addProductToWishlist('<?= esc($product['id']); ?>')"
+                                            >
+                                                <i class="fa-regular fa-heart"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -309,6 +355,38 @@
                                     <?php } ?>
 
                                 </div>
+                                
+                                <div class="product-actions">
+                                    <?php if((int)$row['product_qty'] <= 0): ?>
+
+                                        <button
+                                            class="add-cart-btn"
+                                            type="button"
+                                            onclick="event.preventDefault(); event.stopPropagation(); notifyProduct('<?= esc($row['id']); ?>');"
+                                        >
+                                            <i class="fa-regular fa-bell"></i>
+                                            NOTIFY ME
+                                        </button>
+
+                                    <?php else: ?>
+
+                                        <button
+                                            class="add-cart-btn"
+                                            type="button"
+                                            onclick="event.preventDefault(); event.stopPropagation(); addProductToCart('<?= esc($product['id']); ?>', productQuantity);"
+                                        >
+                                            ADD TO CART
+                                        </button>
+
+                                    <?php endif; ?>
+                                    <button
+                                        class="wishlist-btn"
+                                        type="button"
+                                        onclick="event.preventDefault(); event.stopPropagation(); addProductToWishlist('<?= esc($row['id']); ?>');"
+                                    >
+                                        <i class="fa-regular fa-heart"></i>
+                                    </button>
+                                </div>
 
                             </div>
 
@@ -325,10 +403,8 @@
                 </div>
             </div>
         </div>
-        </div>
-        </section>
-    
-    
+    </div>
+    </section>
 
 </main>
 

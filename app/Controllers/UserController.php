@@ -1723,6 +1723,7 @@ class UserController extends BaseController
         ]);
     }
     
+    
     //create new wishlist
     public function createWishlist()
     {
@@ -1738,6 +1739,10 @@ class UserController extends BaseController
 
         $wishlistName = trim(
             $this->request->getPost('wishlist_name')
+        );
+
+        $productId = trim(
+            $this->request->getPost('product_id') ?? ''
         );
 
         if($wishlistName == '')
@@ -1756,10 +1761,10 @@ class UserController extends BaseController
             ]);
         }
 
-        //check if wishlist with same name already exists
+        // Check whether wishlist with same name already exists
         $sql = "SELECT id
                 FROM Wishlists_master
-                WHERE cust_id = ".$customerId."
+                WHERE cust_id = ".(int)$customerId."
                   AND wishlist_name = '".addslashes($wishlistName)."'
                   AND status = 'Y'
                 LIMIT 1";
@@ -1774,7 +1779,29 @@ class UserController extends BaseController
             ]);
         }
 
-        //create wishlist
+        // If a product was supplied, validate it first
+        if($productId != '')
+        {
+            $safeProductId = addslashes($productId);
+
+            $product = $this->a_access->custom_query(
+                "SELECT id
+                 FROM Products
+                 WHERE id = '".$safeProductId."'
+                   AND status = 'Y'
+                 LIMIT 1"
+            );
+
+            if(empty($product))
+            {
+                return $this->response->setJSON([
+                    'status'  => false,
+                    'message' => 'Product not found.'
+                ]);
+            }
+        }
+
+        // Create wishlist
         $wishlistId = $this->a_access->insert_table_id(
             "Wishlists_master",
             [
@@ -1784,9 +1811,40 @@ class UserController extends BaseController
             ]
         );
 
+        if(!$wishlistId)
+        {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Unable to create your wishlist. Please try again.'
+            ]);
+        }
+
+        // Add product only when the request includes one
+        if($productId != '')
+        {
+            $inserted = $this->a_access->insert_table(
+                "Wishlist_details",
+                [
+                    'wishlist_id'   => $wishlistId,
+                    'product_id'    => $productId,
+                    'acquired_status' => 'N'
+                ]
+            );
+
+            if(!$inserted)
+            {
+                return $this->response->setJSON([
+                    'status'  => false,
+                    'message' => 'The wishlist was created, but the product could not be added.'
+                ]);
+            }
+        }
+
         return $this->response->setJSON([
             'status'      => true,
-            'message'     => 'Your wishlist has been created successfully.',
+            'message'     => ($productId != '')
+                                ? 'Your wishlist has been created and the product added successfully.'
+                                : 'Your wishlist has been created successfully.',
             'wishlist_id' => $wishlistId
         ]);
     }
