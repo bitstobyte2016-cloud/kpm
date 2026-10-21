@@ -1,6 +1,10 @@
 <?php
 
-class ShipAPI extends CI_model{
+namespace App\Models;
+
+use CodeIgniter\Model;
+
+class ShipAPI extends Model{
     
     private static $base_url = "https://apiv2.shiprocket.in";
 	

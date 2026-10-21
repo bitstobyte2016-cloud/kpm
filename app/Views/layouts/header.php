@@ -66,7 +66,9 @@
             <a href="/cart" class="action-item cart-action">
                 <div class="cart-icon-wrapper">
                     <i class="fa-solid fa-cart-shopping"></i>
-                    <span class="cart-badge">0</span>
+                    <span class="cart-badge">
+                        <?= (int) ($cart_count ?? 0); ?>
+                    </span>
                 </div>
                 <span>Cart</span>
             </a>

@@ -454,7 +454,9 @@
 
         $.post(
             "<?= base_url('accountAddAddress'); ?>",
-            {},
+            {
+                isCheckout : false
+            },
             function(response)
             {
                 hideLoader();
@@ -476,7 +478,7 @@
                 "Unable to open the address form. Please try again."
             );
         });
-    }
+    }   
 
     // OPEN EDIT ADDRESS POPUP
     function editAddress(addressId)

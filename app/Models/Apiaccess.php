@@ -8,7 +8,6 @@ class Apiaccess extends Model
 {
     protected $DBGroup = 'default';
     
-    
 	//generate random characters id
 	public function generateidC(){
 		$characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -95,6 +94,19 @@ class Apiaccess extends Model
         }
 
         return $builder->update($val);
+    }
+    
+    public function delete_data($table, array $conditions)
+    {
+        if (empty($table) || empty($conditions)) {
+            return false;
+        }
+
+        $db = \Config\Database::connect();
+        $builder = $this->db->table($table);
+        $builder->where($conditions);
+
+        return $builder->delete();
     }
 
     // custom query

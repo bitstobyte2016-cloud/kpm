@@ -373,7 +373,7 @@
                                         <button
                                             class="add-cart-btn"
                                             type="button"
-                                            onclick="event.preventDefault(); event.stopPropagation(); addProductToCart('<?= esc($product['id']); ?>', productQuantity);"
+                                            onclick="event.preventDefault(); event.stopPropagation(); addProductToCart('<?= esc($row['id']); ?>',1);"
                                         >
                                             ADD TO CART
                                         </button>

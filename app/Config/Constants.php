@@ -77,3 +77,5 @@ defined('EXIT_USER_INPUT')     || define('EXIT_USER_INPUT', 7);     // invalid u
 defined('EXIT_DATABASE')       || define('EXIT_DATABASE', 8);       // database error
 defined('EXIT__AUTO_MIN')      || define('EXIT__AUTO_MIN', 9);      // lowest automatically-assigned error code
 defined('EXIT__AUTO_MAX')      || define('EXIT__AUTO_MAX', 125);    // highest automatically-assigned error code
+
+define($apiKey, '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');

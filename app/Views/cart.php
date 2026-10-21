@@ -167,18 +167,14 @@ $cartCount = $cartCount ?? 0;
 
                     <div class="cart-summary-row">
                         <span>Shipping Fee</span>
-                        <strong class="cart-muted">TBD <i class="fa-regular fa-circle-question"></i></strong>
+                        <strong id="shippingFee" class="cart-muted">
+                            TBD <i class="fa-regular fa-circle-question"></i>
+                        </strong>
                     </div>
                                    
                     <div class="cart-summary-row">
                         <span>GST (18%)</span>
                         <strong id="cartGst">₹<?= number_format((float) $subtotal * 0.18, 2); ?></strong>
-                    </div>
-
-
-                    <div class="cart-summary-row">
-                        <span>Discount</span>
-                        <strong class="cart-discount">₹0</strong>
                     </div>
 
                     <hr class="cart-summary-divider">
@@ -243,21 +239,15 @@ $cartCount = $cartCount ?? 0;
                         <p class="shipping-calculator-message" id="shippingCalculatorMessage" hidden></p>
 
                     </div>
-
-                    <button type="button" class="cart-primary-btn">
+   
+                    <button type="button"
+                            class="cart-primary-btn"
+                            id="proceedToCheckout">
                         <i class="fa-solid fa-lock"></i>
                         Proceed to Checkout
                         <i class="fa-solid fa-arrow-right"></i>
                     </button>
 
-                </div>
-
-                <div class="cart-coupon">
-                    <h3><i class="fa-solid fa-ticket"></i> &nbsp; Have a coupon code?</h3>
-                    <div class="cart-coupon-form">
-                        <input type="text" placeholder="Enter coupon code">
-                        <button type="button">Apply</button>
-                    </div>
                 </div>
             </aside>
 
@@ -541,7 +531,7 @@ $cartCount = $cartCount ?? 0;
         updateCartSummary();
     });
 
-
+    //for calculating shipping
     (function () {
         const toggleButton = document.getElementById('toggleShippingForm');
         const form = document.getElementById('shippingCalculator');
@@ -711,14 +701,49 @@ $cartCount = $cartCount ?? 0;
                     selected_items: JSON.stringify(selectedItems)
                 },
                 success: function (response) {
-                    showShippingMessage(
-                        response.message || 'Unable to calculate shipping.',
-                        response.status === 'success' ? 'success' : 'error'
-                    );
-
-                    if (response.status === 'success') {
-                        console.log('Selected items sent to CheckoutController:', response.data);
+                    if (response.status !== 'success') {
+                        showShippingMessage(
+                            response.message || 'Unable to calculate shipping.',
+                            'error'
+                        );
+                        return;
                     }
+
+                    const shippingCost = Number(response.data.shipping_cost);
+                    const courierName = response.data.courier_name;
+
+                    // Get the current selected-products subtotal.
+                    const subtotalText = document.getElementById('cartSubtotal').textContent;
+                    const subtotal = Number(subtotalText.replace(/[₹,\s]/g, '')) || 0;
+
+                    // GST is 18% on subtotal + shipping.
+                    const gst = (subtotal + shippingCost) * 0.18;
+
+                    // Total includes subtotal, shipping and GST.
+                    const total = subtotal + shippingCost + gst;
+
+                    const formatINR = amount => '₹' + amount.toLocaleString('en-IN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+
+                    // Update shipping fee.
+                    document.getElementById('shippingFee').textContent = formatINR(shippingCost);
+
+                    // Update GST.
+                    document.getElementById('cartGst').textContent = formatINR(gst);
+
+                    // Update total amount.
+                    document.getElementById('cartTotal').textContent = formatINR(total);
+
+                    // Close the dropdown.
+                    form.hidden = true;
+                    toggleButton.setAttribute('aria-expanded', 'false');
+
+                    if (toggleIcon) {
+                        toggleIcon.className = 'fa-solid fa-chevron-down';
+                    }
+
                 },
                 error: function (xhr) {
                     showShippingMessage(
@@ -732,9 +757,50 @@ $cartCount = $cartCount ?? 0;
                 }
             });
         });
-
-
     })();
+    
+    //to handle checkout on click
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const checkoutButton = document.getElementById('proceedToCheckout');
+
+        if (!checkoutButton) {
+            return;
+        }
+
+        checkoutButton.addEventListener('click', function () {
+
+            const selectedCheckboxes = document.querySelectorAll(
+                '.cart-item-check:checked'
+            );
+
+            const selectedProductIds = Array.from(selectedCheckboxes)
+                .map(function (checkbox) {
+                    return checkbox.dataset.productId;
+                })
+                .filter(Boolean);
+
+            if (selectedProductIds.length === 0) {
+                showAlert(
+                    'warning',
+                    'No Products Selected',
+                    'Please select at least one product to proceed to checkout.'
+                );
+                return;
+            }
+
+            const params = new URLSearchParams();
+
+            selectedProductIds.forEach(function (productId) {
+                params.append('product_ids[]', productId);
+            });
+
+            window.location.href =
+                "<?= base_url('checkout'); ?>?" + params.toString();
+        });
+
+    });
+
 
     
 </script>

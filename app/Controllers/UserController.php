@@ -407,12 +407,15 @@ class UserController extends BaseController
     public function accountAddAddress()
     {
         $customerId = session()->get('customer_id');
+        $isCheckout = $this->request->getPost('isCheckout') === 'true';
 
         if(!$customerId){
             return '';
         }
 
-        return view('account/acc_add_address');
+        return view('account/acc_add_address',[
+            'isCheckout'=>$isCheckout
+        ]);
     }
     
     //save new account address
@@ -1722,7 +1725,6 @@ class UserController extends BaseController
             'message' => 'Your wishlist has been renamed successfully.'
         ]);
     }
-    
     
     //create new wishlist
     public function createWishlist()

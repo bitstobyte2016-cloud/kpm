@@ -94,3 +94,9 @@ $routes->post('markWishlistFulfilled', 'UserController::markWishlistFulfilled');
 
 //checkout routes
 $routes->post('calculateShipping', 'CheckoutController::calculateShipping');
+$routes->post('applyCoupon', 'CheckoutController::applyCoupon');
+$routes->get('checkout', 'CheckoutController::checkout');
+$routes->post( 'placeOrderWithStoreCredit', 'CheckoutController::placeOrderWithStoreCredit');
+$routes->post( 'placeOrderWithCod', 'CheckoutController::placeOrderWithCod');
+$routes->post( 'createCashfreeOrder', 'CheckoutController::createCashFreeOrder');
+$routes->get('payment_return/(:segment)', 'CheckoutController::paymentAuth/$1');

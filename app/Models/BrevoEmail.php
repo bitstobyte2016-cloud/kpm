@@ -7,7 +7,457 @@ use CodeIgniter\Model;
 class BrevoEmail extends Model
 {
 
-    private $apiKey='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';
+    private $apiKey = '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';
+    
+    //to form address html
+    private function buildAddress($billingAddress){
+        //helper
+        $e = function ($value) {
+            return htmlspecialchars(
+                (string)$value,
+                ENT_QUOTES,
+                'UTF-8'
+            );
+        };
+        
+        $billingHtml='';
+        
+        $billingName = trim(
+            ($billingAddress['first_name'] ?? '') . ' ' . ($billingAddress['last_name'] ?? '')
+        );
+
+        if ($billingName) {
+            $billingHtml .=
+                '<div>' . $e($billingName) . '</div>';
+        }
+
+        if (!empty($billingAddress['company_name'])) {
+            $billingHtml .=
+                '<div>' .
+                $e($billingAddress['company_name']) .
+                '</div>';
+        }
+
+        if (!empty($billingAddress['address_line1'])) {
+            $billingHtml .=
+                '<div>' .
+                $e($billingAddress['address_line1']) .
+                '</div>';
+        }
+
+        if (!empty($billingAddress['address_line2'])) {
+            $billingHtml .=
+                '<div>' .
+                $e($billingAddress['address_line2']) .
+                '</div>';
+        }
+
+        if (!empty($billingAddress['city'])) {
+
+            $cityState = $billingAddress['city'];
+            if (!empty($billingAddress['state'])) {
+                $cityState .=
+                    ', ' .
+                    $billingAddress['state'];
+            }
+
+            $billingHtml .=
+                '<div>' .
+                $e($cityState) .
+                '</div>';
+        }
+
+        if (!empty($billingAddress['country'])) {
+
+            $countryZip = $billingAddress['country'];
+            if (!empty($billingAddress['zip'])) {
+                $countryZip .=
+                    ', ' .
+                    $billingAddress['zip'];
+            }
+
+            $billingHtml .=
+                '<div>' .
+                $e($countryZip) .
+                '</div>';
+        }
+
+        if (!empty($billingAddress['contact_no'])) {
+            $billingHtml .=
+                '<div>' .
+                $e($billingAddress['contact_no']) .
+                '</div>';
+        }
+        
+        return $billingHtml;
+    }
+    
+    //to build product rows 
+    private function buildProductRows($products){
+        //helper
+        $e = function ($value) {
+            return htmlspecialchars(
+                (string)$value,
+                ENT_QUOTES,
+                'UTF-8'
+            );
+        };
+        
+        $productRows = '';
+        $counter = 1;
+        foreach ($products as $product) {
+
+            $productName =$product['product_name'] ?? 'Product';
+            $productImage =$product['main_image'] ?? base_url('Images/icons/ic_product.png');
+            $productPrice = (float)($product['product_price'] ?? 0);
+            $productQty =(int)($product['product_qty'] ?? 0);
+            $lineTotal = (float)($product['line_total'] ?? 0);
+            $productRows .= '
+                <tr>
+
+                    <!-- NUMBER -->
+                    <td
+                        width="7%"
+                        valign="middle"
+                        align="center"
+                        style="
+                            border:1px solid #e5d9f4;
+                            padding:10px 6px;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:13px;
+                            color:#29205c;
+                        "
+                    >
+                        ' . $counter . '
+                    </td>
+
+
+                    <!-- PRODUCT -->
+                    <td
+                        width="53%"
+                        valign="middle"
+                        style="
+                            border:1px solid #e5d9f4;
+                            padding:8px 10px;
+                        "
+                    >
+
+                        <table
+                            cellpadding="0"
+                            cellspacing="0"
+                            border="0"
+                        >
+                            <tr>
+
+                                <td
+                                    width="55"
+                                    valign="middle"
+                                >
+                                    <img
+                                        src="' . $e($productImage) . '"
+                                        alt="' . $e($productName) . '"
+                                        width="45"
+                                        height="45"
+                                        style="
+                                            width:45px;
+                                            height:45px;
+                                            object-fit:contain;
+                                            display:block;
+                                            border-radius:5px;
+                                        "
+                                    >
+                                </td>
+
+                                <td
+                                    valign="middle"
+                                    style="
+                                        padding-left:8px;
+                                        font-family:Arial,Helvetica,sans-serif;
+                                        font-size:13px;
+                                        line-height:18px;
+                                        color:#29205c;
+                                    "
+                                >
+                                    ' . $e($productName) . '
+                                </td>
+
+                            </tr>
+                        </table>
+
+                    </td>
+
+
+                    <!-- PRICE -->
+                    <td
+                        width="14%"
+                        valign="middle"
+                        align="center"
+                        style="
+                            border:1px solid #e5d9f4;
+                            padding:10px 5px;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:13px;
+                            color:#29205c;
+                        "
+                    >
+                        ₹' .
+                        number_format( $productPrice,  0  ) .
+                    '</td>
+
+
+                    <!-- QTY -->
+                    <td
+                        width="8%"
+                        valign="middle"
+                        align="center"
+                        style="
+                            border:1px solid #e5d9f4;
+                            padding:10px 5px;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:13px;
+                            color:#29205c;
+                        "
+                    >
+                        ' . $productQty . '
+                    </td>
+
+
+                    <!-- TOTAL -->
+                    <td
+                        width="18%"
+                        valign="middle"
+                        align="right"
+                        style="
+                            border:1px solid #e5d9f4;
+                            padding:10px 10px;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:13px;
+                            color:#29205c;
+                        "
+                    >
+                        ₹' .
+                        number_format( $lineTotal, 0 ) .
+                    '</td>
+
+                </tr>
+            ';
+
+            $counter++;
+        }
+        
+        return $productRows;
+    }
+    
+    //to build summary rows 
+    private function buildSummary($order){
+         //helper
+        $e = function ($value) {
+            return htmlspecialchars(
+                (string)$value,
+                ENT_QUOTES,
+                'UTF-8'
+            );
+        };
+        
+        $subtotal = (float)($order['sub_total_amount'] ?? 0);
+        $discountedTotal =  (float)($order['discounted_total_amount'] ?? 0);
+        $discount = $discountedTotal;
+        $shippingFee = (float)($order['shipping_charged_amount'] ?? 0);
+        $storeCredit = (float)($order['store_credit'] ?? 0);
+        $gst = (float)($order['total_taxed_amount'] ?? 0);
+        $codCharges = (float)($order['cod_charges'] ?? 0);
+        
+        //summary rows
+        $summaryRows = '';
+        $summaryRows .= '
+            <tr>
+                <td
+                    style="
+                        padding:5px 0;
+                        font-family:Arial,Helvetica,sans-serif;
+                        font-size:14px;
+                        color:#29205c;
+                    "
+                >
+                    Subtotal
+                </td>
+
+                <td
+                    align="right"
+                    style="
+                        padding:5px 0;
+                        font-family:Arial,Helvetica,sans-serif;
+                        font-size:14px;
+                        color:#29205c;
+                    "
+                >
+                    ₹' .
+                    number_format(
+                        $subtotal,
+                        0
+                    ) .
+                '</td>
+            </tr>
+        ';
+
+        $summaryRows .= '
+            <tr>
+                <td
+                    style="
+                        padding:5px 0;
+                        font-family:Arial,Helvetica,sans-serif;
+                        font-size:14px;
+                        color:#29205c;
+                    "
+                >
+                    Shipping Fee
+                </td>
+
+                <td
+                    align="right"
+                    style="
+                        padding:5px 0;
+                        font-family:Arial,Helvetica,sans-serif;
+                        font-size:14px;
+                        color:#29205c;
+                    "
+                >
+                    ₹' .
+                    number_format(
+                        $shippingFee,
+                        0
+                    ) .
+                '</td>
+            </tr>
+        ';
+
+        $summaryRows .= '
+                <tr>
+                    <td
+                        style="
+                            padding:5px 0;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:14px;
+                            color:#29205c;
+                        "
+                    >
+                        Discount
+                    </td>
+
+                    <td
+                        align="right"
+                        style="
+                            padding:5px 0;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:14px;
+                            color:#2e9b52;
+                        "
+                    >
+                        -₹' .
+                        number_format(
+                            $discount,
+                            0
+                        ) .
+                    '</td>
+                </tr>
+            ';
+
+        $summaryRows .= '
+                <tr>
+                    <td
+                        style="
+                            padding:5px 0;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:14px;
+                            color:#29205c;
+                        "
+                    >
+                        Store Credit Used
+                    </td>
+
+                    <td
+                        align="right"
+                        style="
+                            padding:5px 0;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:14px;
+                            color:#2e9b52;
+                        "
+                    >
+                        -₹' .
+                        number_format(
+                            $storeCredit,
+                            0
+                        ) .
+                    '</td>
+                </tr>
+        ';
+
+        $summaryRows .= '
+                <tr>
+                    <td
+                        style="
+                            padding:5px 0;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:14px;
+                            color:#29205c;
+                        "
+                    >
+                        COD Charges
+                    </td>
+
+                    <td
+                        align="right"
+                        style="
+                            padding:5px 0;
+                            font-family:Arial,Helvetica,sans-serif;
+                            font-size:14px;
+                            color:#29205c;
+                        "
+                    >
+                        ₹' .
+                        number_format(
+                            $codCharges,
+                            0
+                        ) .
+                    '</td>
+                </tr>
+        ';
+
+        $summaryRows .= '
+            <tr>
+                <td
+                    style="
+                        padding:5px 0;
+                        font-family:Arial,Helvetica,sans-serif;
+                        font-size:14px;
+                        color:#29205c;
+                    "
+                >
+                    GST (18%)
+                </td>
+
+                <td
+                    align="right"
+                    style="
+                        padding:5px 0;
+                        font-family:Arial,Helvetica,sans-serif;
+                        font-size:14px;
+                        color:#29205c;
+                    "
+                >
+                    ₹' .
+                    number_format(
+                        $gst,
+                        0
+                    ) .
+                '</td>
+            </tr>
+        ';
+        
+        return $summaryRows;
+        
+    }
     
     //send test email
     public function sendTestEmail($email)
@@ -718,6 +1168,387 @@ class BrevoEmail extends Model
             'curl_error' => $curlError
         ];
     }
+
+    //send email for order placed
+    public function sendOrderPlacedEmail($emailData)
+    {
+        $order           = $emailData['order'] ?? [];
+        $billingAddress  = $emailData['billing_address'] ?? [];
+        $shippingAddress = $emailData['shipping_address'] ?? [];
+        $products        = $emailData['products'] ?? [];
+        $customerEmail   = trim($emailData['customer_email'] ?? '');
+
+        if (!$customerEmail || !filter_var($customerEmail, FILTER_VALIDATE_EMAIL)) {
+            return [
+                'success'  => false,
+                'response' => 'A valid customer email is required.'
+            ];
+        }
+
+        $e = static function ($value) {
+            return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+        };
+
+        $firstName = trim((string) (
+            $order['customer_first_name'] ?? $billingAddress['first_name'] ?? ''
+        ));
+
+        if ($firstName === '') {
+            $firstName = 'there';
+        }
+
+        $orderId = (int) ($order['id'] ?? 0);
+
+        if ($orderId <= 0) {
+            return [
+                'success'  => false,
+                'response' => 'A valid order ID is required.'
+            ];
+        }
+
+        // Order date
+        $orderDateRaw = $order['order_date'] ?? date('Y-m-d');
+        $orderTimestamp = strtotime($orderDateRaw);
+
+        if ($orderTimestamp === false) {
+            $orderTimestamp = time();
+        }
+
+        $orderDate = date('d M Y', $orderTimestamp);
+        $estimatedDeliveryDate = date('d M Y',strtotime($order['estimated_delivery_date']));
+
+        $billingHtml  = $this->buildAddress($billingAddress);
+        $shippingHtml = $this->buildAddress($shippingAddress);
+        $productRows  = $this->buildProductRows($products);
+        $summaryHtml  = $this->buildSummary($order);
+
+        $grandTotal = (float) ($order['grand_total_amount'] ?? 0);
+        $paymentMethod = $order['payment_type'] ?? 'Unknown';
+        $paymentMethod = ucwords(str_replace('_', ' ', $paymentMethod));
+
+        $baseUrl = rtrim(base_url(), '/');
+
+        // Absolute URL required for email images
+        $orderPlacedIcon = $baseUrl . '/Images/order/order_placed.png';
+
+        $orderNumber = '#' . $orderId;
+
+        $html = $this->emailHeader() . '
+            <tr>
+                <td style="padding:25px 30px 30px;background:#ffffff;
+                           font-family:Arial,Helvetica,sans-serif;color:#21145f;">
+
+                    <!-- Order placed icon -->
+                    <div style="text-align:center;padding:0 0 5px;">
+                        <img src="' . $e($orderPlacedIcon) . '"
+                             alt="Order placed"
+                             width="110"
+                             style="display:block;width:110px;max-width:100%;
+                                    height:auto;margin:0 auto 8px;border:0;">
+                    </div>
+
+                    <!-- Greeting -->
+                    <div style="text-align:center;">
+                        <h1 style="margin:0 0 6px;color:#21145f;
+                                   font-size:34px;line-height:1.2;">
+                            Thank You for Your Order!
+                        </h1>
+
+                        <p style="margin:0 0 5px;font-size:17px;">
+                            Hi ' . $e($firstName) . ',
+                        </p>
+
+                        <p style="margin:0 auto 3px;font-size:17px;line-height:24px;">
+                            We’ve received your order and it’s now being processed.
+                        </p>
+
+                        <p style="margin:0 auto 24px;font-size:17px;line-height:24px;">
+                            We’ll notify you once it’s shipped!
+                        </p>
+                    </div>
+
+                    <!-- Order information -->
+                    <table role="presentation" width="100%" cellpadding="0"
+                           cellspacing="0"
+                           style="width:100%;background:#f8effc;
+                                  border-radius:8px;margin-bottom:12px;">
+                        <tr>
+                            <td width="33.33%" align="center"
+                                style="padding:14px 5px;color:#21145f;
+                                       border-right:1px solid #dfcff3;">
+                                <div style="font-size:14px;margin-bottom:7px;">
+                                    Order Number
+                                </div>
+                                <div style="font-size:22px;font-weight:bold;">
+                                    ' . $e($orderNumber) . '
+                                </div>
+                            </td>
+
+                            <td width="33.33%" align="center"
+                                style="padding:14px 5px;color:#21145f;
+                                       border-right:1px solid #dfcff3;">
+                                <div style="font-size:14px;margin-bottom:7px;">
+                                    Order Date
+                                </div>
+                                <div style="font-size:16px;">
+                                    ' . $e($orderDate) . '
+                                </div>
+                            </td>
+
+                            <td width="33.33%" align="center"
+                                style="padding:14px 5px;color:#21145f;">
+                                <div style="font-size:14px;margin-bottom:7px;">
+                                    Order Status
+                                </div>
+                                <span style="display:inline-block;background:#eee0ff;
+                                             color:#7542b7;font-size:14px;
+                                             font-weight:bold;padding:6px 12px;
+                                             border-radius:20px;">
+                                    Processing
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- Billing and shipping addresses -->
+                    <table role="presentation" width="100%" cellpadding="0"
+                           cellspacing="0"
+                           style="width:100%;margin-bottom:12px;">
+                        <tr>
+                            <td width="50%" valign="top"
+                                style="padding:0 8px 0 0;">
+                                <table role="presentation" width="100%"
+                                       cellpadding="0" cellspacing="0"
+                                       style="border:1px solid #dfd5fa;
+                                              border-radius:6px;">
+                                    <tr>
+                                        <td style="background:#f0e8fc;padding:9px 12px;
+                                                   font-weight:bold;color:#21145f;">
+                                            Billing Address
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:12px;color:#21145f;
+                                                   font-size:14px;line-height:21px;">
+                                            ' . $billingHtml . '
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+
+                            <td width="50%" valign="top"
+                                style="padding:0 0 0 8px;">
+                                <table role="presentation" width="100%"
+                                       cellpadding="0" cellspacing="0"
+                                       style="border:1px solid #dfd5fa;
+                                              border-radius:6px;">
+                                    <tr>
+                                        <td style="background:#f0e8fc;padding:9px 12px;
+                                                   font-weight:bold;color:#21145f;">
+                                            Shipping Address
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:12px;color:#21145f;
+                                                   font-size:14px;line-height:21px;">
+                                            ' . $shippingHtml . '
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- Products -->
+                    <table role="presentation" width="100%" cellpadding="0"
+                           cellspacing="0"
+                           style="width:100%;border-collapse:collapse;
+                                  margin-bottom:12px;">
+                        <thead>
+                            <tr style="background:#f0e8fc;color:#21145f;">
+                                <th style="border:1px solid #dfd5fa;padding:9px 5px;">#</th>
+                                <th style="border:1px solid #dfd5fa;padding:9px;
+                                           text-align:left;">Item</th>
+                                <th style="border:1px solid #dfd5fa;padding:9px 5px;">Price</th>
+                                <th style="border:1px solid #dfd5fa;padding:9px 5px;">Qty</th>
+                                <th style="border:1px solid #dfd5fa;padding:9px 5px;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ' . $productRows . '
+                        </tbody>
+                    </table>
+
+                    <!-- Summary and payment/shipping details -->
+                    <table role="presentation" width="100%" cellpadding="0"
+                           cellspacing="0" style="width:100%;margin-bottom:12px;">
+                        <tr>
+                            <!-- Order summary -->
+                            <td width="50%" valign="top"
+                                style="padding:0 8px 0 0;">
+                                <table role="presentation" width="100%"
+                                       cellpadding="0" cellspacing="0"
+                                       style="border:1px solid #dfd5fa;
+                                              border-radius:6px;background:#faf7ff;">
+                                    <tr>
+                                        <td style="background:#f0e8fc;padding:10px 12px;
+                                                   font-weight:bold;color:#21145f;">
+                                            Order Summary
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:5px 12px 12px;">
+                                            <table role="presentation" width="100%"
+                                                   cellpadding="0" cellspacing="0">
+                                                ' . $summaryHtml . '
+
+                                                <tr>
+                                                    <td colspan="2"
+                                                        style="border-top:1px solid #d8c4ef;
+                                                               padding-top:12px;"></td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td style="padding:7px 0;
+                                                               font-size:18px;font-weight:bold;
+                                                               color:#21145f;">
+                                                        Total Amount
+                                                    </td>
+                                                    <td align="right"
+                                                        style="padding:7px 0;
+                                                               font-size:18px;font-weight:bold;
+                                                               color:#21145f;white-space:nowrap;">
+                                                        ₹' . number_format($grandTotal, 2) . '
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+
+                            <!-- Payment and delivery -->
+                            <td width="50%" valign="top"
+                                style="padding:0 0 0 8px;">
+
+                                <table role="presentation" width="100%"
+                                       cellpadding="0" cellspacing="0"
+                                       style="border:1px solid #dfd5fa;
+                                              border-radius:6px;margin-bottom:10px;">
+                                    <tr>
+                                        <td width="45" valign="top"
+                                            style="padding:12px 8px 10px 12px;
+                                                   color:#8d50df;font-size:23px;">
+                                            &#128179;
+                                        </td>
+                                        <td style="padding:12px 10px 10px 0;
+                                                   color:#21145f;font-size:14px;
+                                                   line-height:21px;">
+                                            <strong>Payment Method</strong><br>
+                                            ' . $e($paymentMethod) . '
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <table role="presentation" width="100%"
+                                       cellpadding="0" cellspacing="0"
+                                       style="border:1px solid #dfd5fa;
+                                              border-radius:6px;margin-bottom:10px;">
+                                    <tr>
+                                        <td width="45" valign="top"
+                                            style="padding:12px 8px 10px 12px;
+                                                   color:#8d50df;font-size:23px;">
+                                            &#128666;
+                                        </td>
+                                        <td style="padding:12px 10px 10px 0;
+                                                   color:#21145f;font-size:14px;
+                                                   line-height:21px;">
+                                            <strong>Shipping Details</strong><br>
+                                            Courier Partner: To be confirmed<br>
+                                            Tracking Number: Shared once shipped
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <table role="presentation" width="100%"
+                                       cellpadding="0" cellspacing="0"
+                                       style="border:1px solid #dfd5fa;
+                                              border-radius:6px;">
+                                    <tr>
+                                        <td width="45" valign="top"
+                                            style="padding:12px 8px 10px 12px;
+                                                   color:#8d50df;font-size:23px;">
+                                            &#128197;
+                                        </td>
+                                        <td style="padding:12px 10px 10px 0;
+                                                   color:#21145f;font-size:14px;
+                                                   line-height:21px;">
+                                            <strong>Estimated Delivery</strong><br>
+                                            <strong>' . $e($estimatedDeliveryDate) . '</strong><br>
+                                            <span style="font-size:12px;">
+                                                You will receive a shipping confirmation
+                                                email with tracking details once your
+                                                order is on the way.
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                            </td>
+                        </tr>
+                    </table>
+
+                </td>
+            </tr>
+        ' . $this->emailFooter();
+
+        $data = [
+            'sender' => [
+                'name'  => 'K-Pop Merch',
+                'email' => 'support@kpopmerch.in'
+            ],
+            'to' => [
+                ['email' => $customerEmail]
+            ],
+            'cc' => [
+                ['email' => 'orders@kpopmerch.in']
+            ],
+            'subject' => 'Your K-Pop Merch Order ' . $orderNumber . ' Has Been Placed!',
+            'htmlContent' => $html
+        ];
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, 'https://api.brevo.com/v3/smtp/email');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'accept: application/json',
+            'api-key: ' . $this->apiKey,
+            'content-type: application/json'
+        ]);
+
+        $result = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        if ($httpCode === 201) {
+            return [
+                'success'  => true,
+                'response' => $result
+            ];
+        }
+
+        return [
+            'success'    => false,
+            'response'   => $result,
+            'http_code'  => $httpCode,
+            'curl_error' => $curlError
+        ];
+    }
+
     
     // Send order cancelled email   
     public function sendCancelOrderEmail($emailData)
@@ -767,504 +1598,19 @@ class BrevoEmail extends Model
             : '—';
 
         //billing address
-        $billingHtml = '';
-        $billingName = trim(
-            ($billingAddress['first_name'] ?? '') .
-            ' ' .
-            ($billingAddress['last_name'] ?? '')
-        );
-
-        if ($billingName) {
-            $billingHtml .=
-                '<div>' . $e($billingName) . '</div>';
-        }
-
-        if (!empty($billingAddress['company_name'])) {
-            $billingHtml .=
-                '<div>' .
-                $e($billingAddress['company_name']) .
-                '</div>';
-        }
-
-        if (!empty($billingAddress['address_line1'])) {
-            $billingHtml .=
-                '<div>' .
-                $e($billingAddress['address_line1']) .
-                '</div>';
-        }
-
-        if (!empty($billingAddress['address_line2'])) {
-            $billingHtml .=
-                '<div>' .
-                $e($billingAddress['address_line2']) .
-                '</div>';
-        }
-
-        if (!empty($billingAddress['city'])) {
-
-            $cityState = $billingAddress['city'];
-            if (!empty($billingAddress['state'])) {
-                $cityState .=
-                    ', ' .
-                    $billingAddress['state'];
-            }
-
-            $billingHtml .=
-                '<div>' .
-                $e($cityState) .
-                '</div>';
-        }
-
-        if (!empty($billingAddress['country'])) {
-
-            $countryZip = $billingAddress['country'];
-            if (!empty($billingAddress['zip'])) {
-                $countryZip .=
-                    ', ' .
-                    $billingAddress['zip'];
-            }
-
-            $billingHtml .=
-                '<div>' .
-                $e($countryZip) .
-                '</div>';
-        }
-
-        if (!empty($billingAddress['contact_no'])) {
-            $billingHtml .=
-                '<div>' .
-                $e($billingAddress['contact_no']) .
-                '</div>';
-        }
-
-        //shiiping address
-        $shippingHtml = '';
-        $shippingName = trim(
-            ($shippingAddress['first_name'] ?? '') .
-            ' ' .
-            ($shippingAddress['last_name'] ?? '')
-        );
-
-        if ($shippingName) {
-            $shippingHtml .=
-                '<div>' .
-                $e($shippingName) .
-                '</div>';
-        }
-
-        if (!empty($shippingAddress['company_name'])) {
-            $shippingHtml .=
-                '<div>' .
-                $e($shippingAddress['company_name']) .
-                '</div>';
-        }
-
-        if (!empty($shippingAddress['address_line1'])) {
-            $shippingHtml .=
-                '<div>' .
-                $e($shippingAddress['address_line1']) .
-                '</div>';
-        }
-
-        if (!empty($shippingAddress['address_line2'])) {
-            $shippingHtml .=
-                '<div>' .
-                $e($shippingAddress['address_line2']) .
-                '</div>';
-        }
-
-        if (!empty($shippingAddress['city'])) {
-
-            $cityState = $shippingAddress['city'];
-
-            if (!empty($shippingAddress['state'])) {
-                $cityState .=
-                    ', ' .
-                    $shippingAddress['state'];
-            }
-
-            $shippingHtml .=
-                '<div>' .
-                $e($cityState) .
-                '</div>';
-        }
-
-        if (!empty($shippingAddress['country'])) {
-
-            $countryZip =
-                $shippingAddress['country'];
-
-            if (!empty($shippingAddress['zip'])) {
-                $countryZip .=
-                    ', ' .
-                    $shippingAddress['zip'];
-            }
-
-            $shippingHtml .=
-                '<div>' .
-                $e($countryZip) .
-                '</div>';
-        }
-
-        if (!empty($shippingAddress['contact_no'])) {
-            $shippingHtml .=
-                '<div>' .
-                $e($shippingAddress['contact_no']) .
-                '</div>';
-        }
+        $billingHtml = $this->buildAddress($billingAddress);
+        $shippingHtml = $this->buildAddress($shippingAddress);
 
         //product box
-        $productRows = '';
-        $counter = 1;
-        foreach ($products as $product) {
-
-            $productName =$product['product_name'] ?? 'Product';
-            $productImage =$product['main_image'] ?? base_url('Images/icons/ic_product.png');
-            $productPrice = (float)($product['product_price'] ?? 0);
-            $productQty =(int)($product['product_qty'] ?? 0);
-            $lineTotal = (float)($product['line_total'] ?? 0);
-            $productRows .= '
-                <tr>
-
-                    <!-- NUMBER -->
-                    <td
-                        width="7%"
-                        valign="middle"
-                        align="center"
-                        style="
-                            border:1px solid #e5d9f4;
-                            padding:10px 6px;
-                            font-family:Arial,Helvetica,sans-serif;
-                            font-size:13px;
-                            color:#29205c;
-                        "
-                    >
-                        ' . $counter . '
-                    </td>
-
-
-                    <!-- PRODUCT -->
-                    <td
-                        width="53%"
-                        valign="middle"
-                        style="
-                            border:1px solid #e5d9f4;
-                            padding:8px 10px;
-                        "
-                    >
-
-                        <table
-                            cellpadding="0"
-                            cellspacing="0"
-                            border="0"
-                        >
-                            <tr>
-
-                                <td
-                                    width="55"
-                                    valign="middle"
-                                >
-                                    <img
-                                        src="' . $e($productImage) . '"
-                                        alt="' . $e($productName) . '"
-                                        width="45"
-                                        height="45"
-                                        style="
-                                            width:45px;
-                                            height:45px;
-                                            object-fit:contain;
-                                            display:block;
-                                            border-radius:5px;
-                                        "
-                                    >
-                                </td>
-
-                                <td
-                                    valign="middle"
-                                    style="
-                                        padding-left:8px;
-                                        font-family:Arial,Helvetica,sans-serif;
-                                        font-size:13px;
-                                        line-height:18px;
-                                        color:#29205c;
-                                    "
-                                >
-                                    ' . $e($productName) . '
-                                </td>
-
-                            </tr>
-                        </table>
-
-                    </td>
-
-
-                    <!-- PRICE -->
-                    <td
-                        width="14%"
-                        valign="middle"
-                        align="center"
-                        style="
-                            border:1px solid #e5d9f4;
-                            padding:10px 5px;
-                            font-family:Arial,Helvetica,sans-serif;
-                            font-size:13px;
-                            color:#29205c;
-                        "
-                    >
-                        ₹' .
-                        number_format(
-                            $productPrice,
-                            0
-                        ) .
-                    '</td>
-
-
-                    <!-- QTY -->
-                    <td
-                        width="8%"
-                        valign="middle"
-                        align="center"
-                        style="
-                            border:1px solid #e5d9f4;
-                            padding:10px 5px;
-                            font-family:Arial,Helvetica,sans-serif;
-                            font-size:13px;
-                            color:#29205c;
-                        "
-                    >
-                        ' . $productQty . '
-                    </td>
-
-
-                    <!-- TOTAL -->
-                    <td
-                        width="18%"
-                        valign="middle"
-                        align="right"
-                        style="
-                            border:1px solid #e5d9f4;
-                            padding:10px 10px;
-                            font-family:Arial,Helvetica,sans-serif;
-                            font-size:13px;
-                            color:#29205c;
-                        "
-                    >
-                        ₹' .
-                        number_format(
-                            $lineTotal,
-                            0
-                        ) .
-                    '</td>
-
-                </tr>
-            ';
-
-            $counter++;
-        }
+        $productRows = $this->buildProductRows($products);
+       
 
         //order summary
-        $subtotal = (float)($order['sub_total_amount'] ?? 0);
-        $discountedTotal =  (float)($order['discounted_total_amount'] ?? 0);
-        $discount = $discountedTotal;
-        $shippingFee = (float)($order['shipping_charged_amount'] ?? 0);
-        $storeCredit = (float)($order['store_credit'] ?? 0);
-        $gst = (float)($order['total_taxed_amount'] ?? 0);
         $grandTotal = (float)($order['grand_total_amount'] ?? 0);
-        $codCharges = (float)($order['cod_charges'] ?? 0);
 
         //summary rows
-        $summaryRows = '';
-        $summaryRows .= '
-            <tr>
-                <td
-                    style="
-                        padding:5px 0;
-                        font-family:Arial,Helvetica,sans-serif;
-                        font-size:14px;
-                        color:#29205c;
-                    "
-                >
-                    Subtotal
-                </td>
-
-                <td
-                    align="right"
-                    style="
-                        padding:5px 0;
-                        font-family:Arial,Helvetica,sans-serif;
-                        font-size:14px;
-                        color:#29205c;
-                    "
-                >
-                    ₹' .
-                    number_format(
-                        $subtotal,
-                        0
-                    ) .
-                '</td>
-            </tr>
-        ';
-
-        $summaryRows .= '
-            <tr>
-                <td
-                    style="
-                        padding:5px 0;
-                        font-family:Arial,Helvetica,sans-serif;
-                        font-size:14px;
-                        color:#29205c;
-                    "
-                >
-                    Shipping Fee
-                </td>
-
-                <td
-                    align="right"
-                    style="
-                        padding:5px 0;
-                        font-family:Arial,Helvetica,sans-serif;
-                        font-size:14px;
-                        color:#29205c;
-                    "
-                >
-                    ₹' .
-                    number_format(
-                        $shippingFee,
-                        0
-                    ) .
-                '</td>
-            </tr>
-        ';
-
-        if ($discount > 0) {
-            $summaryRows .= '
-                <tr>
-                    <td
-                        style="
-                            padding:5px 0;
-                            font-family:Arial,Helvetica,sans-serif;
-                            font-size:14px;
-                            color:#29205c;
-                        "
-                    >
-                        Discount
-                    </td>
-
-                    <td
-                        align="right"
-                        style="
-                            padding:5px 0;
-                            font-family:Arial,Helvetica,sans-serif;
-                            font-size:14px;
-                            color:#2e9b52;
-                        "
-                    >
-                        -₹' .
-                        number_format(
-                            $discount,
-                            0
-                        ) .
-                    '</td>
-                </tr>
-            ';
-        }
-
-        if ($storeCredit > 0) {
-            $summaryRows .= '
-                <tr>
-                    <td
-                        style="
-                            padding:5px 0;
-                            font-family:Arial,Helvetica,sans-serif;
-                            font-size:14px;
-                            color:#29205c;
-                        "
-                    >
-                        Store Credit Used
-                    </td>
-
-                    <td
-                        align="right"
-                        style="
-                            padding:5px 0;
-                            font-family:Arial,Helvetica,sans-serif;
-                            font-size:14px;
-                            color:#2e9b52;
-                        "
-                    >
-                        -₹' .
-                        number_format(
-                            $storeCredit,
-                            0
-                        ) .
-                    '</td>
-                </tr>
-            ';
-        }
-
-        if ($codCharges > 0) {
-            $summaryRows .= '
-                <tr>
-                    <td
-                        style="
-                            padding:5px 0;
-                            font-family:Arial,Helvetica,sans-serif;
-                            font-size:14px;
-                            color:#29205c;
-                        "
-                    >
-                        COD Charges
-                    </td>
-
-                    <td
-                        align="right"
-                        style="
-                            padding:5px 0;
-                            font-family:Arial,Helvetica,sans-serif;
-                            font-size:14px;
-                            color:#29205c;
-                        "
-                    >
-                        ₹' .
-                        number_format(
-                            $codCharges,
-                            0
-                        ) .
-                    '</td>
-                </tr>
-            ';
-        }
-
-        $summaryRows .= '
-            <tr>
-                <td
-                    style="
-                        padding:5px 0;
-                        font-family:Arial,Helvetica,sans-serif;
-                        font-size:14px;
-                        color:#29205c;
-                    "
-                >
-                    GST (18%)
-                </td>
-
-                <td
-                    align="right"
-                    style="
-                        padding:5px 0;
-                        font-family:Arial,Helvetica,sans-serif;
-                        font-size:14px;
-                        color:#29205c;
-                    "
-                >
-                    ₹' .
-                    number_format(
-                        $gst,
-                        0
-                    ) .
-                '</td>
-            </tr>
-        ';
+        $summaryRows = $this->buildSummary($order);
+       
 
         //email body
         $body = '

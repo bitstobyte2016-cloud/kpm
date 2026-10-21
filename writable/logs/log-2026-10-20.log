@@ -1,0 +1,174 @@
+WARNING - 2026-10-20 18:47:26 --> [DEPRECATED] Creation of dynamic property App\Controllers\CheckoutController::$a_access is deprecated in APPPATH/Controllers/CheckoutController.php on line 8.
+ 1 SYSTEMPATH/CodeIgniter.php(921): App\Controllers\CheckoutController->__construct()
+ 2 SYSTEMPATH/CodeIgniter.php(488): CodeIgniter\CodeIgniter->createController()
+ 3 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+WARNING - 2026-10-20 18:47:26 --> [DEPRECATED] Creation of dynamic property App\Controllers\CheckoutController::$ship is deprecated in APPPATH/Controllers/CheckoutController.php on line 9.
+ 1 SYSTEMPATH/CodeIgniter.php(921): App\Controllers\CheckoutController->__construct()
+ 2 SYSTEMPATH/CodeIgniter.php(488): CodeIgniter\CodeIgniter->createController()
+ 3 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-10-20 18:47:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-10-20 18:47:26 --> got subtotal
+ERROR - 2026-10-20 18:47:26 --> got shipping fee
+WARNING - 2026-10-20 18:47:40 --> [DEPRECATED] Creation of dynamic property App\Controllers\CheckoutController::$a_access is deprecated in APPPATH/Controllers/CheckoutController.php on line 8.
+ 1 SYSTEMPATH/CodeIgniter.php(921): App\Controllers\CheckoutController->__construct()
+ 2 SYSTEMPATH/CodeIgniter.php(488): CodeIgniter\CodeIgniter->createController()
+ 3 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+WARNING - 2026-10-20 18:47:40 --> [DEPRECATED] Creation of dynamic property App\Controllers\CheckoutController::$ship is deprecated in APPPATH/Controllers/CheckoutController.php on line 9.
+ 1 SYSTEMPATH/CodeIgniter.php(921): App\Controllers\CheckoutController->__construct()
+ 2 SYSTEMPATH/CodeIgniter.php(488): CodeIgniter\CodeIgniter->createController()
+ 3 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-10-20 18:47:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-10-20 18:47:40 --> got subtotal
+ERROR - 2026-10-20 18:47:41 --> got shipping fee
+ERROR - 2026-10-20 18:47:41 --> got coupon
+ERROR - 2026-10-20 18:47:41 --> got all total
+WARNING - 2026-10-20 18:48:33 --> [DEPRECATED] Creation of dynamic property App\Controllers\CheckoutController::$a_access is deprecated in APPPATH/Controllers/CheckoutController.php on line 8.
+ 1 SYSTEMPATH/CodeIgniter.php(921): App\Controllers\CheckoutController->__construct()
+ 2 SYSTEMPATH/CodeIgniter.php(488): CodeIgniter\CodeIgniter->createController()
+ 3 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+WARNING - 2026-10-20 18:48:33 --> [DEPRECATED] Creation of dynamic property App\Controllers\CheckoutController::$ship is deprecated in APPPATH/Controllers/CheckoutController.php on line 9.
+ 1 SYSTEMPATH/CodeIgniter.php(921): App\Controllers\CheckoutController->__construct()
+ 2 SYSTEMPATH/CodeIgniter.php(488): CodeIgniter\CodeIgniter->createController()
+ 3 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-10-20 18:48:33 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-10-20 18:48:33 --> got subtotal
+ERROR - 2026-10-20 18:48:33 --> got shipping fee
+ERROR - 2026-10-20 18:48:33 --> got coupon
+ERROR - 2026-10-20 18:48:33 --> got all total
+WARNING - 2026-10-20 18:49:35 --> [DEPRECATED] Creation of dynamic property App\Controllers\CheckoutController::$a_access is deprecated in APPPATH/Controllers/CheckoutController.php on line 8.
+ 1 SYSTEMPATH/CodeIgniter.php(921): App\Controllers\CheckoutController->__construct()
+ 2 SYSTEMPATH/CodeIgniter.php(488): CodeIgniter\CodeIgniter->createController()
+ 3 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+WARNING - 2026-10-20 18:49:35 --> [DEPRECATED] Creation of dynamic property App\Controllers\CheckoutController::$ship is deprecated in APPPATH/Controllers/CheckoutController.php on line 9.
+ 1 SYSTEMPATH/CodeIgniter.php(921): App\Controllers\CheckoutController->__construct()
+ 2 SYSTEMPATH/CodeIgniter.php(488): CodeIgniter\CodeIgniter->createController()
+ 3 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-10-20 18:49:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-10-20 18:49:35 --> got subtotal
+ERROR - 2026-10-20 18:49:35 --> got shipping fee
+ERROR - 2026-10-20 18:49:35 --> got coupon
+ERROR - 2026-10-20 18:49:35 --> got all total
+ERROR - 2026-10-20 18:49:35 --> added order with id 12470
+ERROR - 2026-10-20 18:49:35 --> got order products
+ERROR - 2026-10-20 18:49:35 --> deleted credit
+ERROR - 2026-10-20 18:49:35 --> deleted coupon
+ERROR - 2026-10-20 18:49:35 --> got cart id
+WARNING - 2026-10-20 18:50:52 --> [DEPRECATED] Creation of dynamic property App\Controllers\CheckoutController::$a_access is deprecated in APPPATH/Controllers/CheckoutController.php on line 8.
+ 1 SYSTEMPATH/CodeIgniter.php(921): App\Controllers\CheckoutController->__construct()
+ 2 SYSTEMPATH/CodeIgniter.php(488): CodeIgniter\CodeIgniter->createController()
+ 3 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+WARNING - 2026-10-20 18:50:52 --> [DEPRECATED] Creation of dynamic property App\Controllers\CheckoutController::$ship is deprecated in APPPATH/Controllers/CheckoutController.php on line 9.
+ 1 SYSTEMPATH/CodeIgniter.php(921): App\Controllers\CheckoutController->__construct()
+ 2 SYSTEMPATH/CodeIgniter.php(488): CodeIgniter\CodeIgniter->createController()
+ 3 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-10-20 18:50:52 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-10-20 18:50:52 --> got subtotal
+ERROR - 2026-10-20 18:50:53 --> got shipping fee
+ERROR - 2026-10-20 18:50:53 --> got coupon
+ERROR - 2026-10-20 18:50:53 --> got all total
+ERROR - 2026-10-20 18:50:53 --> added order with id 12471
+ERROR - 2026-10-20 18:50:53 --> got order products
+ERROR - 2026-10-20 18:50:53 --> deleted credit
+ERROR - 2026-10-20 18:50:53 --> deleted coupon
+WARNING - 2026-10-20 18:51:28 --> [DEPRECATED] Creation of dynamic property App\Controllers\CheckoutController::$a_access is deprecated in APPPATH/Controllers/CheckoutController.php on line 8.
+ 1 SYSTEMPATH/CodeIgniter.php(921): App\Controllers\CheckoutController->__construct()
+ 2 SYSTEMPATH/CodeIgniter.php(488): CodeIgniter\CodeIgniter->createController()
+ 3 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+WARNING - 2026-10-20 18:51:28 --> [DEPRECATED] Creation of dynamic property App\Controllers\CheckoutController::$ship is deprecated in APPPATH/Controllers/CheckoutController.php on line 9.
+ 1 SYSTEMPATH/CodeIgniter.php(921): App\Controllers\CheckoutController->__construct()
+ 2 SYSTEMPATH/CodeIgniter.php(488): CodeIgniter\CodeIgniter->createController()
+ 3 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-10-20 18:51:28 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-10-20 18:51:28 --> got subtotal
+ERROR - 2026-10-20 18:51:29 --> got shipping fee
+ERROR - 2026-10-20 18:51:29 --> got coupon
+ERROR - 2026-10-20 18:51:29 --> got all total
+ERROR - 2026-10-20 18:51:29 --> added order with id 12472
+ERROR - 2026-10-20 18:51:29 --> got order products
+ERROR - 2026-10-20 18:51:29 --> deleted credit
+ERROR - 2026-10-20 18:51:29 --> deleted coupon
+ERROR - 2026-10-20 18:51:29 --> got cart id159444
+WARNING - 2026-10-20 18:55:10 --> [DEPRECATED] Creation of dynamic property App\Controllers\CheckoutController::$a_access is deprecated in APPPATH/Controllers/CheckoutController.php on line 8.
+ 1 SYSTEMPATH/CodeIgniter.php(921): App\Controllers\CheckoutController->__construct()
+ 2 SYSTEMPATH/CodeIgniter.php(488): CodeIgniter\CodeIgniter->createController()
+ 3 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+WARNING - 2026-10-20 18:55:10 --> [DEPRECATED] Creation of dynamic property App\Controllers\CheckoutController::$ship is deprecated in APPPATH/Controllers/CheckoutController.php on line 9.
+ 1 SYSTEMPATH/CodeIgniter.php(921): App\Controllers\CheckoutController->__construct()
+ 2 SYSTEMPATH/CodeIgniter.php(488): CodeIgniter\CodeIgniter->createController()
+ 3 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-10-20 18:55:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-10-20 18:55:10 --> got subtotal
+ERROR - 2026-10-20 18:55:11 --> got shipping fee
+ERROR - 2026-10-20 18:55:11 --> got coupon
+ERROR - 2026-10-20 18:55:11 --> got all total
+ERROR - 2026-10-20 18:55:11 --> added order with id 12473
+ERROR - 2026-10-20 18:55:11 --> got order products
+ERROR - 2026-10-20 18:55:11 --> deleted credit
+ERROR - 2026-10-20 18:55:11 --> deleted coupon
+ERROR - 2026-10-20 18:55:11 --> got cart id159444
+ERROR - 2026-10-20 18:55:11 --> got product id as C4582
+WARNING - 2026-10-20 18:56:18 --> [DEPRECATED] Creation of dynamic property App\Controllers\CheckoutController::$a_access is deprecated in APPPATH/Controllers/CheckoutController.php on line 8.
+ 1 SYSTEMPATH/CodeIgniter.php(921): App\Controllers\CheckoutController->__construct()
+ 2 SYSTEMPATH/CodeIgniter.php(488): CodeIgniter\CodeIgniter->createController()
+ 3 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+WARNING - 2026-10-20 18:56:18 --> [DEPRECATED] Creation of dynamic property App\Controllers\CheckoutController::$ship is deprecated in APPPATH/Controllers/CheckoutController.php on line 9.
+ 1 SYSTEMPATH/CodeIgniter.php(921): App\Controllers\CheckoutController->__construct()
+ 2 SYSTEMPATH/CodeIgniter.php(488): CodeIgniter\CodeIgniter->createController()
+ 3 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-10-20 18:56:18 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-10-20 18:56:18 --> got subtotal
+ERROR - 2026-10-20 18:56:19 --> got shipping fee
+ERROR - 2026-10-20 18:56:19 --> got coupon
+ERROR - 2026-10-20 18:56:19 --> got all total
+ERROR - 2026-10-20 18:56:19 --> added order with id 12474
+ERROR - 2026-10-20 18:56:19 --> got order products
+ERROR - 2026-10-20 18:56:19 --> deleted credit
+ERROR - 2026-10-20 18:56:19 --> deleted coupon

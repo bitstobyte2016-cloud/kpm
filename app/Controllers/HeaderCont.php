@@ -130,8 +130,16 @@ class HeaderCont extends BaseController
 
         return view('search_results', $data );
     }
-
     
+    
+    
+    
+    
+    
+
+    /******************************
+    ********** Login ***************
+    ******************************/
     
 
     
@@ -146,6 +154,7 @@ class HeaderCont extends BaseController
         $email = strtolower(trim($this->request->getPost('email')));
         $password = $this->request->getPost('password');
         $redirect = trim($this->request->getPost('redirect'));
+        $guestIp = $this->request->getIPAddress();
 
         if($email == '' || $password == '')
         {
@@ -200,6 +209,18 @@ class HeaderCont extends BaseController
             'customer_id'   => $customer['id'],
             'customer_name' => $customer['first_name']
         ]);
+        
+        $mergeResult = $this->mergeGuestCart(
+            $customer['id'],
+            $guestIp
+        );
+
+        if (!$mergeResult) {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'We could not merge your cart. Please try again.'
+            ]);
+        }
 
         return $this->response->setJSON([
             'status' => true,
@@ -508,6 +529,13 @@ class HeaderCont extends BaseController
         return view('onhand', ['products' => $products]);
     }
     
+    
+    /******************************
+    ********** CART ***************
+    ******************************/
+    
+    
+    
     //to return cart page 
     public function cart()
     {
@@ -627,8 +655,132 @@ class HeaderCont extends BaseController
             'cartItems' => $cartItems,
             'subtotal' => $subtotal,
             'cartCount' => $cartCount,
-            'recommendations' => $recommendations
+            'recommendations' => $recommendations,
+            'page_title' => 'Cart | K-Pop Merch'
         ]);
+    }
+    
+    //to merge carts if they exists
+    private function mergeGuestCart($customerId, $guestIp)
+    {
+        // Find the guest cart associated with the IP captured before login.
+        $guestCart = null;
+        $customerCart = null;
+
+        // Fetch the logged-in customer's cart.
+        $customerCarts = $this->a_access->custom_query(
+            "SELECT * FROM Cart_master WHERE cust_id = '" .
+            addslashes((string) $customerId) . "' LIMIT 1"
+        );
+
+        if (!empty($customerCarts)) {
+            $customerCart = $customerCarts[0];
+        }
+
+        // Fetch the guest cart associated with this IP.
+        $guestCarts = $this->a_access->custom_query(
+            "SELECT * FROM Cart_master
+             WHERE cust_id IS NULL
+             AND cart_ip_address = '" .
+            addslashes($guestIp) . "'
+             LIMIT 1"
+        );
+
+        if (!empty($guestCarts)) {
+            $guestCart = $guestCarts[0];
+        }
+
+        // Nothing to merge if there is no guest cart for this IP.
+        if (!$guestCart) {
+            return true;
+        }
+
+        $guestCartId = $guestCart['id'];
+        $guestItems = $this->a_access->all_info('Cart_details', [
+            'cart_id' => $guestCartId
+        ]);
+
+        // No guest items: remove the empty guest cart.
+        if (empty($guestItems)) {
+            $this->a_access->custom_query_delete(
+                'DELETE FROM Cart_master WHERE id = ?',
+                [$guestCartId]
+            );
+
+            return true;
+        }
+
+        // Create a customer cart if one doesn't already exist.
+        if (!$customerCart) {
+            $newCartId = $this->a_access->insert_table_id('Cart_master', [
+                'cust_id' => $customerId
+            ]);
+
+            if (!$newCartId) {
+                return false;
+            }
+
+            $customerCartId = $newCartId;
+        } else {
+            $customerCartId = $customerCart['id'];
+        }
+
+        // Get existing items in the customer's cart.
+        $customerItems = $this->a_access->all_info('Cart_details', [
+            'cart_id' => $customerCartId
+        ]);
+
+        $customerItemsByProduct = [];
+
+        if(!empty($customerItems)){
+            foreach ($customerItems as $item) {
+                $customerItemsByProduct[(string) $item['product_id']] = $item;
+            }
+        }
+
+        // Merge guest items into the customer's cart.
+        foreach ($guestItems as $guestItem) {
+            $productId = (string) $guestItem['product_id'];
+            $guestQuantity = (int) $guestItem['product_quantity'];
+
+            if (isset($customerItemsByProduct[$productId])) {
+                $existingItem = $customerItemsByProduct[$productId];
+                $newQuantity =(int) $existingItem['product_quantity'] + $guestQuantity;
+
+                $updated = $this->a_access->update_table(
+                    'Cart_details',
+                    ['product_quantity' => $newQuantity],
+                    ['id' => $existingItem['id']]
+                );
+
+                if ($updated === false) {
+                    return false;
+                }
+            } else {
+                $insertedId = $this->a_access->insert_table_id('Cart_details', [
+                    'cart_id' => $customerCartId,
+                    'product_id' => $productId,
+                    'product_quantity' => $guestQuantity
+                ]);
+
+                if (!$insertedId) {
+                    return false;
+                }
+            }
+        }
+
+        // Delete guest records only after all items have been merged.
+        $this->a_access->custom_query_delete(
+            'DELETE FROM Cart_details WHERE cart_id = ?',
+            [$guestCartId]
+        );
+
+        $this->a_access->custom_query_delete(
+            'DELETE FROM Cart_master WHERE id = ?',
+            [$guestCartId]
+        );
+
+        return true;
     }
     
     //get recommendations for cart

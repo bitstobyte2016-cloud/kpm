@@ -89,7 +89,7 @@
                             <button
                                 type="button"
                                 class="wishlist-move-cart-btn"
-                                onclick="event.stopPropagation(); addProductToCart('<?= esc($product['id']); ?>', 1);"
+                                onclick="event.stopPropagation(); addProductToCart('<?= esc($product['product_id']); ?>', 1);"
                             >
                                 <i class="fa-solid fa-cart-shopping"></i>
                                 Move to Cart
@@ -100,8 +100,7 @@
                             <button
                                 type="button"
                                 class="wishlist-notify-btn"
-                                onclick="event.stopPropagation(); notifyProduct('<?= esc($row['id']); ?>');"
-                            >
+                                onclick="event.stopPropagation(); notifyProduct('<?= esc($product['product_id']); ?>');" >
                                 <i class="fa-regular fa-bell"></i>
                                 Notify Me
                             </button>

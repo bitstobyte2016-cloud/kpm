@@ -32,7 +32,7 @@
 
     $saveButtonFunction = $isEdit
         ? 'updateAccountAddress(' . (int)$addressId . ')'
-        : 'saveAccountAddress()';
+        : 'saveAccountAddress('.$isCheckout.')';
 
 ?>
 

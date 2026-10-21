@@ -161,6 +161,10 @@
 
 <script>
 
+    //*********************************
+    //****** pop-up functions *********
+    //*********************************
+
     // Escape HTML to safely display text
     function escapeHtml(text)
     {
@@ -258,6 +262,63 @@
         );
     }
     
+    //for input alert
+    function showInputAlert(options)
+    {
+        $("#themeAlertIcon")
+            .attr("class", "fa-solid " + (options.icon || "fa-envelope"));
+
+        $(".theme-alert-icon")
+            .removeClass("success error warning info")
+            .addClass(options.type || "info");
+
+        $("#themeAlertTitle").html(options.title || "");
+
+        $("#themeAlertMessage").html(options.message || "");
+
+        $("#themeAlertButtons").html(
+            '<div class="theme-alert-input-wrap">' +
+                '<input ' +
+                    'type="' + (options.inputType || "text") + '" ' +
+                    'id="themeAlertInput" ' +
+                    'class="theme-alert-input" ' +
+                    'placeholder="' + (options.placeholder || "") + '">' +
+            '</div>' +
+
+            '<button ' +
+                'id="themeInputAlertBtn" ' +
+                'class="theme-alert-btn theme-alert-confirm">' +
+                (options.buttonText || "Submit") +
+            '</button>'
+        );
+
+        $("#themeAlert").fadeIn(200);
+
+        $("#themeAlertInput").focus();
+
+        $("#themeInputAlertBtn")
+            .off("click")
+            .on("click", function(){
+
+                let value = $("#themeAlertInput").val().trim();
+
+                if(options.callback)
+                {
+                    options.callback(value);
+                }
+            });
+
+        $("#themeAlertInput")
+            .off("keypress")
+            .on("keypress", function(e){
+
+                if(e.which == 13)
+                {
+                    $("#themeInputAlertBtn").click();
+                }
+            });
+    }
+    
     function showLoader()
     {
         $("#siteLoader").fadeIn(100);
@@ -267,6 +328,12 @@
     {
         $("#siteLoader").fadeOut(100);
     }
+    
+    
+    //*********************************
+    //****** header functions *********
+    //*********************************
+    
     
     //to open band page
     function openBand(brandId, brandName)
@@ -340,62 +407,12 @@
         form.submit();
     }
     
-    //for input alert
-    function showInputAlert(options)
-    {
-        $("#themeAlertIcon")
-            .attr("class", "fa-solid " + (options.icon || "fa-envelope"));
-
-        $(".theme-alert-icon")
-            .removeClass("success error warning info")
-            .addClass(options.type || "info");
-
-        $("#themeAlertTitle").html(options.title || "");
-
-        $("#themeAlertMessage").html(options.message || "");
-
-        $("#themeAlertButtons").html(
-            '<div class="theme-alert-input-wrap">' +
-                '<input ' +
-                    'type="' + (options.inputType || "text") + '" ' +
-                    'id="themeAlertInput" ' +
-                    'class="theme-alert-input" ' +
-                    'placeholder="' + (options.placeholder || "") + '">' +
-            '</div>' +
-
-            '<button ' +
-                'id="themeInputAlertBtn" ' +
-                'class="theme-alert-btn theme-alert-confirm">' +
-                (options.buttonText || "Submit") +
-            '</button>'
-        );
-
-        $("#themeAlert").fadeIn(200);
-
-        $("#themeAlertInput").focus();
-
-        $("#themeInputAlertBtn")
-            .off("click")
-            .on("click", function(){
-
-                let value = $("#themeAlertInput").val().trim();
-
-                if(options.callback)
-                {
-                    options.callback(value);
-                }
-            });
-
-        $("#themeAlertInput")
-            .off("keypress")
-            .on("keypress", function(e){
-
-                if(e.which == 13)
-                {
-                    $("#themeInputAlertBtn").click();
-                }
-            });
-    }
+    
+    
+    //*********************************
+    //****** wishlist functions *******
+    //*********************************
+       
     
     //add to whishlist
     let wishlistProductId = '';
@@ -633,6 +650,12 @@
         });
     }
 
+
+    //*********************************
+    //****** order functions *********
+    //*********************************
+
+
     //to add notify 
     function notifyProduct(productId)
     {
@@ -709,6 +732,105 @@
             }
         });
     }
+
+   // SAVE NEW ADDRESS
+    function saveAccountAddress(isCheck)
+    {
+        const form = document.getElementById("addAddressForm");
+
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        let addressTitle = $("#addressTitle").val().trim();
+        let firstName = $("#addressFirstName").val().trim();
+        let lastName = $("#addressLastName").val().trim();
+        let contactNo = $("#addressContactNo").val().trim();
+        let addressLine1 = $("#addressLine1").val().trim();
+        let addressLine2 = $("#addressLine2").val().trim();
+        let state = $("#addressState").val();
+        let city = $("#addressCity").val();
+        let zip = $("#addressZip").val().trim();
+        let companyName = $("#addressCompanyName").val().trim();
+        let companyGstin = $("#addressCompanyGstin").val().trim();
+        let isDefault = $("#addressIsDefault").is(":checked") ? "Y" : "N";
+
+        if (contactNo.length !== 10) {
+            showAlert("error", "Invalid Phone Number",
+                "Please enter a valid 10-digit phone number.");
+            return;
+        }
+
+        if (zip.length !== 6) {
+            showAlert("error", "Invalid Pincode",
+                "Please enter a valid 6-digit pincode.");
+            return;
+        }
+
+        showLoader();
+
+        $.post(
+            "<?= base_url('saveAccountAddress'); ?>",
+            {
+                address_title: addressTitle,
+                first_name: firstName,
+                last_name: lastName,
+                contact_no: contactNo,
+                address_line1: addressLine1,
+                address_line2: addressLine2,
+                country: "India",
+                state: state,
+                city: city,
+                zip: zip,
+                company_name: companyName,
+                company_gstin: companyGstin,
+                is_default: isDefault
+            },
+            function(response) {
+                hideLoader();
+
+                if (response.status) {
+                    closeAddAddress();
+
+                    showAlert(
+                        "success",
+                        "Address Saved",
+                        response.message
+                    );
+
+                    if(isCheck){
+                        window.location.reload();
+                    }else{
+                        // Refresh the address page.
+                        openAddresses();
+                    }
+                } else {
+                    showAlert(
+                        "error",
+                        "Unable to Save Address",
+                        response.message || "Please try again."
+                    );
+                }
+            },
+            "json"
+        ).fail(function(xhr) {
+            hideLoader();
+            console.log(xhr.responseText);
+
+            showAlert(
+                "error",
+                "Something Went Wrong",
+                "Unable to save your address. Please try again."
+            );
+        });
+    }
+
+
+    //*********************************
+    //****** cart functions *********
+    //*********************************
+
 
     //to add prduct to cart      
     function addProductToCart(productId, quantity = 1)
