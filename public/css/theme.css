@@ -10137,10 +10137,6 @@ cursor:not-allowed;
 }
 
 @media (max-width: 768px) {
-    .header-main-bar .search-area {
-        display: none;
-    }
-
     .header-nav-bar {
         display: none;
     }
@@ -10150,12 +10146,33 @@ cursor:not-allowed;
     }
 
     .header-main-bar {
-        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 15px;
     }
 
-    .actions-area .action-item.account-action,
-    .actions-area .action-item.sign-in-action,
+    .header-main-bar .search-area {
+        order: 3;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .actions-area .action-item span {
+        display: none; /* Hide action text on mobile, keep icons */
+    }
+
     .actions-area .action-item.user-greeting {
-        display: none; /* Hide account text on mobile, keep cart */
+        display: none; /* Hide greeting entirely on mobile */
+    }
+
+    .header-logo {
+        height: 40px; /* Make logo smaller on mobile */
+    }
+
+    .site-title {
+        font-size: 1.1rem;
+    }
+
+    .site-subtitle {
+        font-size: 0.7rem;
     }
 }

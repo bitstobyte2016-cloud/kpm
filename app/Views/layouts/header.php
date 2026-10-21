@@ -158,17 +158,6 @@
         </div>
 
         <div class="mobile-menu-body">
-            <div class="mobile-search-area">
-                <form action="/search" method="get" class="search-form">
-                    <input type="text" name="q"
-                        placeholder="Search for albums, merch, artists..."
-                        class="search-input mobile-search-input" autocomplete="off" >
-                    <button type="submit" class="search-button">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </button>
-                </form>
-            </div>
-
             <nav class="mobile-nav">
                 <ul class="mobile-nav-list">
                     <li class="mobile-nav-item"><a href="<?php echo base_url().'preorder'; ?>">Pre-order / New In</a></li>
@@ -178,18 +167,7 @@
                 </ul>
             </nav>
 
-            <div class="mobile-user-actions">
-                <?php if (session()->has('customer_id')): ?>
-                    <a href="/userhome" class="mobile-action-btn">
-                        <i class="fa-regular fa-user"></i> Account (<?= esc(session()->get('customer_name')); ?>)
-                    </a>
-                <?php else: ?>
-                    <a href="<?= base_url('signin'); ?>?redirect=<?= urlencode(current_url()); ?>" class="mobile-action-btn">
-                        <i class="fa-regular fa-user"></i> Sign In / Sign Up
-                    </a>
-                <?php endif; ?>
             </div>
-        </div>
     </div>
 
 </header>
