@@ -370,6 +370,12 @@
 </script>
 <script>
     $(document).ready(function() {
+
+    // Detect mobile browser
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        $("body").addClass("is-mobile-browser");
+    }
+
         const toggleBtn = $('#mobileMenuToggle');
         const closeBtn = $('#mobileMenuClose');
         const overlay = $('#mobileMenuOverlay');

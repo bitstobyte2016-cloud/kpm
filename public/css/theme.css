@@ -10145,7 +10145,7 @@ cursor:not-allowed;
         display: none;
     }
 
-    .mobile-menu-toggle {
+    body.is-mobile-browser .mobile-menu-toggle {
         display: block;
     }
 
