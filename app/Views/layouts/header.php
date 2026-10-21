@@ -160,10 +160,38 @@
         <div class="mobile-menu-body">
             <nav class="mobile-nav">
                 <ul class="mobile-nav-list">
+                    <li class="mobile-nav-item has-mobile-dropdown">
+                        <div class="mobile-dropdown-toggle">
+                            Categories <i class="fa-solid fa-chevron-down nav-chevron"></i>
+                        </div>
+                        <ul class="mobile-dropdown-menu">
+                            <?php foreach($categories as $row){ ?>
+                                <li>
+                                    <a href="javascript:void(0);" onclick="openCategory(<?= $row['id']; ?>, '<?= esc($row['category_name']); ?>'); closeMobileMenu();">
+                                        <?= esc($row['category_name']); ?>
+                                    </a>
+                                </li>
+                            <?php } ?>
+                            <li><a href="<?php echo base_url().'categories/1'; ?>" class="view-all-link">View all categories &rarr;</a></li>
+                        </ul>
+                    </li>
+                    <li class="mobile-nav-item has-mobile-dropdown">
+                        <div class="mobile-dropdown-toggle">
+                            Bands <i class="fa-solid fa-chevron-down nav-chevron"></i>
+                        </div>
+                        <ul class="mobile-dropdown-menu">
+                            <?php foreach($bands as $row){ ?>
+                                <li>
+                                    <a href="javascript:void(0);" onclick="openBand(<?= $row['id']; ?>, '<?= esc($row['brand_name']); ?>'); closeMobileMenu();">
+                                        <?= esc($row['brand_name']); ?>
+                                    </a>
+                                </li>
+                            <?php } ?>
+                            <li><a href="/bands_all" class="view-all-link">View all bands &rarr;</a></li>
+                        </ul>
+                    </li>
                     <li class="mobile-nav-item"><a href="<?php echo base_url().'preorder'; ?>">Pre-order / New In</a></li>
                     <li class="mobile-nav-item"><a href="<?php echo base_url().'onhand'; ?>">On-hand</a></li>
-                    <li class="mobile-nav-item"><a href="<?php echo base_url().'categories/1'; ?>">Categories</a></li>
-                    <li class="mobile-nav-item"><a href="/bands_all">Bands</a></li>
                 </ul>
             </nav>
 
@@ -359,20 +387,28 @@
         const overlay = $('#mobileMenuOverlay');
         const drawer = $('#mobileMenuDrawer');
 
+
+        $(".mobile-dropdown-toggle").on("click", function() {
+            const parentLi = $(this).parent();
+            parentLi.toggleClass("active");
+            const dropdown = parentLi.find(".mobile-dropdown-menu");
+            dropdown.slideToggle(200);
+        });
+
         function openMobileMenu() {
             overlay.addClass('active');
             drawer.addClass('active');
             $('body').css('overflow', 'hidden'); // Prevent background scrolling
         }
 
-        function closeMobileMenu() {
+        window.closeMobileMenu = function() {
             overlay.removeClass('active');
             drawer.removeClass('active');
             $('body').css('overflow', '');
         }
 
         toggleBtn.on('click', openMobileMenu);
-        closeBtn.on('click', closeMobileMenu);
-        overlay.on('click', closeMobileMenu);
+        closeBtn.on('click', window.closeMobileMenu);
+        overlay.on('click', window.closeMobileMenu);
     });
 </script>
