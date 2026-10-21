@@ -17,6 +17,11 @@
 
     <div class="header-main-bar">
                 
+
+        <button type="button" class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle Mobile Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
         <a href="<?= base_url(); ?>"class="logo-area">
             <img src="/Images/logo.png" alt="K-Pop Merch Logo" class="header-logo">
             <div class="site-title-area">
@@ -139,6 +144,54 @@
             </ul>
         </nav>
     </div>
+
+    <!-- MOBILE MENU OVERLAY -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+
+    <!-- MOBILE MENU DRAWER -->
+    <div class="mobile-menu-drawer" id="mobileMenuDrawer">
+        <div class="mobile-menu-header">
+            <div class="site-title">K-Pop Merch</div>
+            <button type="button" class="mobile-menu-close" id="mobileMenuClose" aria-label="Close Mobile Menu">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="mobile-menu-body">
+            <div class="mobile-search-area">
+                <form action="/search" method="get" class="search-form">
+                    <input type="text" name="q"
+                        placeholder="Search for albums, merch, artists..."
+                        class="search-input mobile-search-input" autocomplete="off" >
+                    <button type="submit" class="search-button">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </form>
+            </div>
+
+            <nav class="mobile-nav">
+                <ul class="mobile-nav-list">
+                    <li class="mobile-nav-item"><a href="<?php echo base_url().'preorder'; ?>">Pre-order / New In</a></li>
+                    <li class="mobile-nav-item"><a href="<?php echo base_url().'onhand'; ?>">On-hand</a></li>
+                    <li class="mobile-nav-item"><a href="<?php echo base_url().'categories/1'; ?>">Categories</a></li>
+                    <li class="mobile-nav-item"><a href="/bands_all">Bands</a></li>
+                </ul>
+            </nav>
+
+            <div class="mobile-user-actions">
+                <?php if (session()->has('customer_id')): ?>
+                    <a href="/userhome" class="mobile-action-btn">
+                        <i class="fa-regular fa-user"></i> Account (<?= esc(session()->get('customer_name')); ?>)
+                    </a>
+                <?php else: ?>
+                    <a href="<?= base_url('signin'); ?>?redirect=<?= urlencode(current_url()); ?>" class="mobile-action-btn">
+                        <i class="fa-regular fa-user"></i> Sign In / Sign Up
+                    </a>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
 </header>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -314,4 +367,34 @@
         form.submit();
     }
 
+</script>
+<script>
+    $(document).ready(function() {
+
+    // Detect mobile browser
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        $("body").addClass("is-mobile-browser");
+    }
+
+        const toggleBtn = $('#mobileMenuToggle');
+        const closeBtn = $('#mobileMenuClose');
+        const overlay = $('#mobileMenuOverlay');
+        const drawer = $('#mobileMenuDrawer');
+
+        function openMobileMenu() {
+            overlay.addClass('active');
+            drawer.addClass('active');
+            $('body').css('overflow', 'hidden'); // Prevent background scrolling
+        }
+
+        function closeMobileMenu() {
+            overlay.removeClass('active');
+            drawer.removeClass('active');
+            $('body').css('overflow', '');
+        }
+
+        toggleBtn.on('click', openMobileMenu);
+        closeBtn.on('click', closeMobileMenu);
+        overlay.on('click', closeMobileMenu);
+    });
 </script>
