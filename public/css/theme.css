@@ -10225,3 +10225,38 @@ cursor:not-allowed;
     font-weight: 500;
     margin-top: 5px;
 }
+
+/* MOBILE HORIZONTAL SCROLL ADJUSTMENTS FOR 2.5 ITEMS */
+@media (max-width: 768px) {
+    .home-products-slider, .featured-slider {
+        overflow-x: auto !important;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 15px; /* for scrollbar */
+        gap: 12px;
+    }
+
+    .home-products-slider::-webkit-scrollbar, .featured-slider::-webkit-scrollbar {
+        height: 6px;
+    }
+    .home-products-slider::-webkit-scrollbar-track, .featured-slider::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+    .home-products-slider::-webkit-scrollbar-thumb, .featured-slider::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 4px;
+    }
+
+    .home-slider-arrow, .featured-arrow {
+        display: none !important;
+    }
+
+    .home-product-slide, .featured-card {
+        scroll-snap-align: start;
+        /* Show roughly 2.5 items => ~38% width */
+        min-width: calc(40% - 12px) !important;
+        max-width: calc(40% - 12px) !important;
+        flex-shrink: 0;
+    }
+}
