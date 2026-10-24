@@ -318,6 +318,13 @@
 
         </div>
 
+        <button type="button"
+                class="product-mobile-accordion-toggle active"
+                data-target="productDetails"
+                aria-expanded="true">
+            <span><i class="fa-solid fa-cube"></i> Product Details</span>
+            <i class="fa-solid fa-chevron-up accordion-chevron"></i>
+        </button>
         <!-- Product Details -->
         <div id="productDetails" class="product-detail-tab-content active">
 
@@ -367,6 +374,13 @@
 
         <!-- Description -->
         <?php if (!empty($product['product_description'])): ?>
+                <button type="button"
+                        class="product-mobile-accordion-toggle"
+                        data-target="description"
+                        aria-expanded="false">
+                    <span><i class="fa-regular fa-file-lines"></i> Description</span>
+                    <i class="fa-solid fa-chevron-down accordion-chevron"></i>
+                </button>
             <div id="description"
                  class="product-detail-tab-content"
                  <?= !empty($additionalImages) ? 'style="display:none;"' : ''; ?>>
@@ -377,6 +391,13 @@
         <?php endif; ?>
 
         <!-- Shipping Info -->
+        <button type="button"
+                class="product-mobile-accordion-toggle active"
+                data-target="shippingInfo"
+                aria-expanded="true">
+            <span><i class="fa-solid fa-truck"></i> Shipping Info</span>
+            <i class="fa-solid fa-chevron-up accordion-chevron"></i>
+        </button>
         <div id="shippingInfo"
              class="product-detail-tab-content"
              style="display:none;">
@@ -387,6 +408,13 @@
         </div>
 
         <!-- Return & Exchange -->
+        <button type="button"
+                class="product-mobile-accordion-toggle active"
+                data-target="returnExchange"
+                aria-expanded="true">
+            <span><i class="fa-solid fa-arrows-rotate"></i> Return & Exchange</span>
+            <i class="fa-solid fa-chevron-up accordion-chevron"></i>
+        </button>
         <div id="returnExchange"
              class="product-detail-tab-content"
              style="display:none;">
@@ -397,6 +425,13 @@
         </div>
 
         <!-- Order Info -->
+        <button type="button"
+                class="product-mobile-accordion-toggle active"
+                data-target="orderInfo"
+                aria-expanded="true">
+            <span><i class="fa-solid fa-circle-info"></i> Order Info</span>
+            <i class="fa-solid fa-chevron-up accordion-chevron"></i>
+        </button>
         <div id="orderInfo"
              class="product-detail-tab-content"
              style="display:none;">
@@ -554,6 +589,19 @@
                         </div>
                     <?php endforeach; ?>
                 </div>
+                <?php if ($reviewCount > 3): ?>
+                    <div class="product-detail-load-more-wrap">
+                        <button
+                            type="button"
+                            id="loadMoreProductReviews"
+                            class="product-detail-load-more-btn"
+                            data-product-id="<?= esc($product['id']); ?>"
+                            data-page="1"
+                            onclick="loadMoreProductReviews()">
+                            VIEW ALL REVIEWS (<?= $reviewCount; ?>)
+                        </button>
+                    </div>
+                <?php endif; ?>
 
                 <button type="button"
                         class="product-detail-review-arrow right"
@@ -869,12 +917,25 @@
         );
     }
 
-    //to open detail tans
+    //to open detail tabs
     function openProductTab(tabId, button)
     {
-        $(".product-detail-tab-content").hide();
-        $("#" + tabId).show();
-        $(".product-detail-tab").removeClass("active");
+        // Hide every tab panel first.
+        $(".product-detail-tab-content")
+            .stop(true, true)
+            .hide()
+            .removeClass("active");
+
+        // Show only the selected panel.
+        $("#" + tabId)
+            .stop(true, true)
+            .show()
+            .addClass("active");
+
+        // Update the desktop tab buttons only.
+        $(".product-detail-tab-buttons .product-detail-tab")
+            .removeClass("active");
+
         $(button).addClass("active");
     }
     
@@ -893,8 +954,113 @@
         }, 300);
     }
     
+    //to load more reviews
+    function loadMoreProductReviews()
+    {
+        const button = $("#loadMoreProductReviews");
+
+        if (!button.length || button.data("loading")) {
+            return;
+        }
+
+        const productId = button.data("product-id");
+        const page = parseInt(button.attr("data-page"), 10) || 1;
+
+        button.data("loading", true);
+        button.prop("disabled", true).text("LOADING...");
+
+        $.ajax({
+            url: "<?= base_url('product/reviews/'); ?>" +
+                 encodeURIComponent(productId),
+            type: "GET",
+            data: { page: page },
+            dataType: "json",
+
+            success: function(response)
+            {
+                if (!response.status) {
+                    button.prop("disabled", false)
+                          .text("VIEW ALL REVIEWS");
+                    return;
+                }
+
+                const container = $("#productReviewsScroll");
+
+                response.reviews.forEach(function(review)
+                {
+                    const card = $("<div>")
+                        .addClass("product-detail-review-card");
+
+                    $("<div>")
+                        .addClass("product-detail-review-customer")
+                        .text(
+                            ((review.first_name || "") + " " +
+                             (review.last_name || "")).trim()
+                        )
+                        .appendTo(card);
+
+                    const stars = $("<div>")
+                        .addClass("product-detail-review-card-stars");
+
+                    const rating = Math.round(
+                        parseFloat(review.review_star_points) || 0
+                    );
+
+                    for (let i = 1; i <= 5; i++) {
+                        $("<i>")
+                            .addClass(
+                                i <= rating
+                                    ? "fa-solid fa-star"
+                                    : "fa-regular fa-star"
+                            )
+                            .appendTo(stars);
+                    }
+
+                    card.append(stars);
+
+                    if (review.review_title) {
+                        $("<div>")
+                            .addClass("product-detail-review-title")
+                            .text(review.review_title)
+                            .appendTo(card);
+                    }
+
+                    if (review.review_text) {
+                        $("<div>")
+                            .addClass("product-detail-review-text")
+                            .text(review.review_text)
+                            .appendTo(card);
+                    }
+
+                    container.append(card);
+                });
+
+                button.attr("data-page", page + 1);
+
+                if (!response.has_more) {
+                    button.remove();
+                } else {
+                    button.prop("disabled", false)
+                          .text("LOAD MORE REVIEWS");
+                }
+            },
+
+            error: function()
+            {
+                button.prop("disabled", false)
+                      .text("RETRY LOADING REVIEWS");
+            },
+
+            complete: function()
+            {
+                button.data("loading", false);
+            }
+        });
+    }
+    
     let selectedReviewStars = 0;
 
+    // to open alert to write review
     function writeProductReview(productId)
     {
         <?php if (!session()->get('customer_id')): ?>
@@ -932,7 +1098,7 @@
         $("#writeReviewModal").fadeOut(200);
     }
 
-
+    //to select no of stars
     function selectReviewStar(star)
     {
         selectedReviewStars = star;
@@ -957,7 +1123,7 @@
         });
     }
 
-
+    //to submit product review
     function submitProductReview()
     {
         let stars = $("#reviewStarPoints").val();
@@ -1028,6 +1194,120 @@
             "json"
         );
     }
+    
+    
+    
+    //for mobile accordian view
+    $(function () {
+        const mobileQuery = window.matchMedia("(max-width: 767px)");
+
+        function setupProductAccordions() {
+            const isMobile = mobileQuery.matches;
+
+            if (!isMobile) {
+                // Reset mobile accordion buttons.
+                $(".product-mobile-accordion-toggle")
+                    .removeClass("active")
+                    .attr("aria-expanded", "false");
+
+                $(".product-mobile-accordion-toggle .accordion-chevron")
+                    .removeClass("fa-chevron-up")
+                    .addClass("fa-chevron-down");
+
+                // Hide every tab panel before initializing desktop tabs.
+                $(".product-detail-tab-content")
+                    .stop(true, true)
+                    .hide()
+                    .removeClass("active");
+
+                // Show Product Details as the default desktop tab.
+                $("#productDetails")
+                    .show()
+                    .addClass("active");
+
+                // Reset desktop tab selection.
+                $(".product-detail-tab-buttons .product-detail-tab")
+                    .removeClass("active");
+
+                $('.product-detail-tab-buttons .product-detail-tab')
+                    .filter(function () {
+                        return $(this).attr("onclick") &&
+                               $(this).attr("onclick").includes(
+                                   "openProductTab('productDetails'"
+                               );
+                    })
+                    .addClass("active");
+
+                return;
+            }
+
+            // Open Product Details by default, matching the reference.
+            $(".product-detail-tab-content").hide();
+
+            $(".product-mobile-accordion-toggle")
+                .removeClass("active")
+                .attr("aria-expanded", "false")
+                .find(".accordion-chevron")
+                .removeClass("fa-chevron-up")
+                .addClass("fa-chevron-down");
+
+            const detailsButton = $(
+                '.product-mobile-accordion-toggle[data-target="productDetails"]'
+            );
+
+            detailsButton
+                .addClass("active")
+                .attr("aria-expanded", "true");
+
+            detailsButton.find(".accordion-chevron")
+                .removeClass("fa-chevron-down")
+                .addClass("fa-chevron-up");
+
+            $("#productDetails").show();
+        }
+
+        $(".product-mobile-accordion-toggle").on("click", function () {
+            if (!mobileQuery.matches) {
+                return;
+            }
+
+            const button = $(this);
+            const target = button.data("target");
+            const panel = $("#" + target);
+            const isOpen = button.hasClass("active");
+
+            // Close all panels first.
+            $(".product-mobile-accordion-toggle")
+                .removeClass("active")
+                .attr("aria-expanded", "false");
+
+            $(".product-mobile-accordion-toggle .accordion-chevron")
+                .removeClass("fa-chevron-up")
+                .addClass("fa-chevron-down");
+
+            $(".product-detail-tab-content").stop(true, true).slideUp(180);
+
+            // Open the selected panel if it was previously closed.
+            if (!isOpen) {
+                button.addClass("active").attr("aria-expanded", "true");
+
+                button.find(".accordion-chevron")
+                    .removeClass("fa-chevron-down")
+                    .addClass("fa-chevron-up");
+
+                panel.stop(true, true).slideDown(180);
+            }
+        });
+
+        setupProductAccordions();
+
+        if (mobileQuery.addEventListener) {
+            mobileQuery.addEventListener("change", setupProductAccordions);
+        } else {
+            mobileQuery.addListener(setupProductAccordions);
+        }
+    });
+
 </script>
 
 <?= $this->endSection(); ?>

@@ -406,6 +406,332 @@
             }
 
         }
+        
+        
+    /* =========================================
+       ORDERS PAGE — MOBILE LAYOUT
+       Purple KPM theme
+    ========================================= */
+    @media (max-width: 700px) {
+
+        .account-orders,
+        .account-orders * {
+            box-sizing: border-box;
+        }
+
+        .account-orders {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+        }
+
+        /* Hide heading on mobile; keep the filter */
+        .account-orders-header {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0;
+            width: 100%;
+            margin: 0 0 12px;
+        }
+
+        .account-orders-header > div:first-child {
+            display: none;
+        }
+
+        .account-orders-filter {
+            position: relative;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .account-orders-filter select {
+            display: block;
+            width: 100%;
+            min-width: 0;
+            height: 34px;
+            padding: 0 12px;
+            border: 1px solid #e5e3ed;
+            border-radius: 8px;
+            background: #fff;
+            color: #29263e;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* Orders list */
+        .account-orders-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            min-width: 0;
+        }
+
+        /* Order card */
+        .account-order-card {
+            display: grid;
+            grid-template-columns: 70px minmax(0, 1fr);
+            align-items: start;
+            column-gap: 12px;
+            row-gap: 0;
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            min-height: 0;
+            padding: 12px 10px 10px;
+            border: 1px solid #eceaf3;
+            border-radius: 10px;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        /* Product image */
+        .account-order-image {
+            grid-column: 1;
+            grid-row: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 70px;
+            height: 76px;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            border-radius: 4px;
+            background: #fafafa;
+        }
+
+        .account-order-image img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .account-order-image > i {
+            color: #9747ff;
+            font-size: 22px;
+        }
+
+        /* Order ID, date, payment and total */
+        .account-order-info {
+            grid-column: 2;
+            grid-row: 1;
+            min-width: 0;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .account-order-id {
+            margin: 1px 0 8px;
+            padding-right: 0;
+            color: #17152f;
+            font-size: 10px;
+            font-weight: 700;
+            line-height: 1.4;
+            overflow-wrap: anywhere;
+        }
+
+        .account-order-date,
+        .account-order-payment {
+            display: flex;
+            align-items: flex-start;
+            gap: 7px;
+            margin: 0 0 6px;
+            color: #68677c;
+            font-size: 10px;
+            line-height: 1.4;
+        }
+
+        .account-order-date i,
+        .account-order-payment i,
+        .account-order-items i {
+            flex: 0 0 12px;
+            width: 12px;
+            margin-top: 1px;
+            color: #9747ff;
+            font-size: 11px;
+        }
+
+        .account-order-items {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 5px 0 0;
+            color: #68677c;
+            font-size: 10px;
+            line-height: 1.4;
+        }
+
+        .account-order-total {
+            margin-left: 3px;
+            color: #873bfa;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* Status and delivery section */
+        .account-order-status-area {
+            grid-column: 1 / -1;
+            grid-row: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0;
+            width: 100%;
+            min-width: 0;
+            min-height: 0;
+            margin: 10px 0 0;
+            padding: 8px 0 0;
+            border: 0;
+            border-top: 1px solid #f0eef5;
+        }
+
+        .account-order-status {
+            position: absolute;
+            top: 12px;
+            right: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 42%;
+            margin: 0;
+            padding: 5px 9px;
+            border-radius: 6px;
+            font-size: 9px;
+            font-weight: 600;
+            line-height: 1.3;
+            white-space: normal;
+            text-align: center;
+        }
+
+        .account-order-status.processing,
+        .account-order-status.fulfilled,
+        .account-order-status.shipped,
+        .account-order-status.shipping-soon {
+            background: #f1e6ff;
+            color: #873bfa;
+        }
+
+        .account-order-status.delivered {
+            background: #e5f8ec;
+            color: #178346;
+        }
+
+        .account-order-status.cancelled {
+            background: #ffe9ec;
+            color: #d9364f;
+        }
+
+        .account-order-status.returned {
+            background: #fff0df;
+            color: #c46b13;
+        }
+
+        .account-order-delivery-label {
+            margin: 0 0 3px;
+            color: #77758b;
+            font-size: 10px;
+            line-height: 1.4;
+        }
+
+        .account-order-delivery-date {
+            color: #424057;
+            font-size: 10px;
+            font-weight: 600;
+            line-height: 1.4;
+            overflow-wrap: anywhere;
+        }
+
+        /* Full-width View Details button */
+        .account-order-actions {
+            grid-column: 1 / -1;
+            grid-row: 3;
+            display: flex;
+            align-items: stretch;
+            width: 100%;
+            min-width: 0;
+            margin: 8px 0 0;
+            padding: 0;
+            border: 0;
+        }
+
+        .account-order-view-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 100%;
+            height: 33px;
+            margin: 0;
+            padding: 7px 10px;
+            border: 0;
+            border-radius: 6px;
+            background: var(--theme-purple, #9747ff);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        .account-order-view-btn:hover {
+            opacity: 1;
+        }
+
+        /* Empty orders state */
+        .account-orders-empty {
+            width: 100%;
+            padding: 35px 16px;
+            border: 1px solid #eceaf3;
+            border-radius: 10px;
+            background: #fff;
+            text-align: center;
+        }
+
+        .account-orders-empty i {
+            margin-bottom: 10px;
+            color: #9747ff;
+            font-size: 30px;
+        }
+
+        .account-orders-empty h3 {
+            margin: 0 0 6px;
+            color: #17152f;
+            font-size: 14px;
+        }
+
+        .account-orders-empty p {
+            margin: 0;
+            color: #77758b;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        /* Pagination */
+        .account-orders .orders-pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            width: 100%;
+            margin: 14px 0;
+        }
+
+        .account-orders .orders-pagination .page-btn {
+            min-width: 30px;
+            height: 30px;
+            padding: 5px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+        }
+    }
+
 
     </style>
 

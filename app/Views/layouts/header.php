@@ -16,6 +16,18 @@
     </div>
 
     <div class="header-main-bar">
+        
+        <!-- Mobile hamburger menu -->
+        <button
+            type="button"
+            class="mobile-menu-toggle"
+            aria-label="Open navigation menu"
+            aria-expanded="false"
+            aria-controls="mobileMenuPanel"
+            onclick="toggleMobileMenu()"
+        >
+            <i class="fa-solid fa-bars"></i>
+        </button>
                 
         <a href="<?= base_url(); ?>"class="logo-area">
             <img src="/Images/logo.png" alt="K-Pop Merch Logo" class="header-logo">
@@ -94,7 +106,7 @@
                                                                     <?php echo $row["category_name"];?></a>
                                                     </li>
                                                 <?php } else { ?>
-                                                    <li><a href="javascript:void(0);"   onclick="openCategory(<?= $row["id"]; ?>, '<?= esc($row["category_name"]); ?>'>
+                                                    <li><a href="javascript:void(0);"   onclick="openCategory(<?= $row["id"]; ?>, '<?= esc($row["category_name"]); ?>')">
                                                            <img  class="cat-icon" src="<?php echo $row["cat_img"];?>">
                                                         <?php echo $row["category_name"];?></a>
                                                     </li>
@@ -139,6 +151,101 @@
             </ul>
         </nav>
     </div>
+    
+
+    <!-- Mobile menu backdrop -->
+    <div
+        class="mobile-menu-backdrop"
+        id="mobileMenuBackdrop"
+        onclick="closeMobileMenu()"
+    ></div>
+
+    <!-- Mobile slide-out menu -->
+    <nav
+        class="mobile-menu-panel"
+        id="mobileMenuPanel"
+        aria-label="Mobile navigation"
+        aria-hidden="true"
+    >
+        <div class="mobile-menu-heading">
+            <span>Explore K-Pop Merch</span>
+
+            <button
+                type="button"
+                aria-label="Close menu"
+                onclick="closeMobileMenu()"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Categories dropdown -->
+        <button
+            type="button"
+            class="mobile-menu-accordion"
+            aria-expanded="false"
+            aria-controls="mobileCategories"
+            onclick="toggleMobileSubmenu(this, 'mobileCategories')"
+        >
+            <span><i class="fa-solid fa-border-all"></i> Categories</span>
+            <i class="fa-solid fa-chevron-down"></i>
+        </button>
+
+        <div class="mobile-menu-submenu" id="mobileCategories">
+            <?php foreach ($categories as $row): ?>
+                <a href="javascript:void(0);"   onclick="openCategory(<?= $row["id"]; ?>, '<?= esc($row["category_name"]); ?>')">
+                    <img
+                        src="<?= base_url($row['cat_img']); ?>"
+                        alt=""
+                    >
+                    <span><?= esc($row['category_name']); ?></span>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </a>
+            <?php endforeach; ?>
+
+            <a class="mobile-view-all" href="<?= base_url('categories/1'); ?>">
+                View all categories →
+            </a>
+        </div>
+
+        <!-- Bands dropdown -->
+        <button
+            type="button"
+            class="mobile-menu-accordion"
+            aria-expanded="false"
+            aria-controls="mobileBands"
+            onclick="toggleMobileSubmenu(this, 'mobileBands')"
+        >
+            <span><i class="fa-solid fa-users"></i> Bands</span>
+            <i class="fa-solid fa-chevron-down"></i>
+        </button>
+
+        <div class="mobile-menu-submenu" id="mobileBands">
+            <?php foreach ($bands as $row): ?>
+                <a href="javascript:void(0);"  onclick="openBand(<?= $row["id"]; ?>, '<?= esc($row["brand_name"]); ?>')" >
+                    <span><?= esc($row['brand_name']); ?></span>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </a>
+            <?php endforeach; ?>
+
+            <a class="mobile-view-all" href="<?= base_url('bands_all'); ?>">
+                View all bands →
+            </a>
+        </div>
+
+        <!-- Other menu links -->
+        <a class="mobile-menu-link" href="<?= base_url('preorder'); ?>">
+            <i class="fa-regular fa-calendar"></i>
+            <span>Pre-order / New In</span>
+            <i class="fa-solid fa-chevron-right"></i>
+        </a>
+
+        <a class="mobile-menu-link" href="<?= base_url('onhand'); ?>">
+            <i class="fa-solid fa-box"></i>
+            <span>On-hand</span>
+            <i class="fa-solid fa-chevron-right"></i>
+        </a>
+    </nav>
 </header>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -313,5 +420,58 @@
 
         form.submit();
     }
+    
+    
+    function toggleMobileMenu() {
+        const panel = document.getElementById('mobileMenuPanel');
+        const backdrop = document.getElementById('mobileMenuBackdrop');
+        const button = document.querySelector('.mobile-menu-toggle');
+
+        if (!panel || !backdrop || !button) return;
+
+        const isOpen = !panel.classList.contains('is-open');
+
+        panel.classList.toggle('is-open', isOpen);
+        backdrop.classList.toggle('is-open', isOpen);
+        document.body.classList.toggle('mobile-menu-open', isOpen);
+
+        button.setAttribute('aria-expanded', String(isOpen));
+        panel.setAttribute('aria-hidden', String(!isOpen));
+    }
+
+    function closeMobileMenu() {
+        document.getElementById('mobileMenuPanel')
+            ?.classList.remove('is-open');
+
+        document.getElementById('mobileMenuBackdrop')
+            ?.classList.remove('is-open');
+
+        document.body.classList.remove('mobile-menu-open');
+
+        document.querySelector('.mobile-menu-toggle')
+            ?.setAttribute('aria-expanded', 'false');
+
+        document.getElementById('mobileMenuPanel')
+            ?.setAttribute('aria-hidden', 'true');
+    }
+
+    function toggleMobileSubmenu(button, submenuId) {
+        const submenu = document.getElementById(submenuId);
+
+        if (!submenu) return;
+
+        const isOpen = !submenu.classList.contains('is-open');
+
+        submenu.classList.toggle('is-open', isOpen);
+        button.classList.toggle('is-open', isOpen);
+        button.setAttribute('aria-expanded', String(isOpen));
+    }
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            closeMobileMenu();
+        }
+    });
+
 
 </script>

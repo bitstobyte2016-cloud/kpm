@@ -127,6 +127,8 @@ class HeaderCont extends BaseController
         $data['search_query'] = $query;
 
         $data['total_results'] = count($data['products']);
+        
+        $data['page_title'] = 'Search Results | K-Pop Merch';
 
         return view('search_results', $data );
     }
@@ -145,7 +147,8 @@ class HeaderCont extends BaseController
     
     // to open sign in page
     public function signin(){
-        return view('signin');
+        return view('signin',[
+            'page_title' => 'Sign - in | K-Pop Merch']);
     }
     
     //to log in user
@@ -231,7 +234,8 @@ class HeaderCont extends BaseController
     
     //to open register page
     public function register(){
-        return view('register');
+        return view('register',[
+            'page_title' => 'Register | K-Pop Merch']);
     }
     
     //to get states and countires list
@@ -463,6 +467,8 @@ class HeaderCont extends BaseController
             WHERE P.cat_id = '".$cat_id."' ";
         $res=$this->a_access->custom_query($sql);
         $data['products'] = $res;
+        
+        $data['page_title'] = 'Checkout | K-Pop Merch';
 
         return view('categories_all',$data);
     }
@@ -479,6 +485,7 @@ class HeaderCont extends BaseController
 
             $data['brands'] = $brands;
             $data['total_brands'] = count($brands);
+            $data['page_title'] = 'Bands | K-Pop Merch';
 
             return view('bands_all',$data);
     }
@@ -504,6 +511,7 @@ class HeaderCont extends BaseController
 
         $products = $this->a_access->custom_query($sql);
         $data = ['products' => $products ];
+        $data['page_title'] = 'Pre -Order | K-Pop Merch';
         return view('preorder', $data);
 
     }
@@ -526,7 +534,9 @@ class HeaderCont extends BaseController
 
         $products = $this->a_access->custom_query($sql);
 
-        return view('onhand', ['products' => $products]);
+        return view('onhand', [
+            'page_title' => 'On-hand | K-Pop Merch',
+            'products' => $products]);
     }
     
     

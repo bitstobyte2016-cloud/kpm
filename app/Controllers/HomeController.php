@@ -25,6 +25,7 @@ class HomeController extends BaseController
         $data['pre_order'] = $this->getPreOrderItems();
         $data['on_hand'] = $this->getOnHandItems();
         $data['featured_items'] = $this->getFeaturedItems();
+        $data[ 'page_title'] = 'Home | K-Pop Merch';
         
         //check if user logged in
         if(session()->has('customer_id')){
@@ -147,6 +148,7 @@ class HomeController extends BaseController
         $products = $this->a_access->custom_query($sql);
 
         return view('categories', [
+            'page_title' => 'Categories | K-Pop Merch',
             'products'   => $products,
             'cat_id'   => $cat_id,
             'category_name'  => $categoryName
@@ -185,6 +187,7 @@ class HomeController extends BaseController
         $products = $this->a_access->custom_query($sql);
 
         return view('band_detail', [
+        'page_title' => 'Bands | K-Pop Merch',
         'products'   => $products,
         'brand_id'   => $brandId,
         'brand_name' => $brandName
@@ -300,47 +303,50 @@ class HomeController extends BaseController
                 ORDER BY id ASC";
         $additionalImages = $this->a_access->custom_query($sql);
 
-        //product reviews
-        $sql = "SELECT r.id, r.cust_id, r.review_text,  r.review_star_points,  r.review_title,
-                    c.first_name,  c.last_name
-                FROM Review_master r
-                LEFT JOIN Customer c   ON c.id = r.cust_id
-                WHERE r.product_id = '".$productId."'  AND r.status = 'Y'
-                ORDER BY r.id DESC";
-        $reviews = $this->a_access->custom_query($sql);
+        //product reviews summary to get all stars
+        $sql = "SELECT
+                    COUNT(*) AS review_count,
+                    AVG(review_star_points) AS average_rating,
+                    SUM(CASE WHEN ROUND(review_star_points) = 5 THEN 1 ELSE 0 END) AS rating_5,
+                    SUM(CASE WHEN ROUND(review_star_points) = 4 THEN 1 ELSE 0 END) AS rating_4,
+                    SUM(CASE WHEN ROUND(review_star_points) = 3 THEN 1 ELSE 0 END) AS rating_3,
+                    SUM(CASE WHEN ROUND(review_star_points) = 2 THEN 1 ELSE 0 END) AS rating_2,
+                    SUM(CASE WHEN ROUND(review_star_points) = 1 THEN 1 ELSE 0 END) AS rating_1
+                FROM Review_master
+                WHERE product_id = '".$productId."'
+                  AND status = 'Y'";
 
-        //calculate review summary
-        $reviewCount = count($reviews);
-        $averageRating = 0;
+        $summaryResult = $this->a_access->custom_query($sql);
+        $summary = $summaryResult[0] ?? [];
+
+        $reviewCount = (int)($summary['review_count'] ?? 0);
+        $averageRating = (float)($summary['average_rating'] ?? 0);
 
         $ratingCounts = [
-            5 => 0,
-            4 => 0,
-            3 => 0,
-            2 => 0,
-            1 => 0
+            5 => (int)($summary['rating_5'] ?? 0),
+            4 => (int)($summary['rating_4'] ?? 0),
+            3 => (int)($summary['rating_3'] ?? 0),
+            2 => (int)($summary['rating_2'] ?? 0),
+            1 => (int)($summary['rating_1'] ?? 0),
         ];
 
-        if($reviewCount > 0)
-        {
-            $totalRating = 0;
+        // Fetch only the latest 3 reviews for the initial page
+        $sql = "SELECT
+                    r.id,
+                    r.cust_id,
+                    r.review_text,
+                    r.review_star_points,
+                    r.review_title,
+                    c.first_name,
+                    c.last_name
+                FROM Review_master r
+                LEFT JOIN Customer c ON c.id = r.cust_id
+                WHERE r.product_id = '".$productId."'
+                  AND r.status = 'Y'
+                ORDER BY r.id DESC
+                LIMIT 3";
 
-            foreach($reviews as $review)
-            {
-                $rating = (float)$review['review_star_points'];
-
-                $totalRating += $rating;
-
-                $ratingKey = (int)round($rating);
-
-                if(isset($ratingCounts[$ratingKey]))
-                {
-                    $ratingCounts[$ratingKey]++;
-                }
-            }
-
-            $averageRating = $totalRating / $reviewCount;
-        }
+        $reviews = $this->a_access->custom_query($sql);    
         
         //same band product recommendations
         $recommendationSql = "SELECT p.id, p.main_image,  p.release_date,
@@ -359,13 +365,62 @@ class HomeController extends BaseController
         $recommendations = $this->a_access->custom_query($recommendationSql);
 
         return view('product_detail', [
+            'page_title' => 'Product Detail | K-Pop Merch',
             'product'          => $product,
             'additionalImages' => $additionalImages,
             'reviews'          => $reviews,
             'reviewCount'      => $reviewCount,
             'averageRating'    => $averageRating,
             'ratingCounts'     => $ratingCounts,
-    'recommendations'  => $recommendations
+            'recommendations'  => $recommendations
+        ]);
+    }
+    
+    // get all product reviews
+    public function getProductReviews($productId)
+    {
+        $productId = trim($productId);
+
+        if ($productId === '') {
+            return $this->response
+                ->setStatusCode(400)
+                ->setJSON([
+                    'status' => false,
+                    'message' => 'Invalid product ID.'
+                ]);
+        }
+
+        $page = max(1, (int)$this->request->getGet('page'));
+        $limit = 5;
+        $offset = 3 + (($page - 1) * $limit);
+
+        $productId = addslashes($productId);
+
+        // Fetch 5 more reviews per request, after the initial 3
+        $sql = "SELECT
+                    r.id,
+                    r.cust_id,
+                    r.review_text,
+                    r.review_star_points,
+                    r.review_title,
+                    c.first_name,
+                    c.last_name
+                FROM Review_master r
+                LEFT JOIN Customer c ON c.id = r.cust_id
+                WHERE r.product_id = '".$productId."'
+                  AND r.status = 'Y'
+                ORDER BY r.id DESC
+                LIMIT ".$limit." OFFSET ".$offset;
+
+        $reviews = $this->a_access->custom_query($sql);
+
+        $reviews = $reviews ?: [];
+
+        return $this->response->setJSON([
+            'status' => true,
+            'reviews' => $reviews,
+            'has_more' => count($reviews) === $limit,
+            'page' => $page
         ]);
     }
     

@@ -25,7 +25,7 @@
         <div class="account-layout">
 
             <!-- LEFT ACCOUNT SIDEBAR -->
-            <aside class="account-sidebar">
+            <aside class="account-sidebar mobile-account-nav">
 
                 <a
                     href="javascript:void(0);"
@@ -78,7 +78,7 @@
 
             
             <!-- RIGHT ACCOUNT CONTENT -->
-            <main class="account-content">
+            <main class="account-content account-main-content">
 
                 <?= $this->include($account_view); ?>
 

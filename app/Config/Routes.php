@@ -13,7 +13,6 @@ $routes->get('/test','HeaderCont::test');
 $routes->get('/faq', 'FooterCont::faq');
 $routes->get('/shipping_info', 'FooterCont::shipping_info');
 $routes->get('/returns', 'FooterCont::returns');
-$routes->get('/contact', 'FooterCont::contact');
 $routes->get('/terms', 'FooterCont::terms');
 $routes->get('/privacy', 'FooterCont::privacy');
 
@@ -53,6 +52,10 @@ $routes->post('forgotPassword', 'HomeController::forgotPassword');
 //home product routes
 $routes->get('product/(:segment)', 'HomeController::getProductDetails/$1');
 $routes->post('product/save-review', 'HomeController::saveProductReview');
+$routes->get(
+    'product/reviews/(:segment)',
+    'HomeController::getProductReviews/$1'
+);
 $routes->post('getCustomerWishlists', 'HomeController::getCustomerWishlists');
 $routes->post('addProductToWishlist', 'HomeController::addProductToWishlist');
 $routes->post('subscribeProductNotification', 'HomeController::subscribeProductNotification');

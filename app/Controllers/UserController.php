@@ -52,6 +52,7 @@ class UserController extends BaseController
         $coupons = $this->a_access->custom_query($couponSql);
 
         return view('user_home', [
+            'page_title' => 'Account | K-Pop Merch',
             'customer' => $customer,
             'coupons' => $coupons,
             'account_view'=>'account/acc_home'
@@ -951,6 +952,7 @@ class UserController extends BaseController
         
 
         return view('account/acc_order_details', [
+            'page_title' => 'Order Details | K-Pop Merch',
             'order'           => $order,
             'billingAddress'  => $billingAddress,
             'shippingAddress' => $shippingAddress,
@@ -1648,6 +1650,7 @@ class UserController extends BaseController
 
         //return wishlist detail view
         return view('account/acc_wishlist_detail', [
+            'page_title' => 'Wishlist Detail | K-Pop Merch',
             'wishlist' => [
                 'id'            => $wishlist['id'],
                 'wishlist_name' => $wishlist['wishlist_name'],

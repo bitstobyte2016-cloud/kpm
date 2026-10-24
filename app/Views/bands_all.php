@@ -123,38 +123,54 @@
 
 
 
-        $("#brandSearch").on(
-            "keyup",
-            function(){
+        //search handling
+        $("#brandSearch").on("keyup", function() {
+            let search = $(this).val().toLowerCase();
+            let html = "";
 
-                let search= $(this)  .val() .toLowerCase();
-                let html='';
-
-                if(search.length<1){
-                    $("#brandSuggestions")
-                    .hide();
-
-                    return;
-                }
-
-                let results=  brands.filter(  b=>  b.name .toLowerCase().includes(search) ) .slice(0,4);
-                
-                results.forEach(item=>{
-                            html+=`
-                            <a
-                                href="#"
-                                class="brand-suggestion"
-                            >
-                                ${item.name}
-                            </a>
-                            `;
-                        });
-
-                        $("#brandSuggestions")
-                        .html(html)
-                        .show();
+            if (search.length < 1) {
+                $("#brandSuggestions").hide();
+                return;
             }
-        );
+
+            let results = brands
+                .filter(b => b.name.toLowerCase().includes(search))
+                .slice(0, 4);
+
+            results.forEach(item => {
+                html += `
+                    <a
+                        href="javascript:void(0);"
+                        class="brand-suggestion"
+                        data-brand-id="${item.id}"
+                    >
+                        ${item.name}
+                    </a>
+                `;
+            });
+
+            $("#brandSuggestions").html(html);
+
+            if (results.length > 0) {
+                $("#brandSuggestions").show();
+            } else {
+                $("#brandSuggestions").hide();
+            }
+        });
+        
+        //on click search results
+        $(document).on("click", ".brand-suggestion", function(e) {
+            e.preventDefault();
+
+            const brandId = $(this).attr("data-brand-id");
+            const brand = brands.find(b => String(b.id) === String(brandId));
+
+            if (brand) {
+                $("#brandSuggestions").hide();
+                $("#brandSearch").val(brand.name);
+                openBand(brand.id, brand.name);
+            }
+        });
 
 
         $(document).click(function(e){

@@ -23,6 +23,22 @@
     <div class="category-page-layout">
         <!-- LEFT SIDEBAR -->
         <aside class="category-sidebar">
+
+            <button
+                type="button"
+                class="mobile-filter-toggle"
+                id="mobileFilterToggle"
+                aria-expanded="false"
+                aria-controls="mobileFilterContent"
+            >
+                <span>
+                    <i class="fa-solid fa-sliders"></i>
+                    Filter by Category
+                </span>
+                <i class="fa-solid fa-chevron-down filter-chevron"></i>
+            </button>
+
+            <div  id="mobileFilterContent">
             <div class="category-sidebar-box">
                 <div class="category-sidebar-title">
                     Filter by Category
@@ -83,7 +99,7 @@
 
                 </div>
             </div>
-
+            </div>
         </aside>
 
         <!-- RIGHT CONTENT -->
@@ -431,6 +447,16 @@
 
     // initial page load
     applySorting();
+    
+    //toggle mobile layout
+    document.getElementById("mobileFilterToggle")
+        .addEventListener("click", function () {
+
+            const sidebar = document.querySelector(".category-sidebar");
+            const isOpen = sidebar.classList.toggle("is-open");
+
+            this.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        });
 
 </script>
 

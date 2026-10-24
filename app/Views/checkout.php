@@ -478,28 +478,31 @@
                     </div>
 
                     <div class="checkout-payment-options" id="checkoutPaymentSection">
+                        
+                        <label class="checkout-payment-option"
+                               <?= empty($codEligible) ? 'hidden' : ''; ?>>
+                            <input
+                                type="radio"
+                                name="payment_method"
+                                value="cod"
+                                <?= !empty($codEligible) ? 'checked' : ''; ?>
+                            >
 
-                        <?php if (!empty($codAvailable) && $codEligible): ?>
-                            <label class="checkout-payment-option selected">
-                                <input
-                                    type="radio"
-                                    name="payment_method"
-                                    value="cod"
-                                    checked >
+                            <i class="fa-solid fa-hand-holding-dollar"></i>
 
-                                <i class="fa-solid fa-hand-holding-dollar"></i>
-
-                                <span>
-                                    <strong>Cash on Delivery (COD)</strong>
-                                    <small>Pay in cash at the time of delivery.</small>
-                                </span>
-                            </label>
-                        <?php endif; ?>
+                            <span>
+                                <strong>Cash on Delivery (COD)</strong>
+                                <small>Pay in cash at the time of delivery.</small>
+                            </span>
+                        </label>
 
                         <label class="checkout-payment-option">
-                            <input type="radio"
-                                   name="payment_method"
-                                   value="cashfree">
+                            <input
+                                type="radio"
+                                name="payment_method"
+                                value="cashfree"
+                                <?= (empty($codAvailable) || empty($codEligible)) ? 'checked' : ''; ?>
+                            >
 
                             <i class="fa-regular fa-credit-card"></i>
 
@@ -1072,80 +1075,144 @@
     }
 
     updateCheckoutItemCount();
-
+ 
     
-    //to update the order summary section
+    let wasCodEligible = false;
+
+    // Update the order summary and dynamically determine COD eligibility.
     function updateSummary() {
+        console.log("inside update summary");
         const codLimit = 8000;
 
         const shippingUnavailable = shippingCost === null || !Number.isFinite(Number(shippingCost));
-
-        const isCODSelected = () => { const selected = document.querySelector(
-                'input[name="payment_method"]:checked'
-            );
-
-            return selected?.value.toLowerCase() === 'cod';
-        };
+        const codInput = document.querySelector( 'input[name="payment_method"][value="cod"]' );
+        const prepaidInput = document.querySelector('input[name="payment_method"][value="cashfree"]'  );
+        const isCODSelected = () => codInput?.checked === true;
 
         let codCharges = 0;
         let gst = null;
         let totalBeforeCredit = null;
         let total = null;
         let fullyPaidByStoreCredit = false;
+        let codEligible = false;
 
         if (!shippingUnavailable) {
-            const amountWithoutCOD = Math.max(
-                0,
-                subtotal + Number(shippingCost) - appliedCouponDiscount
-            );
-
-            // Calculate the full non-COD total, including GST.
+            // Calculate the total without COD charges first.
+            const amountWithoutCOD = Math.max( 0, subtotal + Number(shippingCost) - appliedCouponDiscount );
             const baseGST = roundMoney(amountWithoutCOD * 0.18);
-            const totalWithoutCOD = roundMoney(amountWithoutCOD + baseGST);
+            const totalWithoutCOD = roundMoney( amountWithoutCOD + baseGST );
 
-            fullyPaidByStoreCredit = totalWithoutCOD > 0 && usedStoreCredit >= totalWithoutCOD;
-            
-            codCharges = !fullyPaidByStoreCredit && isCODSelected()
-                ? (  Number(codChargesFromCourier) > 0  ? Number(codChargesFromCourier)  : 50  )
-                : 0;
+            // Clamp the requested store credit to the available balance
+            // and the order total before COD charges.
+            usedStoreCredit = roundMoney( Math.min( Math.max(0, usedStoreCredit), availableStoreCredit,totalWithoutCOD ) );
 
-            const taxableAmount = Math.max(
-                0,
-                subtotal +
-                Number(shippingCost) +
-                codCharges -
-                appliedCouponDiscount
-            );
+            // Determine eligibility AFTER store credit has been deducted.
+            const payableWithoutCOD = Math.max(  0, roundMoney(totalWithoutCOD - usedStoreCredit) );
+            fullyPaidByStoreCredit = totalWithoutCOD > 0 && payableWithoutCOD <= 0;
 
+            codEligible = codAvailableFromCourier &&  !fullyPaidByStoreCredit && payableWithoutCOD > 0 && payableWithoutCOD <= codLimit;
+
+            // If COD has just become eligible, select it automatically.
+            if (codEligible && !wasCodEligible && codInput) {
+                codInput.checked = true;
+                selectedPaymentMethod = 'cod';
+            }
+
+            // Hide and disable COD if it is not eligible.
+            if (codInput) {
+                codInput.disabled = !codEligible;
+
+                const codOption = codInput.closest('.checkout-payment-option' );
+
+                if (codOption) {
+                    codOption.hidden = !codEligible;
+                }
+
+                // Switch to prepaid if COD becomes ineligible.
+                if (!codEligible && codInput.checked) {
+                    codInput.checked = false;
+
+                    if (prepaidInput) {
+                        prepaidInput.checked = true;
+                        selectedPaymentMethod = 'cashfree';
+                    }
+                }
+            }
+
+            // Apply COD charges only when COD is eligible and selected.
+            codCharges = ( codEligible && isCODSelected() ) ? (
+                    Number(codChargesFromCourier) > 0
+                        ? Number(codChargesFromCourier)
+                        : 50
+                ) : 0;
+
+            // Recalculate GST with COD charges included where applicable.
+            const taxableAmount = Math.max( 0, subtotal + Number(shippingCost) + codCharges - appliedCouponDiscount );
             gst = Math.round(taxableAmount * 0.18);
-            totalBeforeCredit = roundMoney(taxableAmount + gst);
+            totalBeforeCredit = roundMoney(  taxableAmount + gst );
 
-            usedStoreCredit = roundMoney(
-                Math.min(
-                    Math.max(0, usedStoreCredit),
-                    availableStoreCredit,
-                    totalBeforeCredit
-                )
-            );
-
-            total = Math.max(0, roundMoney(totalBeforeCredit - usedStoreCredit));
-
-            // Recheck coverage using the actual total, including any COD charges.
+            // Reapply the credit against the actual total.
+            usedStoreCredit = roundMoney(  Math.min( Math.max(0, usedStoreCredit),availableStoreCredit, totalBeforeCredit ) );
+            total = Math.max( 0, roundMoney(totalBeforeCredit - usedStoreCredit) );
             fullyPaidByStoreCredit = total <= 0 && usedStoreCredit > 0;
+
+            // If store credit now covers the full order, COD is not needed.
+            if (fullyPaidByStoreCredit && codInput) {
+                codInput.checked = false;
+                codInput.disabled = true;
+
+                const codOption = codInput.closest( '.checkout-payment-option' );
+
+                if (codOption) {
+                    codOption.hidden = true;
+                }
+
+                if (prepaidInput) {
+                    prepaidInput.checked = false;
+                }
+
+                selectedPaymentMethod = null;
+                codCharges = 0;
+            }
+        } else {
+            if (codInput) {
+                codInput.disabled = true;
+
+                const codOption = codInput.closest(
+                    '.checkout-payment-option'
+                );
+
+                if (codOption) {
+                    codOption.hidden = true;
+                }
+
+                if (codInput.checked) {
+                    codInput.checked = false;
+
+                    if (prepaidInput) {
+                        prepaidInput.checked = true;
+                        selectedPaymentMethod = 'cashfree';
+                    }
+                }
+            }
         }
 
+        // Update the previous eligibility state for the next recalculation.
+        wasCodEligible = codEligible;
+
+        // Update displayed totals.
         document.getElementById('checkoutSubtotal').textContent = formatINR(subtotal);
         document.getElementById('checkoutShipping').textContent =  shippingUnavailable ? 'TBD' : formatINR(shippingCost);
-        document.getElementById('checkoutCod').textContent =  formatINR(codCharges);
-        document.getElementById('checkoutGst').textContent =  gst === null ? 'TBD' : formatINR(gst);
+        document.getElementById('checkoutCod').textContent = formatINR(codCharges);
+        document.getElementById('checkoutGst').textContent =   gst === null ? 'TBD' : formatINR(gst);
         document.getElementById('checkoutGrandTotal').textContent = total === null ? 'TBD' : formatINR(total);
         document.getElementById('checkoutDiscount').textContent =  '-' + formatINR(appliedCouponDiscount);
-        
-        const creditRow = document.getElementById('checkoutStoreCreditRow');
-        const creditAmount = document.getElementById('checkoutStoreCredit');
-        const creditInput = document.getElementById('usedStoreCreditInput');
-        const paymentSection = document.getElementById('checkoutPaymentSection');
-        const removeCreditButton = document.getElementById('removeStoreCreditButton');
+
+        const creditRow = document.getElementById( 'checkoutStoreCreditRow' );
+        const creditAmount = document.getElementById( 'checkoutStoreCredit' );
+        const creditInput = document.getElementById( 'usedStoreCreditInput' );
+        const paymentSection = document.getElementById( 'checkoutPaymentSection' );
+        const removeCreditButton = document.getElementById( 'removeStoreCreditButton' );
 
         if (creditRow && creditAmount) {
             creditRow.hidden = usedStoreCredit <= 0;
@@ -1154,7 +1221,9 @@
 
         if (creditInput) {
             creditInput.value =
-                usedStoreCredit > 0 ? usedStoreCredit.toFixed(2) : '';
+                usedStoreCredit > 0
+                    ? usedStoreCredit.toFixed(2)
+                    : '';
         }
 
         if (removeCreditButton) {
@@ -1171,43 +1240,19 @@
             notice.hidden = total === null || total <= codLimit;
         }
 
-        const codInput = document.querySelector(
-            'input[name="payment_method"][value="cod"]'
-        );
+        // Keep the selected payment option's styling in sync.
+        document.querySelectorAll(
+            '.checkout-payment-option input[name="payment_method"]'
+        ).forEach(function (radio) {
+            const option = radio.closest('.checkout-payment-option');
 
-        if (codInput) {
-            const codEligible =
-                !fullyPaidByStoreCredit &&
-                codAvailableFromCourier &&
-                total !== null &&
-                total > 0 &&
-                total <= codLimit;
-
-            codInput.disabled = !codEligible;
-
-            const codOption = codInput.closest('.checkout-payment-option');
-
-            if (codOption) {
-                codOption.hidden = !codEligible;
+            if (option) {
+                option.classList.toggle('selected', radio.checked);
             }
-            
-            if (!codEligible && codInput.checked && !fullyPaidByStoreCredit) {
-                codInput.checked = false;
-
-                const alternative = document.querySelector(
-                    'input[name="payment_method"]:not([value="cod"]):not(:disabled)'
-                );
-
-                if (alternative) {
-                    alternative.checked = true;
-                    alternative.dispatchEvent(
-                        new Event('change', { bubbles: true })
-                    );
-                }
-            }
-
-        }
+        });
     }
+
+    
 
 
 
@@ -1501,6 +1546,162 @@
             }
         }
     }
+
+    //to toggle mobile options
+    (function () {
+        function setupMobileCheckoutAccordions() {
+            const isMobile = window.matchMedia(
+                '(max-width: 767px)'
+            ).matches;
+
+            const sections = [
+                {
+                    heading: 'Account Information',
+                    content: '.checkout-info-panel',
+                    collapsed: false
+                },
+                {
+                    heading: 'Shipping Address',
+                    content: '.checkout-address-list, .checkout-no-address',
+                    collapsed: false
+                },
+                {
+                    heading: 'Billing Address',
+                    content: '#billingAddressList',
+                    collapsed: true
+                },
+                {
+                    heading: 'Order Notes',
+                    content: '.checkout-notes, .checkout-notes-count',
+                    collapsed: true
+                }
+            ];
+
+            sections.forEach(function (section) {
+                const headings = Array.from(
+                    document.querySelectorAll('.checkout-card-heading')
+                );
+
+                const heading = headings.find(function (element) {
+                    const title = element.querySelector('h2');
+
+                    return title &&
+                        title.textContent.trim().startsWith(section.heading);
+                });
+
+                if (!heading) return;
+
+                const card = heading.closest('.checkout-card');
+                if (!card) return;
+
+                const contentElements = card.querySelectorAll(section.content);
+
+                if (!contentElements.length) return;
+
+                if (isMobile) {
+                    heading.dataset.mobileAccordion = 'true';
+                    heading.setAttribute('role', 'button');
+                    heading.setAttribute('tabindex', '0');
+
+                    contentElements.forEach(function (element) {
+                        element.classList.add('checkout-accordion-content');
+                    });
+
+                    let chevron = heading.querySelector(
+                        '.checkout-accordion-chevron'
+                    );
+
+                    if (!chevron) {
+                        chevron = document.createElement('i');
+                        chevron.className =
+                            'fa-solid fa-chevron-up checkout-accordion-chevron';
+                        chevron.setAttribute('aria-hidden', 'true');
+                        heading.appendChild(chevron);
+                    }
+
+                    if (!heading.dataset.accordionInitialized) {
+                        card.classList.toggle(
+                            'checkout-accordion-collapsed',
+                            section.collapsed
+                        );
+
+                        heading.dataset.accordionInitialized = 'true';
+                    }
+
+                    heading.setAttribute(
+                        'aria-expanded',
+                        String(!card.classList.contains(
+                            'checkout-accordion-collapsed'
+                        ))
+                    );
+
+                    if (!heading.dataset.accordionListener) {
+                        function toggleAccordion(event) {
+                            /* Do not toggle when using the billing checkbox */
+                            if (
+                                event.target.closest(
+                                    'input, label, button, a, select, textarea'
+                                )
+                            ) {
+                                return;
+                            }
+
+                            card.classList.toggle(
+                                'checkout-accordion-collapsed'
+                            );
+
+                            heading.setAttribute(
+                                'aria-expanded',
+                                String(!card.classList.contains(
+                                    'checkout-accordion-collapsed'
+                                ))
+                            );
+                        }
+
+                        heading.addEventListener('click', toggleAccordion);
+
+                        heading.addEventListener('keydown', function (event) {
+                            if (
+                                event.target !== heading ||
+                                (event.key !== 'Enter' && event.key !== ' ')
+                            ) {
+                                return;
+                            }
+
+                            event.preventDefault();
+                            toggleAccordion(event);
+                        });
+
+                        heading.dataset.accordionListener = 'true';
+                    }
+                } else {
+                    heading.removeAttribute('data-mobile-accordion');
+                    heading.removeAttribute('role');
+                    heading.removeAttribute('tabindex');
+                    heading.removeAttribute('aria-expanded');
+
+                    card.classList.remove('checkout-accordion-collapsed');
+
+                    contentElements.forEach(function (element) {
+                        element.classList.remove('checkout-accordion-content');
+                    });
+
+                    const chevron = heading.querySelector(
+                        '.checkout-accordion-chevron'
+                    );
+
+                    if (chevron) chevron.remove();
+                }
+            });
+        }
+
+        setupMobileCheckoutAccordions();
+
+        window.addEventListener(
+            'resize',
+            setupMobileCheckoutAccordions
+        );
+    })();
 
 
 

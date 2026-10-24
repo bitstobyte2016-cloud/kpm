@@ -15,7 +15,7 @@
     <link 
         rel="icon"
         type="image/png"
-        href="<?= base_url('assets/images/logo.png'); ?>"
+        href="<?= base_url('Images/logo.png'); ?>"
     >
 
 

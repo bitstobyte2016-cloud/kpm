@@ -12,7 +12,23 @@
         </div>
 
         <div class="category-page-layout">
-            <aside class="category-sidebar">
+             <aside class="category-sidebar">
+
+                <button
+                    type="button"
+                    class="mobile-filter-toggle"
+                    id="mobileFilterToggle"
+                    aria-expanded="false"
+                    aria-controls="mobileFilterContent"
+                >
+                    <span>
+                        <i class="fa-solid fa-sliders"></i>
+                        Filter by Category
+                    </span>
+                    <i class="fa-solid fa-chevron-down filter-chevron"></i>
+                </button>
+
+                <div  id="mobileFilterContent">
                 <div class="category-sidebar-box">
                     <div class="category-sidebar-title">
                         Categories
@@ -21,9 +37,10 @@
                     <div class="category-sidebar-list">
                         <?php foreach($category as $row){ ?>
                             <?php if(empty($row['scat'])){ ?>
-                                <a href="javascript:void(0)" class="category-sidebar-item
-                                        <?= ($selected_category== $row['id']) ? 'active' : ''; ?> "
-                                    data-category="<?= $row['id']; ?>" >
+                               <a href="javascript:void(0)"
+                                    class="category-sidebar-item <?= ($selected_category == $row['id']) ? 'active' : ''; ?>"
+                                    data-category="<?= $row['id']; ?>"
+                                    data-category-name="<?= esc($row['category_name'], 'attr'); ?>">
                                     <div class="category-sidebar-left">
                                         <img src="<?= $row['cat_img']; ?>">
                                         <span>
@@ -42,10 +59,10 @@
                                 </div>
 
                                 <?php foreach($row['scat']as $sub){ ?>
-                                    <a href="javascript:void(0)"
-                                        class="category-sidebar-item subcategory-item
-                                            <?= ($selected_category== $sub['id'])? 'active' : '';?> "
-                                        data-category="<?= $sub['id']; ?>" >
+                                   <a href="javascript:void(0)"
+                                        class="category-sidebar-item subcategory-item <?= ($selected_category == $sub['id']) ? 'active' : ''; ?>"
+                                        data-category="<?= $sub['id']; ?>"
+                                        data-category-name="<?= esc($sub['category_name'], 'attr'); ?>">
                                         <span>
                                             <?= $sub['category_name']; ?>
                                         </span>
@@ -55,6 +72,7 @@
                         <?php } ?>
                     </div>
                 </div>
+            </div>
             </aside>
 
 
@@ -62,8 +80,8 @@
             <div class="category-products-content">
                 <div class="category-products-topbar">
                     <div>
-                        <h1 class="category-page-title">
-                            <?= $category_name; ?>
+                        <h1 class="category-page-title" id="categoryPageTitle">
+                            <?= esc($category_name); ?>
                         </h1>
                         <div class="category-page-count">
                             Showing
@@ -371,28 +389,51 @@
     //listener for sorting dropdown
     document.getElementById("sortProducts").addEventListener("change",applySorting);
 
-    //listener for category change
-    $(document).on( "click",  ".category-sidebar-item", function(e){
-            e.preventDefault();
+    // Listener for category change
+    $(document).on("click", ".category-sidebar-item", function(e) {
+        e.preventDefault();
 
-            $(".category-sidebar-item").removeClass("active");
+        $(".category-sidebar-item").removeClass("active");
+        $(this).addClass("active");
 
-            $(this) .addClass("active");
+        const cat_id = $(this).data("category");
+        const categoryName = $(this).attr("data-category-name");
 
-            let cat_id =  $(this).data("category");
+        // Update the page heading
+        document.getElementById("categoryPageTitle").textContent = categoryName;
 
-            $.post( "<?= site_url(  'getProductsByCat'  ); ?>", { cat_id : cat_id }, function(response){
-                    allProducts = JSON.parse(response);
-                    filteredProducts = [...allProducts];
-                    currentPage = 1;
-                    applySorting();
-                }
-            );
+        // Close the mobile filter after selecting a category
+        if (window.innerWidth <= 767) {
+            const sidebar = document.querySelector(".category-sidebar");
+            const filterToggle = document.getElementById("mobileFilterToggle");
+
+            sidebar.classList.remove("is-open");
+            filterToggle.setAttribute("aria-expanded", "false");
         }
-    );
+
+        // Fetch products for the selected category
+        $.post("<?= site_url('getProductsByCat'); ?>", {
+            cat_id: cat_id
+        }, function(response) {
+            allProducts = JSON.parse(response);
+            filteredProducts = [...allProducts];
+            currentPage = 1;
+            applySorting();
+        });
+    });
 
     //call function to apply initial sorting
     applySorting();
+    
+      //toggle mobile layout
+    document.getElementById("mobileFilterToggle")
+        .addEventListener("click", function () {
+
+            const sidebar = document.querySelector(".category-sidebar");
+            const isOpen = sidebar.classList.toggle("is-open");
+
+            this.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        });
 
 </script>
 
